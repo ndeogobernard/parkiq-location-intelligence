@@ -169,3 +169,22 @@ def test_license_flag_gates_source(variant, fresh_out) -> None:  # type: ignore[
     reg = ctx.store.read_table("DataSourceRegistry").set_index("source_id")
     assert reg.loc["S02", "status"] == "not configured"
     assert "data_licenses.regrid" in reg.loc["S02", "notes"]
+
+
+def test_secrets_are_redacted() -> None:
+    from parkiq.ingest.base import redact
+
+    msg = "404 for url: https://api.census.gov/data/2023/acs/acs5?get=NAME&key=abc123SECRET&x=1"
+    out = redact(msg)
+    assert "abc123SECRET" not in out and "key=***" in out and "x=1" in out
+    assert redact("https://h/x?token=t0k") == "https://h/x?token=***"
+
+
+def test_params_yaml_never_contains_key(m1_run, monkeypatch) -> None:  # type: ignore[no-untyped-def]
+    text = (m1_run.run_dir / "params.yaml").read_text(encoding="utf-8")
+    assert "api_key_env: CENSUS_API_KEY" in text  # only the variable *name* is recorded
+    import os
+
+    key = os.environ.get("CENSUS_API_KEY")
+    if key:
+        assert key not in text

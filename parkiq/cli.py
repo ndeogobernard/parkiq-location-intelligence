@@ -138,6 +138,13 @@ def validate(
 def package(
     run_id: Annotated[str, typer.Option("--run-id")],
     gdb: Annotated[bool, typer.Option("--gdb")] = False,
+    public: Annotated[
+        bool,
+        typer.Option(
+            "--public",
+            help="redact parcel IDs, owners and addresses and round financials (ADR-0055)",
+        ),
+    ] = False,
 ) -> None:
     """Export the investment package (tool 16). Scheduled for M7."""
     typer.secho("package is scheduled for M7", fg=typer.colors.YELLOW)

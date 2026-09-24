@@ -36,6 +36,14 @@ if TYPE_CHECKING:
 log = logging.getLogger(__name__)
 
 HTTP_TIMEOUT_S = 120  # network timeout, not an analysis parameter
+_SECRET_PARAM = re.compile(r"([?&](?:key|api_key|apikey|token|access_token)=)[^&\s'\"]+", re.I)
+
+
+def redact(text: str) -> str:
+    """Mask secret query parameters (``key=…``) in URLs/messages before logging (ADR-0057)."""
+    return _SECRET_PARAM.sub(lambda m: m.group(1) + "***", text)
+
+
 SYNTHETIC_LABEL = "SYNTHETIC — NOT REAL DATA"
 
 
@@ -212,7 +220,7 @@ def download(url: str, dest_dir: Path, filename: str | None = None) -> Path:
     if out.exists() and out.stat().st_size > 0:
         log.info("cache hit %s", out)
         return out
-    log.info("download %s", url)
+    log.info("download %s", redact(url))
     tmp = out.with_suffix(out.suffix + ".part")
     try:
         with requests.get(url, stream=True, timeout=HTTP_TIMEOUT_S) as r:
@@ -221,7 +229,7 @@ def download(url: str, dest_dir: Path, filename: str | None = None) -> Path:
                 shutil.copyfileobj(r.raw, fh)
     except requests.RequestException as exc:
         tmp.unlink(missing_ok=True)
-        raise IngestError(f"download failed: {url}: {exc}") from exc
+        raise IngestError(redact(f"download failed: {url}: {exc}")) from None
     tmp.replace(out)
     return out
 

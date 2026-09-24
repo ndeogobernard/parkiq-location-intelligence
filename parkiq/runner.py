@@ -187,6 +187,17 @@ def output_root(explicit: str | Path | None = None) -> Path:
     return Path(env).resolve() if env else REPO_ROOT / "outputs"
 
 
+def cache_root(explicit: str | Path | None = None) -> Path:
+    """Download cache (ADR-0056): explicit arg > ``PARKIQ_CACHE_ROOT`` > ``<repo>/../ParkIQ_cache``.
+
+    Always outside the repository, shared by every run of a market so nothing is re-downloaded.
+    """
+    if explicit:
+        return Path(explicit).resolve()
+    env = os.environ.get("PARKIQ_CACHE_ROOT")
+    return Path(env).resolve() if env else REPO_ROOT.parent / "ParkIQ_cache"
+
+
 # --------------------------------------------------------------------------- run lifecycle
 
 
@@ -208,6 +219,7 @@ def open_run(
     out: str | Path | None = None,
     force: bool = False,
     source_filter: list[str] | None = None,
+    cache_dir: str | Path | None = None,
 ) -> RunContext:
     """Create a new run folder or reopen an existing one.
 
@@ -217,6 +229,7 @@ def open_run(
         out: Output root override.
         force: Re-run steps even if their input hash is unchanged.
         source_filter: Restrict ingest to these source IDs.
+        cache_dir: Download cache root override (ADR-0056).
 
     Returns:
         The run context.
@@ -225,7 +238,7 @@ def open_run(
     rid = run_id or new_run_id(cfg.slug, cfg.weights.run_id_scenario)
     run_dir = root / rid
     (run_dir / "logs").mkdir(parents=True, exist_ok=True)
-    cache = root / "_cache"
+    cache = cache_root(cache_dir) / cfg.slug
     cache.mkdir(parents=True, exist_ok=True)
     log_path = run_dir / "logs" / f"{rid}.log"
     _setup_logging(log_path)

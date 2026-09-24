@@ -1,4 +1,4 @@
-# ParkIQ — surface-lot parking site selection and underwriting
+# ParkIQ — Location Intelligence for Parking Site Selection
 
 A repeatable, config-driven toolkit that finds developable parcels where a **paid surface parking
 lot** fills across dayparts and pays. It models demand by daypart at walk-shed resolution,
@@ -17,6 +17,8 @@ network, slope), free-source ingest, QA. Everything from `demand` onward is a la
 ## Install (Windows)
 
 ```powershell
+git clone https://github.com/ndeogobernard/parkiq-location-intelligence.git C:\GIS\ParkIQ
+
 # one-time: create the env with ArcGIS Pro's conda (arcgispro-py3 is not touched)
 $env:CONDA_SSL_VERIFY = "truststore"      # only if your network re-signs HTTPS: use the Windows cert store
 & "C:\Program Files\ArcGIS\Pro\bin\Python\Scripts\conda.exe" env create -p C:\GIS\envs\parkiq -f C:\GIS\ParkIQ\environment.yml
@@ -28,6 +30,13 @@ pip install -e "C:\GIS\ParkIQ[dev]" --no-deps
 
 `parkiq-env.ps1` activates the env with a clean PATH, so third-party DLLs elsewhere on PATH cannot
 shadow GDAL/rasterio's (ADR-0052). It changes the current window only.
+
+## Development
+
+**Tools:** _TODO_
+
+Lint, format and type checks run with `ruff check .`, `ruff format --check .` and `mypy`; the
+offline test suite (`pytest`) runs the synthetic fixture market in about a minute.
 
 ## Commands
 
@@ -60,7 +69,8 @@ has not succeeded, or if a parameter it needs is still `null` (DECIDE). `check-c
 | `run_log.json` | per step: status, input hash, summary; used to resume |
 | `logs/<run_id>.log` | full log |
 
-Downloads are cached once per market in `outputs/<market>/_cache/`.
+Downloads are cached once per market outside the repository, in `../ParkIQ_cache/<market>/`
+(override with `PARKIQ_CACHE_ROOT`; ADR-0056), and never re-downloaded per run.
 
 ## ArcGIS Pro workspace
 
@@ -104,3 +114,8 @@ SCOPE §6.2 plus the additions in ARCHITECTURE §1 / ADR-0005, -0006, -0051: `pa
 `arcpy`), `parkiq/ingest/` (one adapter per source), `configs/`, `markets/`, `schema/`,
 `tests/` (fixture market is **SYNTHETIC — NOT REAL DATA**), `arcgis/` (ArcPy only; `manual/` holds
 the Session-1 scripts), `toolbox/` (M7), `templates/` (M6–M7), `docs/`.
+
+## Licence
+
+Code: MIT © 2026 Bernard Issifu (see [`LICENSE`](LICENSE)). Data retains its source licences
+(e.g. OpenStreetMap under ODbL — "© OpenStreetMap contributors" on every map that uses it).

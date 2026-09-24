@@ -21,13 +21,13 @@ agree unless noted); **Open** = needs a call before the milestone shown.
 | 0005 | Brief-over-scope precedence; `StudyArea` layer added | D-04 | — | Proposed | — |
 | 0006 | Intermediate standardized input layers (Places, BlockJobs, …) | — | — | Proposed | M2 |
 | 0007 | Analysis CRS for Franklin = EPSG:3735 (ftUS) | — | D-02 | Proposed | — |
-| 0008 | Two-stage study extent (county scan → focus submarkets) | — | D-03 | Proposed (amended) | M4 |
-| 0009 | Grid = H3 r9 (h3-py v4, centroid rule) | D-01 | D-04 | Proposed | — |
+| 0008 | Two-stage study extent (county scan → focus submarkets) | — | D-03 | **Accepted** 2026-09-24 | M4 |
+| 0009 | Grid = H3 r9 (h3-py v4, centroid rule) | D-01 | D-04 | **Accepted** 2026-09-24 | — |
 | 0010 | One GeoPackage per run | D-05 | — | Proposed | M2 |
 | 0011 | GDB concepts mapped onto GeoPackage | D-06 | — | Proposed | M2 |
 | 0012 | Rasters as GeoTIFF beside the GeoPackage | D-07 | — | Proposed | — |
-| 0013 | Demand-/supply-conserving walk-shed allocation | D-08 | D-08 | Proposed | M3 |
-| 0014 | Mode-share adjustment = local ÷ rate-source baseline | D-09 | D-06 | Proposed | M4 |
+| 0013 | Demand-/supply-conserving walk-shed allocation | D-08 | D-08 | **Accepted** 2026-09-24 | M3 |
+| 0014 | Mode-share adjustment = local ÷ rate-source baseline | D-09 | D-06 | **Accepted** 2026-09-24 | M4 |
 | 0015 | Residential demand input | D-10 | D-07 | **Open** | M4 |
 | 0016 | `.pyt` shells out to the CLI in the parkiq env | D-11 | — | Proposed | M7 |
 | 0017 | Market `ranking:` overrides shared weights | D-12 | — | Proposed | — |
@@ -38,14 +38,14 @@ agree unless noted); **Open** = needs a call before the milestone shown.
 | 0022 | Anchor category crosswalk `configs/anchor_crosswalk.yaml` | D-17 | — | Proposed | M4 |
 | 0023 | Listing-rate → daypart mapping | D-18 | — | Proposed | M3 |
 | 0024 | Hot-zone contiguity = H3 k=1 components | D-19 | — | Proposed | M4 |
-| 0025 | Shape index = rectangularity | D-20 | D-09 | Proposed | M5 |
+| 0025 | Shape index = rectangularity | D-20 | D-09 | **Accepted** 2026-09-24 | M5 |
 | 0026 | Frontage / corner definitions | D-21 | — | Proposed | M5 |
 | 0027 | Walk-shed polygons = buffered reachable edges | D-22 | — | Proposed | M5 |
 | 0028 | Criteria C01–C10 measurement details | D-23 | — | Proposed | M5 |
-| 0029 | Dirichlet sensitivity = flat (α = 1) | D-24 | D-11 | Proposed | M5 |
+| 0029 | Dirichlet sensitivity = flat (α = 1) | D-24 | D-11 | **Accepted** 2026-09-24 | M5 |
 | 0030 | 40–200 candidate rule: report, don't auto-adjust | D-25 | — | Proposed | M5 |
-| 0031 | Size vs stall range: apply both | Q2 | D-10 | Proposed | M5 |
-| 0032 | Occupancy = min(cap, g(gap_ratio), absorption) | D-26 | D-12 | Proposed | M6 |
+| 0031 | Size vs stall range: apply both | Q2 | D-10 | **Accepted** 2026-09-24 | M5 |
+| 0032 | Occupancy = min(cap, g(gap_ratio), absorption) | D-26 | D-12 | **Accepted** 2026-09-24 | M6 |
 | 0033 | Billing basis / days / event overlap | D-27 | — | Proposed | M6 |
 | 0034 | Monthly permits rule | D-28 | — | Proposed | M6 |
 | 0035 | Opex structure | D-29 | — | Proposed | M6 |
@@ -54,20 +54,23 @@ agree unless noted); **Open** = needs a call before the milestone shown.
 | 0038 | Payback definition | D-32 | — | Proposed | M6 |
 | 0039 | Ground-lease rent | D-33 | — | Proposed | M6 |
 | 0040 | Soft cost base = hard cost | — | D-13 | Proposed | M6 |
-| 0041 | Financial ranking metric = yield-on-cost (buy) | D-34 | D-14 | Proposed | M6 |
+| 0041 | Financial ranking metric = yield-on-cost (buy) | D-34 | D-14 | **Accepted** 2026-09-24 | M6 |
 | 0042 | Excel parity engine (`formulas`, no cached values) | D-35 | — | Proposed | M6 |
 | 0043 | Calibration factors in `markets/<slug>.calibration.yaml` | D-36 | — | Proposed | M8 |
 | 0044 | CLI names: `check-config` validates config; `validate` = back-test | D-37/Q3 | — | Proposed | — |
 | 0045 | `.gdb` export optional (`package --gdb`) | D-38 | — | Proposed | M7 |
 | 0046 | Due-diligence flags are rule-based | D-39 | — | Proposed | M6 |
 | 0047 | Memo numbers carry a trace key | D-40 | — | Proposed | M7 |
-| 0048 | Zoning screen table for Columbus | — | D-15 | Proposed | M2 |
-| 0049 | Stall count rounds down | — | (manual §9.1) | Proposed | M5 |
+| 0048 | Zoning screen table for Columbus | — | D-15 | **Accepted** 2026-09-24 | M2 |
+| 0049 | Stall count rounds down | — | (manual §9.1) | **Accepted** 2026-09-24 | M5 |
 | 0050 | Config provenance (`provenance:` map) and step gating | Q6 | — | Proposed | — |
 | 0051 | `configs/sources.yaml` source catalogue; S03 split into S03a/S03b | Q4 | — | Proposed | — |
 | 0052 | Runtime environment on managed Windows workstations | — | — | Proposed | — |
 | 0053 | Ingest geometry rules (clip, repair, dedupe) | — | — | Proposed | — |
-| 0054 | Manual observations CSV for rates/occupancy | Q1 | S07 row | Proposed | M2 |
+| 0054 | Manual observations CSV for rates/occupancy | Q1 | S07 row | **Accepted** 2026-09-24 | M2 |
+| 0055 | Optional public-redaction mode for packages (`package --public`) | — | — | **Accepted** 2026-09-24 | M7 |
+| 0056 | Download cache outside the repo; DEM fetched once for the study-area extent | — | — | **Accepted** 2026-09-24 | M2 |
+| 0057 | Secrets only from the environment; never persisted or logged | — | — | **Accepted** 2026-09-24 | — |
 
 ---
 
@@ -110,14 +113,14 @@ are `Raw_*` in EPSG:4326 (SCOPE §4.5 versioning).
 EPSG:3735 NAD83 / Ohio South (ftUS). It matches the Auditor parcel service, so the largest layer
 needs no reprojection. `check-config` enforces `units: ft` against the CRS itself.
 
-## ADR-0008 — Study extent (amended)
+## ADR-0008 — Study extent (amended) — Accepted 2026-09-24
 Admin D-03 proposed a two-stage process: a county-wide demand scan, then 1–3 focus submarkets,
 because the manual network work scales poorly. With code, the network and grid run for the whole
-county, so the scan is no longer a workload constraint. **Proposed amendment:** run the full county
+county, so the scan is no longer a workload constraint. **Accepted amendment:** run the full county
 end to end; use the scan only to pick `focus_submarkets` for reporting and insets (SCOPE §2.2: not a
 filter).
 
-## ADR-0009 — H3 grid
+## ADR-0009 — H3 grid — Accepted 2026-09-24 (incl. hole-fill amendment)
 H3 r9 via h3-py v4 `geo_to_cells` (centroid containment, the same as the manual's
 "hexes whose centre is in StudyArea"). Hex IDs will match ArcGIS Pro's Generate Tessellation H3 IDs.
 **Amendment (found on the live Franklin run, 2026-09-24):** at a narrow concave inlet of the
@@ -154,7 +157,7 @@ learned during the build, at the milestone that needs them.
 Build the `zoning_screen` table covering Title 33, Title 34 (Zone In) and Downtown zones A/B;
 suburbs separately. [VERIFY current code] Joined in M2 (S23).
 
-## ADR-0049 — Stall rounding
+## ADR-0049 — Stall rounding — Accepted 2026-09-24
 Buildable stalls = `ROUNDDOWN(lot_sqft × (1 − setback) × efficiency ÷ stall_area, 0)`
 (manual §9.1 / App. C). The plan did not specify rounding; the code follows the manual so the Python
 figures, the Excel model and the manual reference agree.
@@ -193,3 +196,21 @@ noted. Unmatched land-use codes → `Other` (counted); owners matching no rule �
 ## ADR-0054 — Manual observations
 The analyst's field survey (workbook S07 row; manual App. D/E templates) is ingested by
 `manual_observations.py` (M2), in place of app listings unless those are licensed. Never mocked.
+
+## ADR-0055 — Optional public-redaction mode
+`parkiq package --public` (default **off**) produces a publishable package: parcel IDs, owner names
+and addresses are redacted and financial figures are rounded; the choice of what deal detail to
+publish is made per release. In every mode: licensed data is never published, and every map that
+uses OSM data carries "© OpenStreetMap contributors". Implemented with the package step (M7).
+
+## ADR-0056 — Download cache outside the repository
+Raw downloads are cached once per market in `<cache root>/<market>/<source_id>/<vintage>/`, where
+the cache root is `PARKIQ_CACHE_ROOT` or, by default, a `ParkIQ_cache` folder beside the
+repository — never inside it and never re-downloaded per run. The DEM (S18) is fetched once for the
+study-area extent at ~10 m (3DEP ImageServer export if it serves the extent, otherwise tiles);
+slope matters little in central Columbus, so effort here stays minimal.
+
+## ADR-0057 — Secrets
+API keys (e.g. `CENSUS_API_KEY`) are read only from environment variables named in the config.
+They are never written to configs, `params.yaml`, logs, registry rows, error messages or context
+files; URLs are redacted before they are logged or raised.

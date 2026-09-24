@@ -16,6 +16,20 @@ FIXTURE_DIR = Path(__file__).parent / "fixtures" / "fixture_market"
 FIXTURE_YAML = FIXTURE_DIR / "fixture.yaml"
 
 
+@pytest.fixture(scope="session", autouse=True)
+def _isolated_cache(tmp_path_factory: pytest.TempPathFactory) -> Iterator[None]:
+    """Keep test downloads/caches out of the real cache (ADR-0056)."""
+    import os
+
+    old = os.environ.get("PARKIQ_CACHE_ROOT")
+    os.environ["PARKIQ_CACHE_ROOT"] = str(tmp_path_factory.mktemp("cache"))
+    yield
+    if old is None:
+        os.environ.pop("PARKIQ_CACHE_ROOT", None)
+    else:
+        os.environ["PARKIQ_CACHE_ROOT"] = old
+
+
 @pytest.fixture(scope="session")
 def fixture_cfg() -> ResolvedConfig:
     """Resolved fixture config."""

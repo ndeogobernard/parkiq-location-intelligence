@@ -32,6 +32,7 @@ from parkiq.ingest.base import (
     Standardized,
     download,
     read_vector,
+    redact,
     to_analysis,
 )
 
@@ -110,11 +111,14 @@ class AcsAdapter(SourceAdapter):
                             env = opts.get("api_key_env")
                             raise IngestError(
                                 "S05: the Census Data API requires an API key (it redirected to "
-                                f"{r.url}). Get a free key and set the environment variable {env}."
+                                f"{redact(r.url)}). Set the environment variable {env}."
                             )
                         rows = r.json()
                     except (requests.RequestException, ValueError) as exc:
-                        raise IngestError(f"S05 Census API failed for county {c}: {exc}") from exc
+                        # never chain the original: its message can contain the key (ADR-0057)
+                        raise IngestError(
+                            redact(f"S05 Census API failed for county {c}: {exc}")
+                        ) from None
                     frames.append(pd.DataFrame(rows[1:], columns=rows[0]))
                 df = pd.concat(frames, ignore_index=True)
                 df["GEOID"] = df["state"] + df["county"] + df["tract"] + df["block group"]

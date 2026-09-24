@@ -7,3 +7,10 @@ export PROJ_DATA="$(cygpath -w "$E/Library/share/proj")"
 export PROJ_LIB="$PROJ_DATA"
 export CONDA_PREFIX="$(cygpath -w "$E")"
 export PYTHONIOENCODING=utf-8
+# User-level environment variables set after this app/shell started are not inherited; read the
+# Census key from the user environment into this session only (never printed or written).
+if [ -z "${CENSUS_API_KEY:-}" ]; then
+  _k=$(powershell.exe -NoProfile -Command "[Environment]::GetEnvironmentVariable('CENSUS_API_KEY','User')" 2>/dev/null | tr -d '\r\n')
+  if [ -n "$_k" ]; then export CENSUS_API_KEY="$_k"; fi
+  unset _k
+fi
