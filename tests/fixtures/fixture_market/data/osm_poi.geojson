@@ -1,0 +1,528 @@
+{
+ "type": "FeatureCollection",
+ "features": [
+  {
+   "type": "Feature",
+   "properties": {
+    "element": "node",
+    "id": 5000,
+    "name": "OSM restaurant 0",
+    "amenity": "restaurant",
+    "rooms": null,
+    "capacity": null,
+    "shop": null,
+    "tourism": null,
+    "leisure": null,
+    "note": "SYNTHETIC \u2014 NOT REAL DATA"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -82.19448942711313,
+     42.00273238418213
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "element": "node",
+    "id": 5001,
+    "name": "OSM bar 1",
+    "amenity": "bar",
+    "rooms": null,
+    "capacity": null,
+    "shop": null,
+    "tourism": null,
+    "leisure": null,
+    "note": "SYNTHETIC \u2014 NOT REAL DATA"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -82.18414045943092,
+     42.001056313929986
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "element": "node",
+    "id": 5002,
+    "name": "OSM clothes 2",
+    "amenity": null,
+    "rooms": null,
+    "capacity": null,
+    "shop": "clothes",
+    "tourism": null,
+    "leisure": null,
+    "note": "SYNTHETIC \u2014 NOT REAL DATA"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -82.19745100382194,
+     42.01144326303929
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "element": "node",
+    "id": 5003,
+    "name": "OSM hotel 3",
+    "amenity": null,
+    "rooms": "120",
+    "capacity": null,
+    "shop": null,
+    "tourism": "hotel",
+    "leisure": null,
+    "note": "SYNTHETIC \u2014 NOT REAL DATA"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -82.19708335720453,
+     42.012588078127514
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "element": "way",
+    "id": 5004,
+    "name": "OSM stadium 4",
+    "amenity": null,
+    "rooms": null,
+    "capacity": "8000",
+    "shop": null,
+    "tourism": null,
+    "leisure": "stadium",
+    "note": "SYNTHETIC \u2014 NOT REAL DATA"
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       -82.19479367877017,
+       42.012939743240146
+      ],
+      [
+       -82.19480716287049,
+       42.01366011800413
+      ],
+      [
+       -82.196256123563,
+       42.013645024945
+      ],
+      [
+       -82.19624262311982,
+       42.012924650560066
+      ],
+      [
+       -82.19479367877017,
+       42.012939743240146
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "element": "node",
+    "id": 5005,
+    "name": "OSM theatre 5",
+    "amenity": "theatre",
+    "rooms": null,
+    "capacity": null,
+    "shop": null,
+    "tourism": null,
+    "leisure": null,
+    "note": "SYNTHETIC \u2014 NOT REAL DATA"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -82.19865550131229,
+     42.0076295078938
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "element": "node",
+    "id": 5006,
+    "name": "OSM school 6",
+    "amenity": "school",
+    "rooms": null,
+    "capacity": null,
+    "shop": null,
+    "tourism": null,
+    "leisure": null,
+    "note": "SYNTHETIC \u2014 NOT REAL DATA"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -82.18475964472198,
+     42.00140655734732
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "element": "node",
+    "id": 5007,
+    "name": "OSM restaurant 7",
+    "amenity": "restaurant",
+    "rooms": null,
+    "capacity": null,
+    "shop": null,
+    "tourism": null,
+    "leisure": null,
+    "note": "SYNTHETIC \u2014 NOT REAL DATA"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -82.18865058899772,
+     42.005385277647214
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "element": "node",
+    "id": 5008,
+    "name": "OSM bar 8",
+    "amenity": "bar",
+    "rooms": null,
+    "capacity": null,
+    "shop": null,
+    "tourism": null,
+    "leisure": null,
+    "note": "SYNTHETIC \u2014 NOT REAL DATA"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -82.19092049925054,
+     42.0101137472975
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "element": "node",
+    "id": 5009,
+    "name": "OSM clothes 9",
+    "amenity": null,
+    "rooms": null,
+    "capacity": null,
+    "shop": "clothes",
+    "tourism": null,
+    "leisure": null,
+    "note": "SYNTHETIC \u2014 NOT REAL DATA"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -82.18895425892565,
+     42.001301208379545
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "element": "node",
+    "id": 5010,
+    "name": "OSM hotel 10",
+    "amenity": null,
+    "rooms": "120",
+    "capacity": null,
+    "shop": null,
+    "tourism": "hotel",
+    "leisure": null,
+    "note": "SYNTHETIC \u2014 NOT REAL DATA"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -82.19978996107965,
+     42.01130698502416
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "element": "way",
+    "id": 5011,
+    "name": "OSM stadium 11",
+    "amenity": null,
+    "rooms": null,
+    "capacity": "8000",
+    "shop": null,
+    "tourism": null,
+    "leisure": "stadium",
+    "note": "SYNTHETIC \u2014 NOT REAL DATA"
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       -82.19609351155644,
+       42.00319512259548
+      ],
+      [
+       -82.19610700571586,
+       42.003915498244815
+      ],
+      [
+       -82.19755574460223,
+       42.003900391606614
+      ],
+      [
+       -82.19754223410806,
+       42.00318001633671
+      ],
+      [
+       -82.19609351155644,
+       42.00319512259548
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "element": "node",
+    "id": 5012,
+    "name": "OSM theatre 12",
+    "amenity": "theatre",
+    "rooms": null,
+    "capacity": null,
+    "shop": null,
+    "tourism": null,
+    "leisure": null,
+    "note": "SYNTHETIC \u2014 NOT REAL DATA"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -82.19928871188196,
+     42.01098323086376
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "element": "node",
+    "id": 5013,
+    "name": "OSM school 13",
+    "amenity": "school",
+    "rooms": null,
+    "capacity": null,
+    "shop": null,
+    "tourism": null,
+    "leisure": null,
+    "note": "SYNTHETIC \u2014 NOT REAL DATA"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -82.1886038606106,
+     42.01284843625071
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "element": "node",
+    "id": 5014,
+    "name": "OSM restaurant 14",
+    "amenity": "restaurant",
+    "rooms": null,
+    "capacity": null,
+    "shop": null,
+    "tourism": null,
+    "leisure": null,
+    "note": "SYNTHETIC \u2014 NOT REAL DATA"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -82.19410887025391,
+     42.012710570723115
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "element": "node",
+    "id": 5015,
+    "name": "OSM bar 15",
+    "amenity": "bar",
+    "rooms": null,
+    "capacity": null,
+    "shop": null,
+    "tourism": null,
+    "leisure": null,
+    "note": "SYNTHETIC \u2014 NOT REAL DATA"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -82.19264800450665,
+     42.011581358888435
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "element": "node",
+    "id": 5016,
+    "name": "OSM clothes 16",
+    "amenity": null,
+    "rooms": null,
+    "capacity": null,
+    "shop": "clothes",
+    "tourism": null,
+    "leisure": null,
+    "note": "SYNTHETIC \u2014 NOT REAL DATA"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -82.19078286434612,
+     42.00483982408093
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "element": "node",
+    "id": 5017,
+    "name": "OSM hotel 17",
+    "amenity": null,
+    "rooms": "120",
+    "capacity": null,
+    "shop": null,
+    "tourism": "hotel",
+    "leisure": null,
+    "note": "SYNTHETIC \u2014 NOT REAL DATA"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -82.18921662263902,
+     42.00547836127525
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "element": "way",
+    "id": 5018,
+    "name": "OSM stadium 18",
+    "amenity": null,
+    "rooms": null,
+    "capacity": "8000",
+    "shop": null,
+    "tourism": null,
+    "leisure": "stadium",
+    "note": "SYNTHETIC \u2014 NOT REAL DATA"
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       -82.1947287364737,
+       42.009187479177676
+      ],
+      [
+       -82.19474221806858,
+       42.00990785443123
+      ],
+      [
+       -82.19619109363866,
+       42.009892763279744
+      ],
+      [
+       -82.19617759570401,
+       42.009172388405204
+      ],
+      [
+       -82.1947287364737,
+       42.009187479177676
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "element": "node",
+    "id": 5019,
+    "name": "OSM theatre 19",
+    "amenity": "theatre",
+    "rooms": null,
+    "capacity": null,
+    "shop": null,
+    "tourism": null,
+    "leisure": null,
+    "note": "SYNTHETIC \u2014 NOT REAL DATA"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -82.19709864283706,
+     42.00885063012902
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "element": "node",
+    "id": 5020,
+    "name": "OSM school 20",
+    "amenity": "school",
+    "rooms": null,
+    "capacity": null,
+    "shop": null,
+    "tourism": null,
+    "leisure": null,
+    "note": "SYNTHETIC \u2014 NOT REAL DATA"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -82.18803096798467,
+     42.00388486546477
+    ]
+   }
+  }
+ ],
+ "name": "SYNTHETIC \u2014 NOT REAL DATA"
+}

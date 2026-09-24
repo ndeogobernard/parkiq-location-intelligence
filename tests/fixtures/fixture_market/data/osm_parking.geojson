@@ -1,0 +1,786 @@
+{
+ "type": "FeatureCollection",
+ "features": [
+  {
+   "type": "Feature",
+   "properties": {
+    "element": "node",
+    "id": 9000,
+    "amenity": "parking",
+    "parking": "surface",
+    "name": null,
+    "capacity": null,
+    "fee": "no",
+    "access": "private",
+    "operator": null,
+    "building:levels": null,
+    "note": "SYNTHETIC \u2014 NOT REAL DATA"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -82.19837961313544,
+     42.012598782365124
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "element": "way",
+    "id": 9001,
+    "amenity": "parking",
+    "parking": "multi-storey",
+    "name": "Lot 1",
+    "capacity": "393",
+    "fee": "yes",
+    "access": "yes",
+    "operator": "FixturePark",
+    "building:levels": "4",
+    "note": "SYNTHETIC \u2014 NOT REAL DATA"
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       -82.19347175255726,
+       42.0036039686435
+      ],
+      [
+       -82.1934784848849,
+       42.00396415679865
+      ],
+      [
+       -82.19420285571354,
+       42.00395662234388
+      ],
+      [
+       -82.19419611930212,
+       42.00359643428335
+      ],
+      [
+       -82.19347175255726,
+       42.0036039686435
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "element": "way",
+    "id": 9002,
+    "amenity": "parking",
+    "parking": "street_side",
+    "name": "Lot 2",
+    "capacity": null,
+    "fee": "yes",
+    "access": "yes",
+    "operator": null,
+    "building:levels": null,
+    "note": "SYNTHETIC \u2014 NOT REAL DATA"
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       -82.20001800408822,
+       42.00362719425366
+      ],
+      [
+       -82.20002477334317,
+       42.00398738154588
+      ],
+      [
+       -82.20074914270198,
+       42.003979805779416
+      ],
+      [
+       -82.20074236936331,
+       42.00361961858232
+      ],
+      [
+       -82.20001800408822,
+       42.00362719425366
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "element": "way",
+    "id": 9003,
+    "amenity": "parking",
+    "parking": "surface",
+    "name": null,
+    "capacity": "327",
+    "fee": "yes",
+    "access": "yes",
+    "operator": "FixturePark",
+    "building:levels": null,
+    "note": "SYNTHETIC \u2014 NOT REAL DATA"
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       -82.18783038231871,
+       42.01148244212384
+      ],
+      [
+       -82.18783708467815,
+       42.011842630521556
+      ],
+      [
+       -82.18856154637555,
+       42.011835130530265
+      ],
+      [
+       -82.18855483993069,
+       42.01147494222673
+      ],
+      [
+       -82.18783038231871,
+       42.01148244212384
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "element": "way",
+    "id": 9004,
+    "amenity": "parking",
+    "parking": "surface",
+    "name": "Lot 4",
+    "capacity": null,
+    "fee": "no",
+    "access": "yes",
+    "operator": null,
+    "building:levels": null,
+    "note": "SYNTHETIC \u2014 NOT REAL DATA"
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       -82.18433470041802,
+       42.00966647937028
+      ],
+      [
+       -82.18434138263059,
+       42.010026668338256
+      ],
+      [
+       -82.18506582463979,
+       42.01001919066972
+      ],
+      [
+       -82.18505913834215,
+       42.00965900179566
+      ],
+      [
+       -82.18433470041802,
+       42.00966647937028
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "element": "node",
+    "id": 9005,
+    "amenity": "parking",
+    "parking": "multi-storey",
+    "name": "Lot 5",
+    "capacity": "382",
+    "fee": "yes",
+    "access": "yes",
+    "operator": "FixturePark",
+    "building:levels": "4",
+    "note": "SYNTHETIC \u2014 NOT REAL DATA"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -82.20082620511492,
+     42.01063673296397
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "element": "way",
+    "id": 9006,
+    "amenity": "parking",
+    "parking": "street_side",
+    "name": null,
+    "capacity": null,
+    "fee": "yes",
+    "access": "yes",
+    "operator": null,
+    "building:levels": null,
+    "note": "SYNTHETIC \u2014 NOT REAL DATA"
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       -82.18462229622203,
+       42.007742148555984
+      ],
+      [
+       -82.18462897960636,
+       42.00810233760766
+      ],
+      [
+       -82.18535339970698,
+       42.008094858400575
+      ],
+      [
+       -82.18534671223797,
+       42.007734669442826
+      ],
+      [
+       -82.18462229622203,
+       42.007742148555984
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "element": "way",
+    "id": 9007,
+    "amenity": "parking",
+    "parking": "surface",
+    "name": "Lot 7",
+    "capacity": "88",
+    "fee": "yes",
+    "access": "private",
+    "operator": "FixturePark",
+    "building:levels": null,
+    "note": "SYNTHETIC \u2014 NOT REAL DATA"
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       -82.18410080331688,
+       42.01289275140637
+      ],
+      [
+       -82.18410748496525,
+       42.01325294020167
+      ],
+      [
+       -82.18483196364538,
+       42.01324546354599
+      ],
+      [
+       -82.18482527791129,
+       42.012885274844585
+      ],
+      [
+       -82.18410080331688,
+       42.01289275140637
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "element": "way",
+    "id": 9008,
+    "amenity": "parking",
+    "parking": "surface",
+    "name": "Lot 8",
+    "capacity": null,
+    "fee": "no",
+    "access": "yes",
+    "operator": null,
+    "building:levels": null,
+    "note": "SYNTHETIC \u2014 NOT REAL DATA"
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       -82.19763874551437,
+       42.00182845453286
+      ],
+      [
+       -82.19764550092417,
+       42.002188642251994
+      ],
+      [
+       -82.19836985051208,
+       42.00218108176044
+      ],
+      [
+       -82.19836309101892,
+       42.001820894136266
+      ],
+      [
+       -82.19763874551437,
+       42.00182845453286
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "element": "way",
+    "id": 9009,
+    "amenity": "parking",
+    "parking": "multi-storey",
+    "name": null,
+    "capacity": "30",
+    "fee": "yes",
+    "access": "yes",
+    "operator": "FixturePark",
+    "building:levels": "4",
+    "note": "SYNTHETIC \u2014 NOT REAL DATA"
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       -82.19386914691657,
+       42.00854490728346
+      ],
+      [
+       -82.19387588265164,
+       42.00890509507537
+      ],
+      [
+       -82.19460030942685,
+       42.008897557397546
+      ],
+      [
+       -82.19459356960701,
+       42.0085373697003
+      ],
+      [
+       -82.19386914691657,
+       42.00854490728346
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "element": "node",
+    "id": 9010,
+    "amenity": "parking",
+    "parking": "street_side",
+    "name": "Lot 10",
+    "capacity": null,
+    "fee": "yes",
+    "access": "yes",
+    "operator": null,
+    "building:levels": null,
+    "note": "SYNTHETIC \u2014 NOT REAL DATA"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -82.19593630376829,
+     42.00513502204193
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "element": "way",
+    "id": 9011,
+    "amenity": "parking",
+    "parking": "surface",
+    "name": "Lot 11",
+    "capacity": "226",
+    "fee": "yes",
+    "access": "yes",
+    "operator": "FixturePark",
+    "building:levels": null,
+    "note": "SYNTHETIC \u2014 NOT REAL DATA"
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       -82.1945070099231,
+       42.01092568051112
+      ],
+      [
+       -82.19451374981865,
+       42.01128586806938
+      ],
+      [
+       -82.19523820343858,
+       42.011278326021234
+      ],
+      [
+       -82.19523145945774,
+       42.0109181385577
+      ],
+      [
+       -82.1945070099231,
+       42.01092568051112
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "element": "way",
+    "id": 9012,
+    "amenity": "parking",
+    "parking": "surface",
+    "name": null,
+    "capacity": null,
+    "fee": "no",
+    "access": "yes",
+    "operator": null,
+    "building:levels": null,
+    "note": "SYNTHETIC \u2014 NOT REAL DATA"
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       -82.19548642671401,
+       42.01098797222246
+      ],
+      [
+       -82.19549317214975,
+       42.01134815964808
+      ],
+      [
+       -82.19621762621755,
+       42.01134061140971
+      ],
+      [
+       -82.19621087669651,
+       42.010980424078866
+      ],
+      [
+       -82.19548642671401,
+       42.01098797222246
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "element": "way",
+    "id": 9013,
+    "amenity": "parking",
+    "parking": "multi-storey",
+    "name": "Lot 13",
+    "capacity": "87",
+    "fee": "yes",
+    "access": "yes",
+    "operator": "FixturePark",
+    "building:levels": "4",
+    "note": "SYNTHETIC \u2014 NOT REAL DATA"
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       -82.19868962148414,
+       42.004408671735376
+      ],
+      [
+       -82.19869638343198,
+       42.004768859153586
+      ],
+      [
+       -82.19942076200766,
+       42.004761291655896
+      ],
+      [
+       -82.19941399597592,
+       42.004401104332715
+      ],
+      [
+       -82.19868962148414,
+       42.004408671735376
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "element": "way",
+    "id": 9014,
+    "amenity": "parking",
+    "parking": "street_side",
+    "name": "Lot 14",
+    "capacity": null,
+    "fee": "yes",
+    "access": "private",
+    "operator": null,
+    "building:levels": null,
+    "note": "SYNTHETIC \u2014 NOT REAL DATA"
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       -82.19568978448251,
+       42.00852910185104
+      ],
+      [
+       -82.19569653048428,
+       42.008889289404756
+      ],
+      [
+       -82.19642095659887,
+       42.0088817402395
+      ],
+      [
+       -82.19641420651233,
+       42.008521552780586
+      ],
+      [
+       -82.19568978448251,
+       42.00852910185104
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "element": "node",
+    "id": 9015,
+    "amenity": "parking",
+    "parking": "surface",
+    "name": null,
+    "capacity": "62",
+    "fee": "yes",
+    "access": "yes",
+    "operator": "FixturePark",
+    "building:levels": null,
+    "note": "SYNTHETIC \u2014 NOT REAL DATA"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -82.18589344361516,
+     42.003394453526646
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "element": "way",
+    "id": 9016,
+    "amenity": "parking",
+    "parking": "surface",
+    "name": "Lot 16",
+    "capacity": null,
+    "fee": "no",
+    "access": "yes",
+    "operator": null,
+    "building:levels": null,
+    "note": "SYNTHETIC \u2014 NOT REAL DATA"
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       -82.18928543866686,
+       42.005100118319056
+      ],
+      [
+       -82.18929214773478,
+       42.00546030692845
+      ],
+      [
+       -82.19001653663817,
+       42.0054527986745
+      ],
+      [
+       -82.19000982348615,
+       42.005092610159394
+      ],
+      [
+       -82.18928543866686,
+       42.005100118319056
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "element": "way",
+    "id": 9017,
+    "amenity": "parking",
+    "parking": "multi-storey",
+    "name": "Lot 17",
+    "capacity": "182",
+    "fee": "yes",
+    "access": "yes",
+    "operator": "FixturePark",
+    "building:levels": "4",
+    "note": "SYNTHETIC \u2014 NOT REAL DATA"
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       -82.18781873650647,
+       42.003570579858106
+      ],
+      [
+       -82.18782543694239,
+       42.00393076875547
+      ],
+      [
+       -82.1885498088814,
+       42.0039232699774
+      ],
+      [
+       -82.1885431043617,
+       42.003563081174185
+      ],
+      [
+       -82.18781873650647,
+       42.003570579858106
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "element": "way",
+    "id": 9018,
+    "amenity": "parking",
+    "parking": "street_side",
+    "name": null,
+    "capacity": null,
+    "fee": "yes",
+    "access": "yes",
+    "operator": null,
+    "building:levels": null,
+    "note": "SYNTHETIC \u2014 NOT REAL DATA"
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       -82.1892505202225,
+       42.001976193837216
+      ],
+      [
+       -82.18925722835914,
+       42.002336382647854
+      ],
+      [
+       -82.18998158183746,
+       42.002328875064855
+      ],
+      [
+       -82.18997486961739,
+       42.0019686863485
+      ],
+      [
+       -82.1892505202225,
+       42.001976193837216
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "element": "way",
+    "id": 9019,
+    "amenity": "parking",
+    "parking": "surface",
+    "name": "Lot 19",
+    "capacity": "217",
+    "fee": "yes",
+    "access": "yes",
+    "operator": "FixturePark",
+    "building:levels": null,
+    "note": "SYNTHETIC \u2014 NOT REAL DATA"
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       -82.19779409525857,
+       42.01112841318279
+      ],
+      [
+       -82.19780085374654,
+       42.01148860029591
+      ],
+      [
+       -82.1985253087969,
+       42.011481037473175
+      ],
+      [
+       -82.19851854622365,
+       42.011120850455015
+      ],
+      [
+       -82.19779409525857,
+       42.01112841318279
+      ]
+     ]
+    ]
+   }
+  }
+ ],
+ "name": "SYNTHETIC \u2014 NOT REAL DATA"
+}

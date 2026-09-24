@@ -1,0 +1,118 @@
+# Franklin County, OH — pilot market (ADR-0001, admin workbook).
+# Values and statuses mirror docs/reference/ParkIQ_FranklinOH_Admin.xlsx → Parameters.
+# null = DECIDE (blank in the workbook): check-config shows which steps each one blocks.
+# `parkiq check-config --market markets/franklin_oh.yaml --report franklin_params.csv`
+# writes these back out in the workbook's Parameters layout.
+market:
+  name: "Franklin County, OH"
+  slug: franklin_oh
+  boundary: {type: county, value: "39049"}
+  focus_submarkets: []          # DECIDE after the county-wide demand scan (ADR-0008)
+  analysis_crs: EPSG:3735       # NAD83 / Ohio South (ftUS) — ADR-0007
+  units: ft
+study:
+  buffer_miles: 1.0             # SCOPE §2.2
+  h3_resolution: 9              # SCOPE §2.2 [DECISION] — ADR-0009
+site:
+  min_parcel_sqft: 15000
+  max_parcel_sqft: 200000
+  target_stalls_range: [50, 300]
+  stall_area_sqft_gross: 320
+  layout_efficiency: 0.90
+  setback_landscape_pct: 0.08   # check Columbus parking-lot landscaping/screening rules (CC 3312)
+  max_slope_pct: 5
+  min_frontage_ft: 60
+  min_shape_index: 0.60         # metric = rectangularity (ADR-0025)
+  improvement_ratio_max: 0.25
+  frontage_buffer_ft: null      # DECIDE
+demand:
+  walk_shed_minutes: [3, 5, 8]
+  decay_weights: {3: 1.0, 5: 0.6, 8: 0.25}
+  dayparts: [wd_day, wd_eve, we_day, we_eve, event]
+  parking_generation_source: "ITE Parking Generation / ULI Shared Parking"   # [VERIFY license] V-01
+  transit_adjustment:
+    high_frequency_radius_m: 400
+    demand_factor: 0.85
+    high_frequency_headway_max_min: null   # DECIDE
+    peak_window: null                      # DECIDE, e.g. ["07:00", "09:00"] (manual §6.3)
+  mode_adjustment: null         # DECIDE: relative (ADR-0014, proposed) needs baseline drive shares
+  residential_offstreet_share: null        # DECIDE or exclude residential (ADR-0015)
+network:
+  backend: osmnx                # ADR-0004 confirmed 2026-09-24
+  walking_speed_m_s: 1.3
+  network_type: walk
+  graph_path: null              # null → download via OSMnx and cache
+supply:
+  private_effective_share: 0.50
+  onstreet_stall_length_ft: 22  # Columbus meter layer (S20) may make this unnecessary downtown
+  dedupe_distance_m: 40
+  dedupe_name_similarity: null  # DECIDE (ADR-0020)
+finance: {}                     # all SCOPE defaults from configs/finance_defaults.yaml; DECIDE keys null
+ranking: {financial_weight: 0.70, suitability_weight: 0.30, shortlist_size: null}   # shortlist DECIDE (5–10)
+data_licenses:
+  regrid: false                 # county auditor fallback (S01)
+  foot_traffic: none
+  parking_transactions: none
+
+sources:
+  S00:
+    vintage: "2025"             # TIGER/Line year [VERIFY V-33]
+  S01:
+    enabled: false              # enable once the Auditor parcels + CAMA are downloaded and inspected
+    path: null                  # e.g. C:/GIS/ParkIQ_data/franklin_oh/S01_parcels/parcels.shp
+    field_map: {}               # fill from 02_inspect_layer.py output (target: source column)
+    options: {}
+  S02: {enabled: false, vintage: null}      # Overture release id [VERIFY V-13]
+  S03a: {enabled: false, vintage: null}     # Overture release id [VERIFY V-13]
+  S03b: {enabled: true}                     # OSM POIs via Overpass
+  S04:
+    enabled: false              # set vintage to the latest LODES8 year for Ohio [VERIFY V-14]
+    vintage: null
+    options: {url_params: {state_abbr: oh}}
+  S05:
+    enabled: false              # set ACS 5-year vintage [VERIFY V-15]
+    vintage: null
+  S06: {enabled: true}                      # OSM parking via Overpass
+  S09:
+    enabled: false              # COTA GTFS — current URL from Mobility Database [VERIFY V-16]
+    url: null
+    options: {service_date: null}
+  S10:
+    enabled: false              # analyst venue table (Nationwide Arena, Lower.com Field, Ohio Stadium, ...)
+    path: null
+  S12a: {enabled: false, path: null}        # hospitals with beds [VERIFY V-18]
+  S12b: {enabled: false, vintage: null}     # IPEDS year [VERIFY V-19]
+  S13:
+    enabled: false              # ODOT TIMS traffic count layer (admin Source_Register) [VERIFY V-20]
+    url: "https://tims.dot.state.oh.us/ags/rest/services/Roadway_Information/Traffic_Count_Stations/MapServer"
+    field_map: {}
+  S14: {enabled: false}                     # FEMA NFHL [VERIFY V-21]
+  S15: {enabled: false, path: null}         # EPA FRS/ACRES [VERIFY V-22]
+  S18:
+    enabled: false              # 3DEP 1/3" tiles for Franklin ≈ 4 × 1°-tiles (~1–2 GB); enable when OK'd
+
+provenance:
+  study.buffer_miles:              {status: SCOPE,  source: "SCOPE §2.2"}
+  study.h3_resolution:             {status: SCOPE,  source: "SCOPE §2.2 [DECISION] ADR-0009"}
+  site.min_parcel_sqft:            {status: SCOPE,  source: "SCOPE §2.1 (yields ~39 stalls <50; ADR-0031)"}
+  site.max_parcel_sqft:            {status: SCOPE,  source: "SCOPE §2.1"}
+  site.stall_area_sqft_gross:      {status: SCOPE,  source: "SCOPE §2.1 [PARAMETER] 300–350 typical"}
+  site.layout_efficiency:          {status: SCOPE,  source: "SCOPE §2.1"}
+  site.setback_landscape_pct:      {status: SCOPE,  source: "SCOPE §2.1; check Columbus CC 3312"}
+  site.max_slope_pct:              {status: SCOPE,  source: "SCOPE §2.1"}
+  site.min_frontage_ft:            {status: SCOPE,  source: "SCOPE §2.1"}
+  site.min_shape_index:            {status: SCOPE,  source: "SCOPE §2.1; rectangularity (ADR-0025)"}
+  site.improvement_ratio_max:      {status: SCOPE,  source: "SCOPE §5.5"}
+  site.frontage_buffer_ft:         {status: DECIDE, source: ""}
+  demand.transit_adjustment.high_frequency_radius_m: {status: VERIFY, source: "SCOPE §2.1"}
+  demand.transit_adjustment.demand_factor:           {status: VERIFY, source: "SCOPE §2.1"}
+  demand.transit_adjustment.high_frequency_headway_max_min: {status: DECIDE, source: ""}
+  demand.residential_offstreet_share: {status: DECIDE, source: "or exclude residential (ADR-0015)"}
+  network.walking_speed_m_s:       {status: VERIFY, source: "SCOPE §5.1 [PARAMETER]; needs citation"}
+  supply.private_effective_share:  {status: SCOPE,  source: "SCOPE §2.1"}
+  supply.onstreet_stall_length_ft: {status: SCOPE,  source: "SCOPE §2.1"}
+  supply.dedupe_distance_m:        {status: SCOPE,  source: "SCOPE §5.3"}
+  supply.dedupe_name_similarity:   {status: DECIDE, source: "ADR-0020"}
+  ranking.financial_weight:        {status: SCOPE,  source: "SCOPE §5.8"}
+  ranking.suitability_weight:      {status: SCOPE,  source: "SCOPE §5.8"}
+  ranking.shortlist_size:          {status: DECIDE, source: "SCOPE says 5–10"}

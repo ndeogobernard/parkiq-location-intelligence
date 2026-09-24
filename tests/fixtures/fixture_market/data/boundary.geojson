@@ -1,0 +1,40 @@
+{
+ "type": "FeatureCollection",
+ "features": [
+  {
+   "type": "Feature",
+   "properties": {
+    "name": "Fixture City",
+    "note": "SYNTHETIC \u2014 NOT REAL DATA"
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       -82.18332185778627,
+       42.000419395567086
+      ],
+      [
+       -82.1835722288109,
+       42.01392649252819
+      ],
+      [
+       -82.2016843076457,
+       42.0137382867448
+      ],
+      [
+       -82.20143010744988,
+       42.00023127839293
+      ],
+      [
+       -82.18332185778627,
+       42.000419395567086
+      ]
+     ]
+    ]
+   }
+  }
+ ],
+ "name": "SYNTHETIC \u2014 NOT REAL DATA"
+}

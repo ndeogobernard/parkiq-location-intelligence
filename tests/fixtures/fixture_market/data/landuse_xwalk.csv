@@ -1,0 +1,7 @@
+county_code,land_use_class,auto_oriented_commercial,note
+100,Vacant,N,SYNTHETIC — NOT REAL DATA
+400,Commercial,Y,SYNTHETIC — NOT REAL DATA
+430,SurfaceParking,Y,SYNTHETIC — NOT REAL DATA
+500,Residential,N,SYNTHETIC — NOT REAL DATA
+510,Residential,N,SYNTHETIC — NOT REAL DATA
+680,Institutional,N,SYNTHETIC — NOT REAL DATA

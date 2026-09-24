@@ -1,0 +1,20 @@
+# Scoring weights by scenario — SCOPE Appendix B, verbatim.
+# Each scenario must sum to 1.00 (enforced by parkiq.config; SCOPE §10).
+# status: SCOPE (placeholder values from the scope document; no external citation needed —
+# these are the partners' stated priorities, not empirical rates).
+
+scenarios:
+  Balanced:    {C01: 0.18, C02: 0.14, C03: 0.08, C04: 0.12, C05: 0.10, C06: 0.08, C07: 0.12, C08: 0.08, C09: 0.05, C10: 0.05}
+  DemandFirst: {C01: 0.25, C02: 0.18, C03: 0.10, C04: 0.12, C05: 0.08, C06: 0.07, C07: 0.06, C08: 0.06, C09: 0.04, C10: 0.04}
+  CostFirst:   {C01: 0.12, C02: 0.10, C03: 0.05, C04: 0.12, C05: 0.10, C06: 0.06, C07: 0.25, C08: 0.08, C09: 0.06, C10: 0.06}
+
+# Final-rank blend (SCOPE §5.8 [PARAMETER]). A market config `ranking:` block overrides this (ADR-0017).
+ranking: {financial_weight: 0.70, suitability_weight: 0.30}
+
+# Scenario label used in run_id = YYYYMMDD_HHMM_<market>_<scenario> (SCOPE §6.5).
+# All three scenarios are always computed; this only names the run.
+run_id_scenario: Balanced
+
+provenance:
+  scenarios:  {status: SCOPE, source: "SCOPE Appendix B"}
+  ranking:    {status: SCOPE, source: "SCOPE §5.8 / Appendix B [PARAMETER]"}

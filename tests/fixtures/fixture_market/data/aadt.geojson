@@ -1,0 +1,74 @@
+{
+ "type": "FeatureCollection",
+ "features": [
+  {
+   "type": "Feature",
+   "properties": {
+    "STATION_ID": "A0",
+    "AADT": 8000,
+    "YEAR": 2025,
+    "ROUTE": "Main St",
+    "note": "SYNTHETIC \u2014 NOT REAL DATA"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -82.20034984691333,
+     42.00699741967817
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "STATION_ID": "A1",
+    "AADT": 9500,
+    "YEAR": 2025,
+    "ROUTE": "Main St",
+    "note": "SYNTHETIC \u2014 NOT REAL DATA"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -82.1961241547705,
+     42.00704153508264
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "STATION_ID": "A2",
+    "AADT": 11000,
+    "YEAR": 2025,
+    "ROUTE": "Main St",
+    "note": "SYNTHETIC \u2014 NOT REAL DATA"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -82.19189845319288,
+     42.00708549496953
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "STATION_ID": "A3",
+    "AADT": 12500,
+    "YEAR": 2025,
+    "ROUTE": "Main St",
+    "note": "SYNTHETIC \u2014 NOT REAL DATA"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -82.18767274221372,
+     42.00712929933789
+    ]
+   }
+  }
+ ],
+ "name": "SYNTHETIC \u2014 NOT REAL DATA"
+}

@@ -1,0 +1,311 @@
+# ParkIQ data model — machine-readable (SCOPE §4). Identical for every market.
+# v0 (M1): all SCOPE §4.4 domains; layers/tables written by M1 steps. M2 completes §4.2–4.5
+# (relationships, remaining Analysis/Results layers, GeoPackage schema-extension constraints).
+#
+# Field types: TEXT, INTEGER, REAL, DATETIME, BOOLEAN (stored 0/1), JSON (stored TEXT).
+# crs: analysis (market analysis_crs) | wgs84 (EPSG:4326) | none (attribute table)
+# raw: true → source attributes kept as delivered (free-form), only lineage fields enforced.
+# Every feature class carries the lineage fields (SCOPE §4.2).
+
+version: "0.1.0"
+
+lineage_fields:
+  source_id: {type: TEXT, nullable: false}
+  run_id:    {type: TEXT, nullable: false}
+  load_ts:   {type: DATETIME, nullable: false}
+
+domains:
+  dm_LandUseClass:   {type: coded, values: [Vacant, SurfaceParking, Commercial, Industrial, Residential, MixedUse, Institutional, Other]}
+  dm_OwnerType:      {type: coded, values: [Private, Corporate, Public, Institutional, Unknown]}
+  dm_ZoningScreen:   {type: coded, values: [ByRight, Conditional, Prohibited, Unknown]}
+  dm_AnchorCategory: {type: coded, values: [Office, Medical, University, Hotel, RestaurantBar, Retail, Venue, Transit, ResidentialBlock, Government, Other]}
+  dm_SizeMetric:     {type: coded, values: [Jobs, Beds, Enrollment, Rooms, Seats, Sqft, Units, Count]}
+  dm_SupplyType:     {type: coded, values: [Surface, Garage, OnStreet, Mixed]}
+  dm_Daypart:        {type: coded, values: [wd_day, wd_eve, we_day, we_eve, event]}
+  dm_ScreenStatus:   {type: coded, values: [Pass, Fail, Review]}
+  dm_Scenario:       {type: coded, values: [Balanced, DemandFirst, CostFirst]}
+  dm_Direction:      {type: coded, values: [Benefit, Cost]}
+  rg_Score:          {type: range, min: 0, max: 100}
+  rg_Occupancy:      {type: range, min: 0, max: 1}
+
+layers:
+  # ------------------------------------------------------------------ Reference
+  MarketBoundary:
+    feature_dataset: Reference
+    geometry: MultiPolygon
+    crs: analysis
+    fields:
+      name:      {type: TEXT}
+      geoid:     {type: TEXT}
+      area_sqmi: {type: REAL}
+  StudyArea:            # addition (ADR-0005): boundary + buffer, the clip extent for every source
+    feature_dataset: Reference
+    geometry: MultiPolygon
+    crs: analysis
+    fields:
+      buffer_miles: {type: REAL}
+      area_sqmi:    {type: REAL}
+  Submarkets:
+    feature_dataset: Reference
+    geometry: MultiPolygon
+    crs: analysis
+    fields:
+      name: {type: TEXT}
+      type: {type: TEXT}
+  HexGrid:
+    feature_dataset: Reference
+    geometry: Polygon
+    crs: analysis
+    fields:
+      hex_id:    {type: TEXT, nullable: false, unique: true}
+      submarket: {type: TEXT}
+      area_km2:  {type: REAL}
+  WalkNodes:
+    feature_dataset: Reference
+    geometry: Point
+    crs: analysis
+    fields:
+      node_id:      {type: TEXT, nullable: false, unique: true}
+      street_count: {type: INTEGER}
+  WalkEdges:
+    feature_dataset: Reference
+    geometry: LineString
+    crs: analysis
+    fields:
+      u:            {type: TEXT, nullable: false}
+      v:            {type: TEXT, nullable: false}
+      key:          {type: INTEGER}
+      osmid:        {type: TEXT}
+      highway:      {type: TEXT}
+      name:         {type: TEXT}
+      length_m:     {type: REAL, nullable: false}
+      walk_minutes: {type: REAL, nullable: false}
+  # ------------------------------------------------------------------ Cadastral
+  Parcels:
+    feature_dataset: Cadastral
+    geometry: MultiPolygon
+    crs: analysis
+    fields:
+      parcel_id:                  {type: TEXT, nullable: false, unique: true}
+      apn:                        {type: TEXT}
+      address:                    {type: TEXT}
+      owner:                      {type: TEXT}
+      owner_type:                 {type: TEXT, domain: dm_OwnerType}
+      land_use_code:              {type: TEXT}
+      land_use_class:             {type: TEXT, domain: dm_LandUseClass}
+      zoning_code:                {type: TEXT}
+      zoning_screen:              {type: TEXT, domain: dm_ZoningScreen}
+      lot_sqft:                   {type: REAL}
+      assessed_land_value:        {type: REAL}
+      assessed_improvement_value: {type: REAL}
+      improvement_value_ratio:    {type: REAL}
+      year_built:                 {type: INTEGER}
+      frontage_ft:                {type: REAL}
+      shape_index:                {type: REAL}
+      corner_flag:                {type: BOOLEAN}
+      listing_price:              {type: REAL}
+      listing_source:             {type: TEXT}
+  Buildings:
+    feature_dataset: Cadastral
+    geometry: MultiPolygon
+    crs: analysis
+    fields:
+      bldg_id:   {type: TEXT, nullable: false, unique: true}
+      area_sqft: {type: REAL}
+      height_m:  {type: REAL}
+      levels:    {type: REAL}
+  # ------------------------------------------------------------------ Demand
+  TransitStops:
+    feature_dataset: Demand
+    geometry: Point
+    crs: analysis
+    fields:
+      stop_id:             {type: TEXT, nullable: false, unique: true}
+      stop_name:           {type: TEXT}
+      route_count:         {type: INTEGER}
+      peak_departures:     {type: INTEGER}
+      peak_headway_min:    {type: REAL}
+      high_frequency_flag: {type: BOOLEAN}
+  Venues:
+    feature_dataset: Demand
+    geometry: Point
+    crs: analysis
+    fields:
+      venue_id:              {type: TEXT, nullable: false, unique: true}
+      name:                  {type: TEXT}
+      seats:                 {type: REAL}
+      events_per_year:       {type: REAL}
+      event_calendar_source: {type: TEXT}
+  # ---- intermediate standardized inputs (ADR-0006); analysis CRS, feed M3–M5 ----
+  Places:
+    feature_dataset: Demand
+    geometry: Point
+    crs: analysis
+    fields:
+      place_id:      {type: TEXT, nullable: false, unique: true}
+      name:          {type: TEXT}
+      category:      {type: TEXT}
+      category_src:  {type: TEXT}
+      tags_json:     {type: JSON}
+  BlockJobs:
+    feature_dataset: Demand
+    geometry: Point
+    crs: analysis
+    fields:
+      block_geoid: {type: TEXT, nullable: false, unique: true}
+      jobs_total:  {type: REAL}
+      sectors_json: {type: JSON}
+  BlockGroups:
+    feature_dataset: Demand
+    geometry: MultiPolygon
+    crs: analysis
+    fields:
+      bg_geoid:          {type: TEXT, nullable: false, unique: true}
+      population:        {type: REAL}
+      workers_total:     {type: REAL}
+      workers_drove:     {type: REAL}
+      drive_share:       {type: REAL}
+      units_total:       {type: REAL}
+      units_5plus:       {type: REAL}
+      households:        {type: REAL}
+      households_no_vehicle: {type: REAL}
+  Hospitals:
+    feature_dataset: Demand
+    geometry: Point
+    crs: analysis
+    fields:
+      hospital_id: {type: TEXT, nullable: false, unique: true}
+      name:        {type: TEXT}
+      beds:        {type: REAL}
+  Institutions:
+    feature_dataset: Demand
+    geometry: Point
+    crs: analysis
+    fields:
+      unitid:     {type: TEXT, nullable: false, unique: true}
+      name:       {type: TEXT}
+      enrollment: {type: REAL}
+  ParkingOSM:
+    feature_dataset: Supply
+    geometry: Geometry
+    crs: analysis
+    fields:
+      osm_id:     {type: TEXT, nullable: false, unique: true}
+      name:       {type: TEXT}
+      parking:    {type: TEXT}
+      capacity:   {type: REAL}
+      fee:        {type: TEXT}
+      access:     {type: TEXT}
+      operator:   {type: TEXT}
+      levels:     {type: REAL}
+      area_sqft:  {type: REAL}
+  TrafficCounts:
+    feature_dataset: Reference
+    geometry: Geometry
+    crs: analysis
+    fields:
+      count_id: {type: TEXT, nullable: false}
+      aadt:     {type: REAL}
+      year:     {type: INTEGER}
+      road:     {type: TEXT}
+  FloodHazard:
+    feature_dataset: Reference
+    geometry: MultiPolygon
+    crs: analysis
+    fields:
+      fld_zone:      {type: TEXT}
+      zone_subty:    {type: TEXT}
+      sfha_flag:     {type: BOOLEAN}
+      floodway_flag: {type: BOOLEAN}
+  EnvSites:
+    feature_dataset: Reference
+    geometry: Point
+    crs: analysis
+    fields:
+      site_id:  {type: TEXT, nullable: false}
+      name:     {type: TEXT}
+      program:  {type: TEXT}
+      brownfield_flag: {type: BOOLEAN}
+
+rasters:
+  Slope_pct:
+    feature_dataset: Reference
+    file: rasters/Slope_pct.tif
+    units: percent rise
+
+# Raw (immutable snapshot, EPSG:4326, source attributes as delivered). Name = Raw_<source>.
+raw_layers:
+  crs: wgs84
+  names: [Raw_Boundary, Raw_Parcels, Raw_Buildings, Raw_Places_Overture, Raw_OSM_POI, Raw_OSM_Parking,
+          Raw_LODES_WAC, Raw_ACS_BG, Raw_GTFS_Stops, Raw_Venues, Raw_Hospitals, Raw_Institutions,
+          Raw_AADT, Raw_FEMA_NFHL, Raw_EPA_Sites]
+
+tables:
+  DataSourceRegistry:
+    fields:
+      source_id:      {type: TEXT, nullable: false}
+      run_id:         {type: TEXT, nullable: false}
+      provider:       {type: TEXT}
+      dataset:        {type: TEXT}
+      endpoint:       {type: TEXT}
+      vintage:        {type: TEXT}
+      download_date:  {type: TEXT}
+      license:        {type: TEXT}
+      native_crs:     {type: TEXT}
+      transformation: {type: TEXT}
+      row_count:      {type: INTEGER}
+      status:         {type: TEXT}
+      notes:          {type: TEXT}
+  QAQC_Log:
+    fields:
+      check_id:   {type: TEXT, nullable: false}
+      run_id:     {type: TEXT, nullable: false}
+      step:       {type: TEXT}
+      layer:      {type: TEXT}
+      check_name: {type: TEXT}
+      result:     {type: TEXT}
+      count:      {type: REAL}
+      threshold:  {type: TEXT}
+      passed:     {type: BOOLEAN}
+      severity:   {type: TEXT}
+      timestamp:  {type: DATETIME}
+  ScoreRuns:
+    fields:
+      run_id:          {type: TEXT, nullable: false}
+      market:          {type: TEXT}
+      scenario:        {type: TEXT, domain: dm_Scenario}
+      step:            {type: TEXT}
+      timestamp:       {type: DATETIME}
+      toolbox_version: {type: TEXT}
+      git_commit:      {type: TEXT}
+      params_json:     {type: JSON}
+      candidate_cnt:   {type: INTEGER}
+  ParkingRates:
+    fields:
+      run_id:             {type: TEXT, nullable: false}
+      category:           {type: TEXT}
+      daypart:            {type: TEXT, domain: dm_Daypart}
+      rate:               {type: REAL}
+      unit:               {type: TEXT}
+      source_citation:    {type: TEXT}
+      calibration_factor: {type: REAL}
+  CriteriaDefinitions:
+    fields:
+      run_id:        {type: TEXT, nullable: false}
+      criterion_id:  {type: TEXT}
+      name:          {type: TEXT}
+      description:   {type: TEXT}
+      unit:          {type: TEXT}
+      direction:     {type: TEXT, domain: dm_Direction}
+      normalization: {type: TEXT}
+  WeightScenarios:
+    fields:
+      run_id:       {type: TEXT, nullable: false}
+      scenario:     {type: TEXT, domain: dm_Scenario}
+      criterion_id: {type: TEXT}
+      weight:       {type: REAL}
+  FinanceParams:
+    fields:
+      run_id: {type: TEXT, nullable: false}
+      param:  {type: TEXT}
+      value:  {type: TEXT}

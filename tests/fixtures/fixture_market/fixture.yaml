@@ -1,0 +1,181 @@
+# ============================================================================================
+#  FIXTURE MARKET — SYNTHETIC — NOT REAL DATA
+#  Exercises every M1 code path offline. Values are invented; never copy them to a real market.
+#  Finance inputs are set HERE (not in configs/) so shared defaults stay [VERIFY]/null (docs/ARCHITECTURE.md §5).
+# ============================================================================================
+market:
+  name: "Fixture City (SYNTHETIC)"
+  slug: fixture
+  boundary: {type: custom, value: data/boundary.geojson}
+  focus_submarkets: []
+  analysis_crs: EPSG:32617
+  units: m
+study:
+  buffer_miles: 0.25          # smaller than SCOPE's 1 mile to keep the fixture small
+  h3_resolution: 9
+site:
+  min_parcel_sqft: 15000
+  max_parcel_sqft: 200000
+  target_stalls_range: [50, 300]
+  stall_area_sqft_gross: 320
+  layout_efficiency: 0.90
+  setback_landscape_pct: 0.08
+  max_slope_pct: 5
+  min_frontage_ft: 60
+  min_shape_index: 0.60
+  improvement_ratio_max: 0.25
+  frontage_buffer_ft: 40
+demand:
+  walk_shed_minutes: [3, 5, 8]
+  decay_weights: {3: 1.0, 5: 0.6, 8: 0.25}
+  dayparts: [wd_day, wd_eve, we_day, we_eve, event]
+  parking_generation_source: "SYNTHETIC fixture"
+  transit_adjustment:
+    high_frequency_radius_m: 400
+    demand_factor: 0.85
+    high_frequency_headway_max_min: 15
+    peak_window: ["07:00", "09:00"]
+  mode_adjustment: none
+  residential_offstreet_share: 0.5
+network:
+  backend: osmnx
+  walking_speed_m_s: 1.3
+  network_type: walk
+  graph_path: data/walk_graph.graphml
+supply:
+  private_effective_share: 0.50
+  onstreet_stall_length_ft: 22
+  dedupe_distance_m: 40
+  dedupe_name_similarity: 0.8
+finance:
+  tech_fee_pct_revenue: 0.05
+  mgmt_fee_pct_revenue: 0.06
+  occupancy_curve: [[0.5, 0.2], [1.0, 0.6], [2.0, 0.85]]
+  capture_share: 0.5
+  billing:
+    wd_day: {basis: daily, units: 1}
+    wd_eve: {basis: flat, units: 1}
+    we_day: {basis: daily, units: 1}
+    we_eve: {basis: flat, units: 1}
+    event:  {basis: flat, units: 1}
+  operating_days: {wd_day: 250, wd_eve: 250, we_day: 104, we_eve: 104, event: 0}
+  event_weekday_share: 0.6
+  permit_share: 0.2
+  office_heavy_threshold: 0.5
+  revenue_growth: 0.02
+  opex_growth: 0.025
+  exit_cap_rate: 0.08
+  selling_cost_pct: 0.03
+  ground_lease_rent_pct_of_land_value: 0.07
+  ground_lease_escalator: 0.02
+  ground_lease_term_years: 30
+  evening_stay_hours: 3
+ranking: {financial_weight: 0.70, suitability_weight: 0.30, shortlist_size: 5}
+data_licenses:
+  regrid: false
+  foot_traffic: none
+  parking_transactions: none
+
+sources:
+  S00: {synthetic: true}
+  S01:
+    synthetic: true
+    path: data/parcels.gpkg
+    field_map: {parcel_id: PARCELID, owner: OWNER, land_use_code: LUC, address: ADDR,
+                assessed_land_value: LAND_VAL, assessed_improvement_value: BLDG_VAL,
+                year_built: YRBUILT}
+    options:
+      cama_path: data/cama.csv
+      cama_join: {parcels: PARCELID, cama: PARCEL_ID}
+      cama_field_map: {LUC: LUC, LAND_VAL: LAND_VAL, BLDG_VAL: BLDG_VAL, OWNER: OWNER,
+                       ADDR: ADDR, YRBUILT: YRBUILT}
+      land_use_crosswalk_path: data/landuse_xwalk.csv
+      owner_rules:
+        - {pattern: "\\b(CITY|COUNTY|STATE)\\b", owner_type: Public}
+        - {pattern: "\\bUNIVERSITY\\b", owner_type: Institutional}
+        - {pattern: "\\b(LLC|INC|CORP|LP|PARTNERS)\\b", owner_type: Corporate}
+        - {pattern: "^[A-Z]+ [A-Z]+$", owner_type: Private}
+  S02: {synthetic: true, path: data/overture_buildings.parquet}
+  S03a: {synthetic: true, path: data/overture_places.parquet, options: {min_confidence: 0.5}}
+  S03b: {synthetic: true, path: data/osm_poi.geojson}
+  S04:
+    synthetic: true
+    path: data/zz_wac_S000_JT00_2023.csv
+    options: {xwalk_path: data/zz_xwalk.csv}
+  S05:
+    synthetic: true
+    path: data/acs_bg.csv
+    options: {geometry_path: data/tiger_bg.geojson, counties: ["99999"]}
+  S06: {synthetic: true, path: data/osm_parking.geojson}
+  S08: {synthetic: true}
+  S09:
+    synthetic: true
+    path: data/gtfs.zip
+    options: {service_date: "20261001"}
+  S10:
+    synthetic: true
+    path: data/venues.csv
+    options: {x: lon, y: lat, xy_crs: "EPSG:4326"}
+  S12a:
+    synthetic: true
+    path: data/hospitals.csv
+    field_map: {hospital_id: ID, name: NAME, beds: BEDS}
+    options: {x: LONGITUDE, y: LATITUDE, xy_crs: "EPSG:4326"}
+  S12b:
+    synthetic: true
+    path: data/ipeds_hd.csv
+    field_map: {unitid: UNITID, name: INSTNM}
+    options: {x: LONGITUD, y: LATITUDE, xy_crs: "EPSG:4326", enrollment_path: data/ipeds_effy.csv,
+              enrollment_field: EFYTOTLT, enrollment_filter: {EFFYLEV: 1}}
+  S13:
+    synthetic: true
+    path: data/aadt.geojson
+    field_map: {count_id: STATION_ID, aadt: AADT, year: YEAR, road: ROUTE}
+  S14: {synthetic: true, path: data/nfhl.geojson}
+  S15:
+    synthetic: true
+    path: data/epa_sites.csv
+    field_map: {site_id: REGISTRY_ID, name: PRIMARY_NAME, program: PGM_SYS_ACRNM}
+    options: {x: LONGITUDE83, y: LATITUDE83, xy_crs: "EPSG:4269", brownfield_programs: [ACRES]}
+  S18: {synthetic: true, path: data/dem.tif}
+
+# Every value in this file is synthetic.
+provenance:
+  study.buffer_miles:              {status: SET, source: "SYNTHETIC fixture"}
+  study.h3_resolution:             {status: SET, source: "SYNTHETIC fixture"}
+  site.min_parcel_sqft:            {status: SET, source: "SYNTHETIC fixture"}
+  site.max_parcel_sqft:            {status: SET, source: "SYNTHETIC fixture"}
+  site.stall_area_sqft_gross:      {status: SET, source: "SYNTHETIC fixture"}
+  site.layout_efficiency:          {status: SET, source: "SYNTHETIC fixture"}
+  site.setback_landscape_pct:      {status: SET, source: "SYNTHETIC fixture"}
+  site.max_slope_pct:              {status: SET, source: "SYNTHETIC fixture"}
+  site.min_frontage_ft:            {status: SET, source: "SYNTHETIC fixture"}
+  site.min_shape_index:            {status: SET, source: "SYNTHETIC fixture"}
+  site.improvement_ratio_max:      {status: SET, source: "SYNTHETIC fixture"}
+  site.frontage_buffer_ft:         {status: SET, source: "SYNTHETIC fixture"}
+  demand.transit_adjustment.high_frequency_radius_m: {status: SET, source: "SYNTHETIC fixture"}
+  demand.transit_adjustment.demand_factor:           {status: SET, source: "SYNTHETIC fixture"}
+  demand.transit_adjustment.high_frequency_headway_max_min: {status: SET, source: "SYNTHETIC fixture"}
+  demand.residential_offstreet_share: {status: SET, source: "SYNTHETIC fixture"}
+  network.walking_speed_m_s:       {status: SET, source: "SYNTHETIC fixture"}
+  supply.private_effective_share:  {status: SET, source: "SYNTHETIC fixture"}
+  supply.onstreet_stall_length_ft: {status: SET, source: "SYNTHETIC fixture"}
+  supply.dedupe_distance_m:        {status: SET, source: "SYNTHETIC fixture"}
+  supply.dedupe_name_similarity:   {status: SET, source: "SYNTHETIC fixture"}
+  finance.tech_fee_pct_revenue:    {status: SET, source: "SYNTHETIC fixture"}
+  finance.mgmt_fee_pct_revenue:    {status: SET, source: "SYNTHETIC fixture"}
+  finance.capture_share:           {status: SET, source: "SYNTHETIC fixture"}
+  finance.event_weekday_share:     {status: SET, source: "SYNTHETIC fixture"}
+  finance.permit_share:            {status: SET, source: "SYNTHETIC fixture"}
+  finance.office_heavy_threshold:  {status: SET, source: "SYNTHETIC fixture"}
+  finance.revenue_growth:          {status: SET, source: "SYNTHETIC fixture"}
+  finance.opex_growth:             {status: SET, source: "SYNTHETIC fixture"}
+  finance.exit_cap_rate:           {status: SET, source: "SYNTHETIC fixture"}
+  finance.selling_cost_pct:        {status: SET, source: "SYNTHETIC fixture"}
+  finance.ground_lease_rent_pct_of_land_value: {status: SET, source: "SYNTHETIC fixture"}
+  finance.ground_lease_escalator:  {status: SET, source: "SYNTHETIC fixture"}
+  finance.ground_lease_term_years: {status: SET, source: "SYNTHETIC fixture"}
+  finance.evening_stay_hours:      {status: SET, source: "SYNTHETIC fixture"}
+  ranking.financial_weight:        {status: SET, source: "SYNTHETIC fixture"}
+  ranking.suitability_weight:      {status: SET, source: "SYNTHETIC fixture"}
+  ranking.shortlist_size:          {status: SET, source: "SYNTHETIC fixture"}

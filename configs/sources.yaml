@@ -1,0 +1,131 @@
+# Source catalogue (SCOPE §3). Defaults for every adapter; a market's `sources:` block overrides
+# per key (enabled, path, url, vintage, field_map, options).
+#
+# `verify: true`  → endpoint/format/terms not yet confirmed live (docs/VERIFY.md). The adapter still
+#                   runs, but check-config lists it and the registry row carries "[VERIFY]".
+# `license_flag`  → key in market.data_licenses; when false the adapter takes the "not configured"
+#                   path (registry row, WARNING, no rows). Never substituted with synthetic data.
+# `path` (market) → local file override. Always wins over `url`. This is how the fixture runs
+#                   offline and how you feed files you downloaded by hand.
+# URL templates use {year}, {state_fips}, {state_abbr}, {release} filled from `vintage`/options.
+
+sources:
+  S00:
+    provider: US Census Bureau
+    dataset: TIGER/Line Counties (boundary)
+    license: Public domain
+    url: "https://www2.census.gov/geo/tiger/TIGER{year}/COUNTY/tl_{year}_us_county.zip"
+    options: {place_url: "https://www2.census.gov/geo/tiger/TIGER{year}/PLACE/tl_{year}_{state_fips}_place.zip"}
+    verify: true            # V-33 URL pattern by year
+  S01:
+    provider: County assessor / auditor (Regrid fallback)
+    dataset: Parcel polygons + CAMA attributes
+    license: per county portal
+    license_flag: null       # county fallback is free; Regrid (M2) uses license_flag regrid
+    url: null                # per market (V-28)
+    verify: true
+  S02:
+    provider: Overture Maps Foundation
+    dataset: Buildings theme
+    license: ODbL
+    url: "s3://overturemaps-us-west-2/release/{release}/theme=buildings/type=building/*"
+    verify: true            # V-13 release id
+  S03a:
+    provider: Overture Maps Foundation
+    dataset: Places theme
+    license: CDLA-Permissive-2.0
+    url: "s3://overturemaps-us-west-2/release/{release}/theme=places/type=place/*"
+    verify: true            # V-13
+  S04:
+    provider: US Census Bureau LEHD
+    dataset: LODES WAC (all jobs JT00, all workers S000) + geography crosswalk
+    license: Public domain
+    url: "https://lehd.ces.census.gov/data/lodes/LODES8/{state_abbr}/wac/{state_abbr}_wac_S000_JT00_{year}.csv.gz"
+    options: {xwalk_url: "https://lehd.ces.census.gov/data/lodes/LODES8/{state_abbr}/{state_abbr}_xwalk.csv.gz"}
+    verify: true            # V-14 version and latest year
+  S05:
+    provider: US Census Bureau
+    dataset: ACS 5-year block groups (B01003, B08301, B25024, B25044) + TIGER block groups
+    license: Public domain
+    url: "https://api.census.gov/data/{year}/acs/acs5"
+    options: {geometry_url: "https://www2.census.gov/geo/tiger/TIGER{year}/BG/tl_{year}_{state_fips}_bg.zip",
+              api_key_env: CENSUS_API_KEY}
+    verify: true            # V-15 table/variable IDs
+  S06:
+    provider: OpenStreetMap contributors
+    dataset: amenity=parking (via OSMnx / Overpass)
+    license: ODbL
+    url: overpass
+    options:
+      tags: {amenity: [parking, parking_entrance]}
+    verify: false
+  S03b:
+    provider: OpenStreetMap contributors
+    dataset: POIs — food, retail, lodging, venues, health, education (via OSMnx / Overpass)
+    license: ODbL
+    url: overpass
+    options:
+      tags:
+        amenity: [restaurant, bar, pub, cafe, fast_food, nightclub, theatre, cinema, arts_centre,
+                  events_venue, conference_centre, hospital, university, college]
+        shop: true
+        tourism: [hotel, motel, hostel, guest_house]
+        leisure: [stadium, sports_centre]
+        building: [stadium]
+    verify: false
+  S08:
+    provider: OpenStreetMap contributors
+    dataset: Pedestrian network (OSMnx network_type=walk)
+    license: ODbL
+    url: overpass
+    verify: false
+  S09:
+    provider: Transit agency / Mobility Database
+    dataset: GTFS schedule
+    license: per agency
+    url: null                # per market (V-16)
+    verify: true
+  S10:
+    provider: Analyst-maintained venue table (+ Ticketmaster, flag-gated, M2)
+    dataset: Venue seats and events per year
+    license: Own data
+    url: null
+    verify: false
+  S12a:
+    provider: HIFLD / CMS
+    dataset: Hospitals with bed counts
+    license: "[VERIFY]"
+    url: null                # V-18 current availability
+    verify: true
+  S12b:
+    provider: NCES
+    dataset: IPEDS directory (HD) + 12-month enrollment (EFFY)
+    license: Public domain
+    url: "https://nces.ed.gov/ipeds/datacenter/data/HD{year}.zip"
+    options: {enrollment_url: "https://nces.ed.gov/ipeds/datacenter/data/EFFY{year}.zip"}
+    verify: true            # V-19
+  S13:
+    provider: State DOT
+    dataset: AADT traffic counts
+    license: per state
+    url: null                # ArcGIS REST layer per market (V-20)
+    verify: true
+  S14:
+    provider: FEMA
+    dataset: National Flood Hazard Layer — flood hazard zones
+    license: Public domain
+    url: "https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/28"
+    verify: true            # V-21
+  S15:
+    provider: US EPA
+    dataset: FRS facilities / ACRES brownfields
+    license: Public domain
+    url: null                # V-22 — download to a local file for now
+    verify: true
+  S18:
+    provider: USGS
+    dataset: 3DEP 1/3 arc-second DEM
+    license: Public domain
+    url: "https://tnmaccess.nationalmap.gov/api/v1/products"
+    options: {dataset_name: "National Elevation Dataset (NED) 1/3 arc-second"}
+    verify: true            # V-23

@@ -1,0 +1,21 @@
+# Parking-generation rates by anchor category and daypart — SCOPE Appendix C, verbatim.
+# Units: stalls of peak parked demand per `unit`. sqft_k = per 1,000 sq ft of floor area.
+# EVERY row is [VERIFY] (docs/VERIFY.md V-01, V-04..V-12). Do not use for a partner-facing
+# result until each `source` cites a confirmed edition/table.
+#
+# `baseline_drive_share`: the drive share embedded in the rate source's survey sites, used by
+# the relative mode-share adjustment (ADR-0014). null = unknown → the demand step
+# refuses to run unless the market sets demand.mode_adjustment: none (logged).
+
+rates:
+  office:         {unit: employee,          wd_day: 0.80, wd_eve: 0.05, we_day: 0.05, we_eve: 0.02, event: 0.00, source: "ITE PG 6th ed. LU 701 [VERIFY]", baseline_drive_share: null}
+  medical:        {unit: bed,               wd_day: 2.50, wd_eve: 0.80, we_day: 0.90, we_eve: 0.50, event: 0.00, source: "[VERIFY]", baseline_drive_share: null}
+  university:     {unit: student,           wd_day: 0.25, wd_eve: 0.10, we_day: 0.05, we_eve: 0.05, event: 0.00, source: "[VERIFY]", baseline_drive_share: null}
+  hotel:          {unit: room,              wd_day: 0.40, wd_eve: 1.00, we_day: 0.50, we_eve: 1.10, event: 0.00, source: "[VERIFY]", baseline_drive_share: null}
+  restaurant_bar: {unit: sqft_k,            wd_day: 6.0,  wd_eve: 14.0, we_day: 8.0,  we_eve: 16.0, event: 0.00, source: "[VERIFY]", baseline_drive_share: null}
+  retail:         {unit: sqft_k,            wd_day: 2.5,  wd_eve: 2.0,  we_day: 3.5,  we_eve: 2.5,  event: 0.00, source: "[VERIFY]", baseline_drive_share: null}
+  venue:          {unit: seat,              wd_day: 0.00, wd_eve: 0.00, we_day: 0.00, we_eve: 0.00, event: 0.33, source: "seats × drive share 0.85 ÷ 2.6 persons/car [VERIFY]", baseline_drive_share: null}
+  residential:    {unit: unit_no_offstreet, wd_day: 0.30, wd_eve: 0.90, we_day: 0.80, we_eve: 0.95, event: 0.00, source: "[VERIFY]", baseline_drive_share: null}
+
+# Filled per market by Validate — written to markets/<slug>.calibration.yaml, never here (ADR-0043).
+calibration_factors: {}

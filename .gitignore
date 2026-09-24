@@ -1,0 +1,48 @@
+# --- data & outputs: never commit (docs/ENGINEERING.md) ---
+outputs/
+/data/
+*.gdb/
+*.gpkg
+*.gpkg-journal
+*.gpkg-wal
+*.gpkg-shm
+*.tif
+*.tiff
+*.zip
+*.gz
+*.parquet
+*.lock
+.backups/
+~$*.xlsx
+# fixture inputs ARE committed (synthetic, small) — re-include them
+!tests/fixtures/**/*.tif
+!tests/fixtures/**/*.zip
+!tests/fixtures/**/*.parquet
+# --- ArcGIS Pro clutter ---
+*.atbx.bak
+Index/
+ImportLog/
+GpMessages/
+# --- python ---
+__pycache__/
+*.pyc
+*.egg-info/
+.venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+# --- secrets ---
+.env
+*.key
+
+# test scratch
+tests/fixtures/**/_variant_*.yaml
+!tests/fixtures/**/*.gpkg
+!tests/fixtures/**/*.graphml
+# ArcGIS Pro local workspace (machine-specific paths; rebuilt by arcgis/build_workspace.py)
+arcgis/*.aprx
+arcgis/*.gdb/
+arcgis/*.atbx
+arcgis/.backups/
