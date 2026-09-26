@@ -22,11 +22,13 @@ Only this script (in ``arcgis/``) imports arcpy; the library never does.
 from __future__ import annotations
 
 import argparse
+import contextlib
 import json
 import sqlite3
 import subprocess
 import sys
 import time
+import zipfile
 from pathlib import Path
 
 import arcpy
@@ -34,6 +36,9 @@ import arcpy
 REPO = Path(__file__).resolve().parents[1]
 APRX = REPO / "arcgis" / "ParkIQ_Workspace.aprx"
 GDB = REPO / "arcgis" / "ParkIQ_Workspace.gdb"
+ATBX = REPO / "arcgis" / "ParkIQ_Workspace.atbx"
+FOCUS_MARKET = "franklin_oh"  # map opened as the active view after a build
+HOLLOW = {"MarketBoundary": [40, 40, 40, 100], "StudyArea": [120, 120, 120, 100]}  # outline RGBA
 OUTPUTS = REPO / "outputs"
 BLANK = (
     Path(arcpy.GetInstallInfo()["InstallDir"])
@@ -91,6 +96,21 @@ def find_runs(latest: int | None, markets: list[str] | None = None) -> list[Path
     return runs
 
 
+def _write_empty_atbx(path: Path) -> None:
+    """Write an empty ArcGIS Pro toolbox (.atbx is a zip of toolbox.content + .rc JSON)."""
+    content = {
+        "version": "1.0",
+        "alias": "parkiqworkspace",
+        "displayname": "$rc:title",
+        "description": "$rc:descr",
+        "toolsets": {},
+    }
+    rc = {"map": {"title": "ParkIQ Workspace", "descr": "Scratch toolbox for manual work"}}
+    with zipfile.ZipFile(path, "w", zipfile.ZIP_DEFLATED) as z:
+        z.writestr("toolbox.content", json.dumps(content, indent=4))
+        z.writestr("toolbox.content.rc", json.dumps(rc, indent=4))
+
+
 def open_project() -> arcpy.mp.ArcGISProject:
     """Open the workspace project, creating it from Pro's blank project if needed."""
     if not APRX.exists():
@@ -98,7 +118,12 @@ def open_project() -> arcpy.mp.ArcGISProject:
         print(f"created {APRX}")
     if not arcpy.Exists(str(GDB)):
         arcpy.management.CreateFileGDB(str(GDB.parent), GDB.name)
+    if not ATBX.exists():  # a project needs a valid default toolbox; Blank.aprx's is missing
+        _write_empty_atbx(ATBX)
     p = arcpy.mp.ArcGISProject(str(APRX))
+    # Drop the Blank template's own gdb/toolbox references (they show as broken "!" items).
+    p.updateDatabases([{"databasePath": str(GDB), "isDefaultDatabase": True}], validate=False)
+    p.updateToolboxes([{"toolboxPath": str(ATBX), "isDefaultToolbox": True}], validate=False)
     for attr, val in (("homeFolder", str(REPO)), ("defaultGeodatabase", str(GDB))):
         try:
             setattr(p, attr, val)
@@ -123,6 +148,32 @@ def open_project() -> arcpy.mp.ArcGISProject:
         validate=False,
     )
     return p
+
+
+def _hollow(lyr: arcpy.mp.Layer, outline_rgba: list[int]) -> None:
+    """No fill, dark outline, so boundary layers don't hide what is beneath them."""
+    sym = lyr.symbology
+    if hasattr(sym, "renderer") and sym.renderer.type == "SimpleRenderer":
+        sym.renderer.symbol.color = {"RGB": [0, 0, 0, 0]}
+        sym.renderer.symbol.outlineColor = {"RGB": outline_rgba}
+        sym.renderer.symbol.outlineWidth = 1.5
+        lyr.symbology = sym
+
+
+def focus() -> int:
+    """Child process: open the newest FOCUS_MARKET map as the only open view, then save."""
+    p = arcpy.mp.ArcGISProject(str(APRX))
+    maps = sorted(
+        (m for m in p.listMaps() if m.name.startswith(FOCUS_MARKET + SEP)),
+        key=lambda m: m.name,
+        reverse=True,
+    )
+    if not maps:
+        return 0
+    with contextlib.suppress(AttributeError, RuntimeError, ValueError):
+        p.closeViews("MAPS")
+    maps[0].openView()
+    return _save(p)
 
 
 def run_description(run: Path) -> str:
@@ -173,10 +224,15 @@ def add_run(p: arcpy.mp.ArcGISProject, run: Path) -> str:
                 print(f"  skip {r['layer']}: {exc}")
                 continue
             lyr.name = r["layer"]
+            if r["layer"] in HOLLOW:
+                _hollow(lyr, HOLLOW[r["layer"]])
             m.addLayerToGroup(grp, lyr, "BOTTOM")
             m.removeLayer(lyr)
             if not sr_set and r["layer"] == "MarketBoundary":
                 m.spatialReference = arcpy.Describe(src).spatialReference
+                cam = m.defaultCamera
+                cam.setExtent(arcpy.Describe(src).extent)
+                m.defaultCamera = cam
                 sr_set = True
         if gname == "Raw":
             grp.visible = False
@@ -243,9 +299,12 @@ def main() -> int:
     ap.add_argument("--market", action="append", help="only this market slug (repeatable)")
     ap.add_argument("--one", type=Path, help=argparse.SUPPRESS)  # internal: child process
     ap.add_argument("--clean", action="store_true", help=argparse.SUPPRESS)  # internal
+    ap.add_argument("--focus", action="store_true", help=argparse.SUPPRESS)  # internal
     a = ap.parse_args()
     if a.clean:
         return clean()
+    if a.focus:
+        return focus()
     if a.one:
         return build_one(a.one)
     runs = find_runs(None if a.all else a.latest, a.market)
@@ -261,7 +320,10 @@ def main() -> int:
         if rc:
             print(f"  failed (exit {rc})")
             return rc
-    print(f"saved {APRX} ({len(runs)} run maps)")
+    rc = _child("--focus")
+    if rc:
+        return rc
+    print(f"saved {APRX} ({len(runs)} run maps; active view: newest {FOCUS_MARKET} map)")
     return 0
 
 

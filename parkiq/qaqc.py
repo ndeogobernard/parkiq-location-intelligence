@@ -205,7 +205,7 @@ def run_qaqc(ctx: RunContext) -> dict[str, Any]:
     """Tool 4 RunQAQC: ingest checks on every ingested layer present in the run."""
     study = ctx.store.read_layer("StudyArea").union_all()
     checks: list[Check] = []
-    present = set(ctx.store.layers())
+    present = set(ctx.store.written_layers())  # BuildSchema's empty layers are not checked
     for layer, idf in INGEST_LAYERS.items():
         if layer not in present:
             continue

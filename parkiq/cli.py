@@ -14,6 +14,7 @@ import typer
 
 from parkiq.config import STEP_REQUIREMENTS, ConfigError, load_config, missing_for_step
 from parkiq.config import parameter_report as _param_report
+from parkiq.config import unused_items as _unused_items
 from parkiq.config import verify_items as _verify_items
 
 app = typer.Typer(
@@ -57,6 +58,11 @@ def check_config(
     typer.echo(f"\n[VERIFY] items still open: {len(ver)}")
     for k, why in ver:
         typer.echo(f"  - {k}: {why}")
+    unused = _unused_items(cfg)
+    if unused:
+        typer.echo(f"\nNot used in this market ({len(unused)}):")
+        for k, why in unused:
+            typer.echo(f"  - {k}: {why}")
     rows = _param_report(cfg)
     untagged = [r for r in rows if r["status"] == "UNTAGGED"]
     if untagged:
@@ -120,6 +126,64 @@ def run(
         status = "skipped (unchanged)" if r.get("skipped") else r["status"]
         typer.echo(f"  {name:<12} {status}")
     typer.echo(f"log: {ctx.log_path}")
+
+
+def _schema(schema_path: Path | None):  # type: ignore[no-untyped-def]
+    from parkiq.schema import Schema
+
+    return Schema.load(schema_path or Path(__file__).parents[1] / "schema" / "schema.yaml")
+
+
+SchemaOpt = Annotated[Path | None, typer.Option("--schema", help="schema.yaml (default: repo)")]
+
+
+@app.command("build-schema")
+def build_schema_cmd(
+    market: MarketOpt,
+    out: Annotated[Path, typer.Option(help="GeoPackage to create/complete")],
+    overwrite: Annotated[bool, typer.Option(help="recreate layers that already exist")] = False,
+    schema: SchemaOpt = None,
+    config_dir: Annotated[Path | None, typer.Option(help="configs/ directory")] = None,
+) -> None:
+    """Tool 1 BuildSchema: create every layer, domain and relationship on a GeoPackage."""
+    from parkiq.schema_build import build_schema
+
+    cfg = _load(market, config_dir)
+    res = build_schema(out, _schema(schema), cfg.crs, overwrite=overwrite)
+    typer.echo(f"{out}: {res}")
+
+
+@app.command("schema-diff")
+def schema_diff_cmd(
+    market: MarketOpt,
+    gpkg: Annotated[Path, typer.Option(help="GeoPackage to compare", exists=True)],
+    schema: SchemaOpt = None,
+    config_dir: Annotated[Path | None, typer.Option(help="configs/ directory")] = None,
+) -> None:
+    """Compare a GeoPackage with schema.yaml; exit 1 if they differ."""
+    from parkiq.schema_build import schema_diff
+
+    cfg = _load(market, config_dir)
+    diffs = schema_diff(gpkg, _schema(schema), cfg.crs)
+    if not diffs:
+        typer.secho(f"{gpkg}: conforms to schema.yaml", fg=typer.colors.GREEN)
+        return
+    typer.secho(f"{gpkg}: {len(diffs)} differences", fg=typer.colors.RED)
+    for d in diffs:
+        typer.echo(f"  - {d}")
+    raise typer.Exit(1)
+
+
+@app.command("schema-docs")
+def schema_docs_cmd(
+    out: Annotated[Path, typer.Option(help="docs directory")] = Path("docs"),
+    schema: SchemaOpt = None,
+) -> None:
+    """Generate ERD.drawio, ERD.png and DataDictionary.md from schema.yaml."""
+    from parkiq.schema_build import write_docs
+
+    for kind, path in write_docs(_schema(schema), out).items():
+        typer.echo(f"{kind}: {path}")
 
 
 @app.command()

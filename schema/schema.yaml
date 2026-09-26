@@ -1,18 +1,20 @@
 # ParkIQ data model — machine-readable (SCOPE §4). Identical for every market.
-# v0 (M1): all SCOPE §4.4 domains; layers/tables written by M1 steps. M2 completes §4.2–4.5
-# (relationships, remaining Analysis/Results layers, GeoPackage schema-extension constraints).
+# v1.0 (M2): complete §4.2–4.5 — every feature class and table, domains, subtypes, relationships
+# and rules. BuildSchema creates all of it on an empty GeoPackage; schema-diff compares a
+# GeoPackage to this file; docs/ERD.* and docs/DataDictionary.md are generated from it.
 #
 # Field types: TEXT, INTEGER, REAL, DATETIME, BOOLEAN (stored 0/1), JSON (stored TEXT).
 # crs: analysis (market analysis_crs) | wgs84 (EPSG:4326) | none (attribute table)
 # raw: true → source attributes kept as delivered (free-form), only lineage fields enforced.
-# Every feature class carries the lineage fields (SCOPE §4.2).
+# Every feature class carries the lineage fields (SCOPE §4.2). Additions beyond SCOPE §4.2 are
+# marked "addition" with their ADR.
 
-version: "0.1.0"
+version: "1.0.0"
 
 lineage_fields:
-  source_id: {type: TEXT, nullable: false}
-  run_id:    {type: TEXT, nullable: false}
-  load_ts:   {type: DATETIME, nullable: false}
+  source_id: {type: TEXT, nullable: false, desc: "Source ID from configs/sources.yaml (S00–S24) or DERIVED"}
+  run_id:    {type: TEXT, nullable: false, desc: "Run that wrote the row (ScoreRuns.run_id)"}
+  load_ts:   {type: DATETIME, nullable: false, desc: "UTC time the row was written"}
 
 domains:
   dm_LandUseClass:   {type: coded, values: [Vacant, SurfaceParking, Commercial, Industrial, Residential, MixedUse, Institutional, Other]}
@@ -25,287 +27,582 @@ domains:
   dm_ScreenStatus:   {type: coded, values: [Pass, Fail, Review]}
   dm_Scenario:       {type: coded, values: [Balanced, DemandFirst, CostFirst]}
   dm_Direction:      {type: coded, values: [Benefit, Cost]}
+  dm_Tenure:         {type: coded, values: [Buy, Lease]}              # addition (ADR-0060)
+  dm_ParkingZone:    {type: coded, values: [A, B]}                    # addition (ADR-0061)
   rg_Score:          {type: range, min: 0, max: 100}
   rg_Occupancy:      {type: range, min: 0, max: 1}
 
 layers:
-  # ------------------------------------------------------------------ Reference
+  # ================================================================== Reference
   MarketBoundary:
     feature_dataset: Reference
     geometry: MultiPolygon
     crs: analysis
+    desc: "Market boundary (county/city) from TIGER/Line."
     fields:
-      name:      {type: TEXT}
-      geoid:     {type: TEXT}
-      area_sqmi: {type: REAL}
-  StudyArea:            # addition (ADR-0005): boundary + buffer, the clip extent for every source
+      name:      {type: TEXT, desc: "Boundary name"}
+      geoid:     {type: TEXT, desc: "Census GEOID"}
+      area_sqmi: {type: REAL, desc: "Area, square miles"}
+  StudyArea:            # addition (ADR-0005)
     feature_dataset: Reference
     geometry: MultiPolygon
     crs: analysis
+    desc: "Boundary plus buffer; the clip extent for every source (addition, ADR-0005)."
     fields:
-      buffer_miles: {type: REAL}
-      area_sqmi:    {type: REAL}
+      buffer_miles: {type: REAL, desc: "Buffer distance, miles"}
+      area_sqmi:    {type: REAL, desc: "Area, square miles"}
   Submarkets:
     feature_dataset: Reference
     geometry: MultiPolygon
     crs: analysis
+    desc: "Analyst-defined submarkets (downtown, university, ...)."
     fields:
-      name: {type: TEXT}
-      type: {type: TEXT}
+      name: {type: TEXT, desc: "Submarket name"}
+      type: {type: TEXT, desc: "Submarket type"}
   HexGrid:
     feature_dataset: Reference
     geometry: Polygon
     crs: analysis
+    desc: "H3 resolution-9 grid clipped to the study area (ADR-0009)."
     fields:
-      hex_id:    {type: TEXT, nullable: false, unique: true}
-      submarket: {type: TEXT}
-      area_km2:  {type: REAL}
+      hex_id:    {type: TEXT, nullable: false, unique: true, desc: "H3 cell index"}
+      submarket: {type: TEXT, desc: "Submarket containing the cell centroid"}
+      area_km2:  {type: REAL, desc: "Cell area, km²"}
   WalkNodes:
     feature_dataset: Reference
     geometry: Point
     crs: analysis
+    desc: "Pedestrian network nodes (OSMnx walk network)."
     fields:
-      node_id:      {type: TEXT, nullable: false, unique: true}
-      street_count: {type: INTEGER}
+      node_id:      {type: TEXT, nullable: false, unique: true, desc: "OSM node id"}
+      street_count: {type: INTEGER, desc: "Streets meeting at the node"}
   WalkEdges:
     feature_dataset: Reference
     geometry: LineString
     crs: analysis
+    desc: "Pedestrian network edges with walk time at the configured speed."
     fields:
-      u:            {type: TEXT, nullable: false}
-      v:            {type: TEXT, nullable: false}
-      key:          {type: INTEGER}
-      osmid:        {type: TEXT}
-      highway:      {type: TEXT}
-      name:         {type: TEXT}
-      length_m:     {type: REAL, nullable: false}
-      walk_minutes: {type: REAL, nullable: false}
-  # ------------------------------------------------------------------ Cadastral
-  Parcels:
-    feature_dataset: Cadastral
-    geometry: MultiPolygon
-    crs: analysis
-    fields:
-      parcel_id:                  {type: TEXT, nullable: false, unique: true}
-      apn:                        {type: TEXT}
-      address:                    {type: TEXT}
-      owner:                      {type: TEXT}
-      owner_type:                 {type: TEXT, domain: dm_OwnerType}
-      land_use_code:              {type: TEXT}
-      land_use_class:             {type: TEXT, domain: dm_LandUseClass}
-      zoning_code:                {type: TEXT}
-      zoning_screen:              {type: TEXT, domain: dm_ZoningScreen}
-      lot_sqft:                   {type: REAL}
-      assessed_land_value:        {type: REAL}
-      assessed_improvement_value: {type: REAL}
-      improvement_value_ratio:    {type: REAL}
-      year_built:                 {type: INTEGER}
-      frontage_ft:                {type: REAL}
-      shape_index:                {type: REAL}
-      corner_flag:                {type: BOOLEAN}
-      listing_price:              {type: REAL}
-      listing_source:             {type: TEXT}
-  Buildings:
-    feature_dataset: Cadastral
-    geometry: MultiPolygon
-    crs: analysis
-    fields:
-      bldg_id:   {type: TEXT, nullable: false, unique: true}
-      area_sqft: {type: REAL}
-      height_m:  {type: REAL}
-      levels:    {type: REAL}
-  # ------------------------------------------------------------------ Demand
-  TransitStops:
-    feature_dataset: Demand
-    geometry: Point
-    crs: analysis
-    fields:
-      stop_id:             {type: TEXT, nullable: false, unique: true}
-      stop_name:           {type: TEXT}
-      route_count:         {type: INTEGER}
-      peak_departures:     {type: INTEGER}
-      peak_headway_min:    {type: REAL}
-      high_frequency_flag: {type: BOOLEAN}
-  Venues:
-    feature_dataset: Demand
-    geometry: Point
-    crs: analysis
-    fields:
-      venue_id:              {type: TEXT, nullable: false, unique: true}
-      name:                  {type: TEXT}
-      seats:                 {type: REAL}
-      events_per_year:       {type: REAL}
-      event_calendar_source: {type: TEXT}
-  # ---- intermediate standardized inputs (ADR-0006); analysis CRS, feed M3–M5 ----
-  Places:
-    feature_dataset: Demand
-    geometry: Point
-    crs: analysis
-    fields:
-      place_id:      {type: TEXT, nullable: false, unique: true}
-      name:          {type: TEXT}
-      category:      {type: TEXT}
-      category_src:  {type: TEXT}
-      tags_json:     {type: JSON}
-  BlockJobs:
-    feature_dataset: Demand
-    geometry: Point
-    crs: analysis
-    fields:
-      block_geoid: {type: TEXT, nullable: false, unique: true}
-      jobs_total:  {type: REAL}
-      sectors_json: {type: JSON}
-  BlockGroups:
-    feature_dataset: Demand
-    geometry: MultiPolygon
-    crs: analysis
-    fields:
-      bg_geoid:          {type: TEXT, nullable: false, unique: true}
-      population:        {type: REAL}
-      workers_total:     {type: REAL}
-      workers_drove:     {type: REAL}
-      drive_share:       {type: REAL}
-      units_total:       {type: REAL}
-      units_5plus:       {type: REAL}
-      households:        {type: REAL}
-      households_no_vehicle: {type: REAL}
-  Hospitals:
-    feature_dataset: Demand
-    geometry: Point
-    crs: analysis
-    fields:
-      hospital_id: {type: TEXT, nullable: false, unique: true}
-      name:        {type: TEXT}
-      beds:        {type: REAL}
-  Institutions:
-    feature_dataset: Demand
-    geometry: Point
-    crs: analysis
-    fields:
-      unitid:     {type: TEXT, nullable: false, unique: true}
-      name:       {type: TEXT}
-      enrollment: {type: REAL}
-  ParkingOSM:
-    feature_dataset: Supply
-    geometry: Geometry
-    crs: analysis
-    fields:
-      osm_id:     {type: TEXT, nullable: false, unique: true}
-      name:       {type: TEXT}
-      parking:    {type: TEXT}
-      capacity:   {type: REAL}
-      fee:        {type: TEXT}
-      access:     {type: TEXT}
-      operator:   {type: TEXT}
-      levels:     {type: REAL}
-      area_sqft:  {type: REAL}
+      u:            {type: TEXT, nullable: false, desc: "From node id"}
+      v:            {type: TEXT, nullable: false, desc: "To node id"}
+      key:          {type: INTEGER, desc: "Parallel-edge key"}
+      osmid:        {type: TEXT, desc: "OSM way id(s)"}
+      highway:      {type: TEXT, desc: "OSM highway tag"}
+      name:         {type: TEXT, desc: "Street name"}
+      length_m:     {type: REAL, nullable: false, desc: "Length, metres"}
+      walk_minutes: {type: REAL, nullable: false, desc: "length_m / walk speed / 60"}
   TrafficCounts:
     feature_dataset: Reference
     geometry: Geometry
     crs: analysis
+    desc: "State DOT traffic count stations/segments (AADT)."
     fields:
-      count_id: {type: TEXT, nullable: false}
-      aadt:     {type: REAL}
-      year:     {type: INTEGER}
-      road:     {type: TEXT}
+      count_id: {type: TEXT, nullable: false, desc: "Station/segment id"}
+      aadt:     {type: REAL, desc: "Annual average daily traffic"}
+      year:     {type: INTEGER, desc: "Count year"}
+      road:     {type: TEXT, desc: "Road name/route"}
   FloodHazard:
     feature_dataset: Reference
     geometry: MultiPolygon
     crs: analysis
+    desc: "FEMA NFHL flood hazard zones."
     fields:
-      fld_zone:      {type: TEXT}
-      zone_subty:    {type: TEXT}
-      sfha_flag:     {type: BOOLEAN}
-      floodway_flag: {type: BOOLEAN}
+      fld_zone:      {type: TEXT, desc: "FEMA flood zone (A, AE, X, ...)"}
+      zone_subty:    {type: TEXT, desc: "Zone subtype (e.g. FLOODWAY)"}
+      sfha_flag:     {type: BOOLEAN, desc: "Special Flood Hazard Area"}
+      floodway_flag: {type: BOOLEAN, desc: "Regulatory floodway"}
   EnvSites:
     feature_dataset: Reference
     geometry: Point
     crs: analysis
+    desc: "EPA FRS/ACRES environmental interest sites."
     fields:
-      site_id:  {type: TEXT, nullable: false}
-      name:     {type: TEXT}
-      program:  {type: TEXT}
-      brownfield_flag: {type: BOOLEAN}
+      site_id:  {type: TEXT, nullable: false, desc: "EPA registry id"}
+      name:     {type: TEXT, desc: "Site name"}
+      program:  {type: TEXT, desc: "EPA program acronym(s)"}
+      brownfield_flag: {type: BOOLEAN, desc: "Brownfield program interest"}
+  ZoningDistricts:      # addition (ADR-0060)
+    feature_dataset: Reference
+    geometry: MultiPolygon
+    crs: analysis
+    desc: "Municipal base zoning districts (addition, ADR-0060)."
+    fields:
+      zoning_code:      {type: TEXT, nullable: false, desc: "District code as published (e.g. C4, LC4, UCR-R)"}
+      jurisdiction:     {type: TEXT, nullable: false, desc: "Zoning authority (e.g. Columbus)"}
+      general_category: {type: TEXT, desc: "Publisher's general category"}
+      zoning_status:    {type: TEXT, desc: "Publisher's status"}
+      ord_no:           {type: TEXT, desc: "Rezoning ordinance number"}
+      case_number:      {type: TEXT, desc: "Zoning case number"}
+  ZoningOverlays:       # addition (ADR-0060)
+    feature_dataset: Reference
+    geometry: MultiPolygon
+    crs: analysis
+    desc: "Zoning/planning overlays, coded to zoning-table overlay rows (addition, ADR-0060)."
+    fields:
+      overlay_code: {type: TEXT, nullable: false, desc: "Zoning-table key, e.g. overlay:UCO, overlay:University/NC"}
+      overlay_name: {type: TEXT, desc: "Published overlay name"}
+      overlay_type: {type: TEXT, desc: "Published overlay type"}
+      jurisdiction: {type: TEXT, nullable: false, desc: "Zoning authority"}
+      ord_no:       {type: TEXT, desc: "Ordinance number"}
+  ParkingZones:         # addition (ADR-0061)
+    feature_dataset: Reference
+    geometry: MultiPolygon
+    crs: analysis
+    desc: "Downtown parking zones A/B; Franklin: derived from City Code Map 2 (S23c, [VERIFY]) (addition, ADR-0061)."
+    fields:
+      zone:         {type: TEXT, nullable: false, domain: dm_ParkingZone, desc: "Parking zone"}
+      jurisdiction: {type: TEXT, nullable: false, desc: "Zoning authority"}
+      method:       {type: TEXT, desc: "How the polygon was produced"}
+      derived_date: {type: TEXT, desc: "Date derived (ISO)"}
+  # ================================================================== Cadastral
+  Parcels:
+    feature_dataset: Cadastral
+    geometry: MultiPolygon
+    crs: analysis
+    desc: "Tax parcels with land use, owner type, values and zoning."
+    subtype_field: land_use_class
+    fields:
+      parcel_id:                  {type: TEXT, nullable: false, unique: true, desc: "County parcel id"}
+      apn:                        {type: TEXT, desc: "Assessor parcel number (if different)"}
+      address:                    {type: TEXT, desc: "Site address"}
+      owner:                      {type: TEXT, desc: "Owner name as recorded"}
+      owner_type:                 {type: TEXT, domain: dm_OwnerType, desc: "Owner class from ordered regex rules + overrides (due-diligence flag only)"}
+      land_use_code:              {type: TEXT, desc: "County land-use code"}
+      land_use_class:             {type: TEXT, domain: dm_LandUseClass, desc: "Land-use class via the market crosswalk (subtype)"}
+      auto_oriented_flag:         {type: BOOLEAN, desc: "Crosswalk: auto-oriented commercial use (addition, ADR-0060)"}
+      excluded_use_flag:          {type: BOOLEAN, desc: "Crosswalk: park/cemetery/ROW/utility etc. (addition, ADR-0060)"}
+      jurisdiction:               {type: TEXT, desc: "Municipality or township governing zoning (addition, ADR-0060)"}
+      zoning_code:                {type: TEXT, desc: "Base zoning code (largest overlap)"}
+      zoning_overlays:            {type: TEXT, desc: "Overlay codes, ';'-joined (addition, ADR-0060)"}
+      parking_zone:               {type: TEXT, domain: dm_ParkingZone, desc: "Downtown parking zone (addition, ADR-0061)"}
+      parking_zone_near_boundary: {type: BOOLEAN, desc: "Within the review distance of the A/B line (addition, ADR-0061)"}
+      zoning_screen:              {type: TEXT, domain: dm_ZoningScreen, desc: "Commercial-parking use class from the zoning table"}
+      zoning_status:              {type: TEXT, domain: dm_ScreenStatus, desc: "Zoning route: Pass/Review/Fail (addition, ADR-0059)"}
+      zoning_reason:              {type: TEXT, desc: "Zoning result with confidence and citation (addition, ADR-0059)"}
+      lot_sqft:                   {type: REAL, desc: "Parcel area in square feet (= Shape_Area)"}
+      assessed_land_value:        {type: REAL, desc: "Auditor land value (Franklin: 100% appraised)"}
+      assessed_improvement_value: {type: REAL, desc: "Auditor improvement value"}
+      improvement_value_ratio:    {type: REAL, desc: "improvement / NULLIF(land, 0)"}
+      year_built:                 {type: INTEGER, desc: "Year built (if recorded)"}
+      frontage_ft:                {type: REAL, desc: "Frontage on a public street, ft (screen step)"}
+      shape_index:                {type: REAL, desc: "Rectangularity 0–1 (screen step)"}
+      corner_flag:                {type: BOOLEAN, desc: "Corner lot (screen step)"}
+      listing_price:              {type: REAL, desc: "Asking price if listed"}
+      listing_source:             {type: TEXT, desc: "Listing source"}
+  Buildings:
+    feature_dataset: Cadastral
+    geometry: MultiPolygon
+    crs: analysis
+    desc: "Building footprints (Overture, which conflates OSM and ML footprints)."
+    fields:
+      bldg_id:   {type: TEXT, nullable: false, unique: true, desc: "Building id"}
+      area_sqft: {type: REAL, desc: "Footprint area, ft²"}
+      height_m:  {type: REAL, desc: "Height, m"}
+      levels:    {type: REAL, desc: "Floors above ground"}
+  # ================================================================== Demand
+  DemandAnchors:
+    feature_dataset: Demand
+    geometry: Point
+    crs: analysis
+    desc: "Classified demand generators with a size metric (Phase B)."
+    fields:
+      anchor_id:   {type: TEXT, nullable: false, unique: true, desc: "Anchor id"}
+      category:    {type: TEXT, nullable: false, domain: dm_AnchorCategory, desc: "Demand category"}
+      name:        {type: TEXT, desc: "Name"}
+      size_metric: {type: TEXT, domain: dm_SizeMetric, desc: "Size unit"}
+      size_value:  {type: REAL, desc: "Size in size_metric units"}
+      drive_share: {type: REAL, domain: rg_Occupancy, desc: "Driver mode share 0–1"}
+      venue_id:    {type: TEXT, desc: "Venues.venue_id for venue anchors"}
+  TransitStops:
+    feature_dataset: Demand
+    geometry: Point
+    crs: analysis
+    desc: "GTFS stops with peak service."
+    fields:
+      stop_id:             {type: TEXT, nullable: false, unique: true, desc: "GTFS stop_id"}
+      stop_name:           {type: TEXT, desc: "Stop name"}
+      route_count:         {type: INTEGER, desc: "Routes serving the stop"}
+      peak_departures:     {type: INTEGER, desc: "Departures in the peak window"}
+      peak_headway_min:    {type: REAL, desc: "Peak headway, minutes"}
+      high_frequency_flag: {type: BOOLEAN, desc: "Headway at or below the threshold"}
+  Venues:
+    feature_dataset: Demand
+    geometry: Point
+    crs: analysis
+    desc: "Event venues with seats and event counts."
+    fields:
+      venue_id:              {type: TEXT, nullable: false, unique: true, desc: "Venue id"}
+      name:                  {type: TEXT, desc: "Name"}
+      seats:                 {type: REAL, desc: "Seats"}
+      events_per_year:       {type: REAL, desc: "Events per year"}
+      event_calendar_source: {type: TEXT, desc: "Calendar source"}
+  # ---- intermediate standardized inputs (ADR-0006) ----
+  Places:
+    feature_dataset: Demand
+    geometry: Point
+    crs: analysis
+    desc: "POIs from Overture/OSM, standardized (ADR-0006)."
+    fields:
+      place_id:      {type: TEXT, nullable: false, unique: true, desc: "Place id"}
+      name:          {type: TEXT, desc: "Name"}
+      category:      {type: TEXT, desc: "Normalized category"}
+      category_src:  {type: TEXT, desc: "Source category"}
+      tags_json:     {type: JSON, desc: "Source tags"}
+  BlockJobs:
+    feature_dataset: Demand
+    geometry: Point
+    crs: analysis
+    desc: "LODES WAC jobs at census block internal points (ADR-0006)."
+    fields:
+      block_geoid: {type: TEXT, nullable: false, unique: true, desc: "2020 block GEOID"}
+      jobs_total:  {type: REAL, desc: "All jobs (C000)"}
+      sectors_json: {type: JSON, desc: "Jobs by NAICS sector (CNS01–CNS20)"}
+  BlockGroups:
+    feature_dataset: Demand
+    geometry: MultiPolygon
+    crs: analysis
+    desc: "ACS 5-year block-group indicators (ADR-0006)."
+    fields:
+      bg_geoid:          {type: TEXT, nullable: false, unique: true, desc: "Block group GEOID"}
+      population:        {type: REAL, desc: "B01003_001E"}
+      workers_total:     {type: REAL, desc: "B08301_001E"}
+      workers_drove:     {type: REAL, desc: "B08301_002E"}
+      drive_share:       {type: REAL, desc: "workers_drove / workers_total"}
+      units_total:       {type: REAL, desc: "B25024_001E"}
+      units_5plus:       {type: REAL, desc: "B25024_006E–009E"}
+      households:        {type: REAL, desc: "B25044_001E"}
+      households_no_vehicle: {type: REAL, desc: "B25044_003E + 010E"}
+  Hospitals:
+    feature_dataset: Demand
+    geometry: Point
+    crs: analysis
+    desc: "Hospitals with bed counts (ADR-0006)."
+    fields:
+      hospital_id: {type: TEXT, nullable: false, unique: true, desc: "Hospital id"}
+      name:        {type: TEXT, desc: "Name"}
+      beds:        {type: REAL, desc: "Beds"}
+  Institutions:
+    feature_dataset: Demand
+    geometry: Point
+    crs: analysis
+    desc: "Colleges/universities with enrollment (ADR-0006)."
+    fields:
+      unitid:     {type: TEXT, nullable: false, unique: true, desc: "IPEDS UNITID"}
+      name:       {type: TEXT, desc: "Name"}
+      enrollment: {type: REAL, desc: "12-month enrollment"}
+  # ================================================================== Supply
+  ParkingOSM:
+    feature_dataset: Supply
+    geometry: Geometry
+    crs: analysis
+    desc: "OSM amenity=parking features, standardized (ADR-0006)."
+    fields:
+      osm_id:     {type: TEXT, nullable: false, unique: true, desc: "OSM type/id"}
+      name:       {type: TEXT, desc: "Name"}
+      parking:    {type: TEXT, desc: "OSM parking tag (surface, multi-storey, ...)"}
+      capacity:   {type: REAL, desc: "Tagged capacity"}
+      fee:        {type: TEXT, desc: "OSM fee tag"}
+      access:     {type: TEXT, desc: "OSM access tag"}
+      operator:   {type: TEXT, desc: "Operator"}
+      levels:     {type: REAL, desc: "Levels"}
+      area_sqft:  {type: REAL, desc: "Polygon area, ft²"}
+  SupplyFacilities:
+    feature_dataset: Supply
+    geometry: Point
+    crs: analysis
+    desc: "Merged off-street supply (OSM/Overture/listings/city/manual), one point per facility (ADR-0060)."
+    subtype_field: type
+    fields:
+      facility_id:     {type: TEXT, nullable: false, unique: true, desc: "Facility id"}
+      name:            {type: TEXT, desc: "Name"}
+      type:            {type: TEXT, nullable: false, domain: dm_SupplyType, desc: "Facility type (subtype)"}
+      capacity_stated: {type: REAL, desc: "Published capacity"}
+      capacity_est:    {type: REAL, desc: "Estimated capacity"}
+      capacity_source: {type: TEXT, desc: "stated | area | footprint×levels"}
+      area_sqft:       {type: REAL, desc: "Footprint area, ft²"}
+      fee_flag:        {type: BOOLEAN, desc: "Paid"}
+      private_flag:    {type: BOOLEAN, desc: "Private/reserved"}
+      rate_hour:       {type: REAL, desc: "Hourly rate"}
+      rate_day:        {type: REAL, desc: "Daily rate"}
+      rate_month:      {type: REAL, desc: "Monthly rate"}
+      rate_event:      {type: REAL, desc: "Event rate"}
+      operator:        {type: TEXT, desc: "Operator"}
+  OnStreetSegments:
+    feature_dataset: Supply
+    geometry: LineString
+    crs: analysis
+    desc: "Curb segments with estimated stalls and meter/permit status."
+    fields:
+      segment_id:   {type: TEXT, nullable: false, unique: true, desc: "Segment id"}
+      length_ft:    {type: REAL, desc: "Curb length, ft"}
+      stalls_est:   {type: REAL, desc: "length_ft / stall length"}
+      metered_flag: {type: BOOLEAN, desc: "Metered"}
+      permit_flag:  {type: BOOLEAN, desc: "Permit-only"}
+      rate_hour:    {type: REAL, desc: "Meter rate per hour"}
+  # ================================================================== Analysis
+  HotZones:
+    feature_dataset: Analysis
+    geometry: MultiPolygon
+    crs: analysis
+    desc: "Contiguous hexes meeting the multi-daypart gap rule (Phase D)."
+    fields:
+      zone_id:           {type: TEXT, nullable: false, unique: true, desc: "Hot-zone id"}
+      dayparts_positive: {type: TEXT, desc: "Dayparts with gap > 0, ';'-joined"}
+      total_gap_stalls:  {type: REAL, desc: "Sum of positive gap stalls"}
+      mean_rate_index:   {type: REAL, desc: "Mean rate index"}
+  CandidateParcels:
+    feature_dataset: Analysis
+    geometry: MultiPolygon
+    crs: analysis
+    desc: "Every evaluated parcel with its screen result and all failing reasons (Phase E)."
+    fields:
+      parcel_id:           {type: TEXT, nullable: false, unique: true, desc: "Parcels.parcel_id"}
+      screen_status:       {type: TEXT, nullable: false, domain: dm_ScreenStatus, desc: "Pass / Fail / Review"}
+      screen_reason:       {type: TEXT, desc: "All failing/review reasons, ';'-joined"}
+      walk_min_to_hotzone: {type: REAL, desc: "Network walk minutes to nearest hot zone"}
+      brownfield_flag:     {type: BOOLEAN, desc: "Brownfield within the configured distance"}
+      flood_flag:          {type: BOOLEAN, desc: "Intersects SFHA"}
+      pipeline_flag:       {type: BOOLEAN, desc: "Active development permit"}
+      slope_pct:           {type: REAL, desc: "Mean slope, percent"}
+  WalkSheds:
+    feature_dataset: Analysis
+    geometry: MultiPolygon
+    crs: analysis
+    desc: "Network walk sheds per candidate (3/5/8 min)."
+    fields:
+      parcel_id: {type: TEXT, nullable: false, desc: "CandidateParcels.parcel_id"}
+      minutes:   {type: INTEGER, nullable: false, desc: "Walk minutes"}
+  # ================================================================== Results
+  SiteScores:
+    feature_dataset: Results
+    geometry: MultiPolygon
+    crs: analysis
+    desc: "Criterion raw and scaled values, composite and rank per scenario (Phase G)."
+    fields:
+      parcel_id: {type: TEXT, nullable: false, desc: "CandidateParcels.parcel_id"}
+      scenario:  {type: TEXT, nullable: false, domain: dm_Scenario, desc: "Weight scenario"}
+      c01_raw: {type: REAL, desc: "C01 raw"}
+      c02_raw: {type: REAL, desc: "C02 raw"}
+      c03_raw: {type: REAL, desc: "C03 raw"}
+      c04_raw: {type: REAL, desc: "C04 raw"}
+      c05_raw: {type: REAL, desc: "C05 raw"}
+      c06_raw: {type: REAL, desc: "C06 raw"}
+      c07_raw: {type: REAL, desc: "C07 raw"}
+      c08_raw: {type: REAL, desc: "C08 raw"}
+      c09_raw: {type: REAL, desc: "C09 raw"}
+      c10_raw: {type: REAL, desc: "C10 raw"}
+      c01_s: {type: REAL, domain: rg_Score, desc: "C01 scaled 0–100"}
+      c02_s: {type: REAL, domain: rg_Score, desc: "C02 scaled 0–100"}
+      c03_s: {type: REAL, domain: rg_Score, desc: "C03 scaled 0–100"}
+      c04_s: {type: REAL, domain: rg_Score, desc: "C04 scaled 0–100"}
+      c05_s: {type: REAL, domain: rg_Score, desc: "C05 scaled 0–100"}
+      c06_s: {type: REAL, domain: rg_Score, desc: "C06 scaled 0–100"}
+      c07_s: {type: REAL, domain: rg_Score, desc: "C07 scaled 0–100"}
+      c08_s: {type: REAL, domain: rg_Score, desc: "C08 scaled 0–100"}
+      c09_s: {type: REAL, domain: rg_Score, desc: "C09 scaled 0–100"}
+      c10_s: {type: REAL, domain: rg_Score, desc: "C10 scaled 0–100"}
+      composite: {type: REAL, domain: rg_Score, desc: "Weighted composite 0–100"}
+      rank:      {type: INTEGER, desc: "Rank within scenario (tie-break parcel_id)"}
+  SiteFinancials:
+    feature_dataset: Results
+    geometry: MultiPolygon
+    crs: analysis
+    desc: "Pro forma per candidate and tenure (Phase H)."
+    fields:
+      parcel_id:         {type: TEXT, nullable: false, desc: "CandidateParcels.parcel_id"}
+      tenure:            {type: TEXT, nullable: false, domain: dm_Tenure, desc: "Buy or ground lease"}
+      stalls:            {type: REAL, desc: "Stalls"}
+      land_cost:         {type: REAL, desc: "Land cost"}
+      construction_cost: {type: REAL, desc: "Construction cost"}
+      soft_cost:         {type: REAL, desc: "Soft cost"}
+      total_cost:        {type: REAL, desc: "Total cost"}
+      occ_wd_day:   {type: REAL, domain: rg_Occupancy, desc: "Occupancy, weekday day"}
+      occ_wd_eve:   {type: REAL, domain: rg_Occupancy, desc: "Occupancy, weekday evening"}
+      occ_we_day:   {type: REAL, domain: rg_Occupancy, desc: "Occupancy, weekend day"}
+      occ_we_eve:   {type: REAL, domain: rg_Occupancy, desc: "Occupancy, weekend evening"}
+      occ_event:    {type: REAL, domain: rg_Occupancy, desc: "Occupancy, event"}
+      rate_wd_day:  {type: REAL, desc: "Rate, weekday day"}
+      rate_wd_eve:  {type: REAL, desc: "Rate, weekday evening"}
+      rate_we_day:  {type: REAL, desc: "Rate, weekend day"}
+      rate_we_eve:  {type: REAL, desc: "Rate, weekend evening"}
+      rate_event:   {type: REAL, desc: "Rate, event"}
+      annual_revenue:   {type: REAL, desc: "Annual revenue"}
+      opex:             {type: REAL, desc: "Operating expenses"}
+      noi:              {type: REAL, desc: "Net operating income"}
+      yield_on_cost:    {type: REAL, desc: "NOI / total cost"}
+      value_at_cap:     {type: REAL, desc: "NOI / cap rate"}
+      payback_years:    {type: REAL, desc: "Simple payback, years"}
+      irr_10yr:         {type: REAL, desc: "10-year unlevered IRR"}
+      npv:              {type: REAL, desc: "NPV at the discount rate"}
+      sensitivity_json: {type: JSON, desc: "Sensitivity results"}
+  Shortlist:
+    feature_dataset: Results
+    geometry: MultiPolygon
+    crs: analysis
+    desc: "Final ranked shortlist with recommendation and due-diligence flags."
+    fields:
+      parcel_id:           {type: TEXT, nullable: false, unique: true, desc: "CandidateParcels.parcel_id"}
+      final_rank:          {type: INTEGER, desc: "0.70 financial + 0.30 suitability rank"}
+      recommended_flag:    {type: BOOLEAN, desc: "Recommended site"}
+      alternate_flag:      {type: BOOLEAN, desc: "Alternate site"}
+      profile_page_no:     {type: INTEGER, desc: "Page in the map series"}
+      due_diligence_flags: {type: TEXT, desc: "Flags, ';'-joined"}
+      notes:               {type: TEXT, desc: "Notes"}
 
 rasters:
   Slope_pct:
     feature_dataset: Reference
     file: rasters/Slope_pct.tif
     units: percent rise
+    desc: "Percent slope from the 3DEP DEM (Horn)."
+  RateSurface_{daypart}:
+    feature_dataset: Supply
+    file: rasters/RateSurface_{daypart}.tif
+    units: currency per hour
+    desc: "IDW achievable-rate surface, one per daypart."
 
 # Raw (immutable snapshot, EPSG:4326, source attributes as delivered). Name = Raw_<source>.
 raw_layers:
   crs: wgs84
   names: [Raw_Boundary, Raw_Parcels, Raw_Buildings, Raw_Places_Overture, Raw_OSM_POI, Raw_OSM_Parking,
           Raw_LODES_WAC, Raw_ACS_BG, Raw_GTFS_Stops, Raw_Venues, Raw_Hospitals, Raw_Institutions,
-          Raw_AADT, Raw_FEMA_NFHL, Raw_EPA_Sites]
+          Raw_AADT, Raw_FEMA_NFHL, Raw_EPA_Sites, Raw_Zoning, Raw_ZoningOverlays, Raw_ParkingZones]
 
 tables:
   DataSourceRegistry:
+    desc: "Provenance: one row per source per run."
     fields:
-      source_id:      {type: TEXT, nullable: false}
-      run_id:         {type: TEXT, nullable: false}
-      provider:       {type: TEXT}
-      dataset:        {type: TEXT}
-      endpoint:       {type: TEXT}
-      vintage:        {type: TEXT}
-      download_date:  {type: TEXT}
-      license:        {type: TEXT}
-      native_crs:     {type: TEXT}
-      transformation: {type: TEXT}
-      row_count:      {type: INTEGER}
-      status:         {type: TEXT}
-      notes:          {type: TEXT}
+      source_id:      {type: TEXT, nullable: false, desc: "Source id"}
+      run_id:         {type: TEXT, nullable: false, desc: "Run id"}
+      provider:       {type: TEXT, desc: "Provider"}
+      dataset:        {type: TEXT, desc: "Dataset"}
+      endpoint:       {type: TEXT, desc: "URL or local path (secrets redacted)"}
+      vintage:        {type: TEXT, desc: "Data vintage"}
+      download_date:  {type: TEXT, desc: "Date fetched/loaded"}
+      license:        {type: TEXT, desc: "Licence ([VERIFY] if unconfirmed)"}
+      native_crs:     {type: TEXT, desc: "CRS as delivered"}
+      transformation: {type: TEXT, desc: "CRS transformation applied"}
+      row_count:      {type: INTEGER, desc: "Rows written"}
+      status:         {type: TEXT, desc: "loaded | not configured | failed"}
+      notes:          {type: TEXT, desc: "Notes"}
   QAQC_Log:
+    desc: "QA check results."
     fields:
-      check_id:   {type: TEXT, nullable: false}
-      run_id:     {type: TEXT, nullable: false}
-      step:       {type: TEXT}
-      layer:      {type: TEXT}
-      check_name: {type: TEXT}
-      result:     {type: TEXT}
-      count:      {type: REAL}
-      threshold:  {type: TEXT}
-      passed:     {type: BOOLEAN}
-      severity:   {type: TEXT}
-      timestamp:  {type: DATETIME}
+      check_id:   {type: TEXT, nullable: false, desc: "Check id"}
+      run_id:     {type: TEXT, nullable: false, desc: "Run id"}
+      step:       {type: TEXT, desc: "Step"}
+      layer:      {type: TEXT, desc: "Layer checked"}
+      check_name: {type: TEXT, desc: "Check"}
+      result:     {type: TEXT, desc: "Result text"}
+      count:      {type: REAL, desc: "Measured value"}
+      threshold:  {type: TEXT, desc: "Threshold"}
+      passed:     {type: BOOLEAN, desc: "Passed"}
+      severity:   {type: TEXT, desc: "error | warning | info"}
+      timestamp:  {type: DATETIME, desc: "UTC time"}
   ScoreRuns:
+    desc: "Run log: one row per step per run."
     fields:
-      run_id:          {type: TEXT, nullable: false}
-      market:          {type: TEXT}
-      scenario:        {type: TEXT, domain: dm_Scenario}
-      step:            {type: TEXT}
-      timestamp:       {type: DATETIME}
-      toolbox_version: {type: TEXT}
-      git_commit:      {type: TEXT}
-      params_json:     {type: JSON}
-      candidate_cnt:   {type: INTEGER}
+      run_id:          {type: TEXT, nullable: false, desc: "Run id"}
+      market:          {type: TEXT, desc: "Market slug"}
+      scenario:        {type: TEXT, domain: dm_Scenario, desc: "Scenario (scoring steps)"}
+      step:            {type: TEXT, desc: "Step"}
+      timestamp:       {type: DATETIME, desc: "UTC time"}
+      toolbox_version: {type: TEXT, desc: "parkiq version"}
+      git_commit:      {type: TEXT, desc: "Git commit"}
+      params_json:     {type: JSON, desc: "Resolved parameters"}
+      candidate_cnt:   {type: INTEGER, desc: "Pass candidates"}
   ParkingRates:
+    desc: "Generation rates by category and daypart."
     fields:
-      run_id:             {type: TEXT, nullable: false}
-      category:           {type: TEXT}
-      daypart:            {type: TEXT, domain: dm_Daypart}
-      rate:               {type: REAL}
-      unit:               {type: TEXT}
-      source_citation:    {type: TEXT}
-      calibration_factor: {type: REAL}
+      run_id:             {type: TEXT, nullable: false, desc: "Run id"}
+      category:           {type: TEXT, desc: "Rate category"}
+      daypart:            {type: TEXT, domain: dm_Daypart, desc: "Daypart"}
+      rate:               {type: REAL, desc: "Stalls per unit"}
+      unit:               {type: TEXT, desc: "Unit"}
+      source_citation:    {type: TEXT, desc: "Citation"}
+      calibration_factor: {type: REAL, desc: "Pilot calibration factor"}
   CriteriaDefinitions:
+    desc: "Scoring criteria C01–C10."
     fields:
-      run_id:        {type: TEXT, nullable: false}
-      criterion_id:  {type: TEXT}
-      name:          {type: TEXT}
-      description:   {type: TEXT}
-      unit:          {type: TEXT}
-      direction:     {type: TEXT, domain: dm_Direction}
-      normalization: {type: TEXT}
+      run_id:        {type: TEXT, nullable: false, desc: "Run id"}
+      criterion_id:  {type: TEXT, desc: "C01–C10"}
+      name:          {type: TEXT, desc: "Name"}
+      description:   {type: TEXT, desc: "Description"}
+      unit:          {type: TEXT, desc: "Unit"}
+      direction:     {type: TEXT, domain: dm_Direction, desc: "Benefit or Cost"}
+      normalization: {type: TEXT, desc: "Normalization rule"}
   WeightScenarios:
+    desc: "Weights per scenario and criterion."
     fields:
-      run_id:       {type: TEXT, nullable: false}
-      scenario:     {type: TEXT, domain: dm_Scenario}
-      criterion_id: {type: TEXT}
-      weight:       {type: REAL}
+      run_id:       {type: TEXT, nullable: false, desc: "Run id"}
+      scenario:     {type: TEXT, domain: dm_Scenario, desc: "Scenario"}
+      criterion_id: {type: TEXT, desc: "CriteriaDefinitions.criterion_id"}
+      weight:       {type: REAL, desc: "Weight (sums to 1 per scenario)"}
   FinanceParams:
+    desc: "Resolved finance parameters per run."
     fields:
-      run_id: {type: TEXT, nullable: false}
-      param:  {type: TEXT}
-      value:  {type: TEXT}
+      run_id: {type: TEXT, nullable: false, desc: "Run id"}
+      param:  {type: TEXT, desc: "Parameter"}
+      value:  {type: TEXT, desc: "JSON value"}
+  Validation:
+    desc: "Pilot back-test: observed vs modeled (Phase I)."
+    fields:
+      run_id:          {type: TEXT, nullable: false, desc: "Run id"}
+      facility_id:     {type: TEXT, desc: "SupplyFacilities.facility_id"}
+      observed_metric: {type: TEXT, desc: "What was observed"}
+      observed_value:  {type: REAL, desc: "Observed"}
+      modeled_value:   {type: REAL, desc: "Modeled"}
+      error_pct:       {type: REAL, desc: "(modeled − observed) / observed × 100"}
+  # SCOPE shows the hex × daypart outputs as "Polygon/table": stored as tables keyed by hex_id and
+  # joined to HexGrid for display (ADR-0060) — avoids storing each hexagon five times.
+  Hex_Demand_Daypart:
+    desc: "Modeled demand stalls per hex and daypart (Phase B)."
+    fields:
+      run_id:          {type: TEXT, nullable: false, desc: "Run id"}
+      hex_id:          {type: TEXT, nullable: false, desc: "HexGrid.hex_id"}
+      daypart:         {type: TEXT, nullable: false, domain: dm_Daypart, desc: "Daypart"}
+      demand_stalls:   {type: REAL, desc: "Demand, stalls"}
+      components_json: {type: JSON, desc: "Contribution by anchor category"}
+      method:          {type: TEXT, desc: "Model version/method"}
+  Hex_Supply_Daypart:
+    desc: "Supply stalls per hex and daypart (Phase C)."
+    fields:
+      run_id:                  {type: TEXT, nullable: false, desc: "Run id"}
+      hex_id:                  {type: TEXT, nullable: false, desc: "HexGrid.hex_id"}
+      daypart:                 {type: TEXT, nullable: false, domain: dm_Daypart, desc: "Daypart"}
+      supply_stalls:           {type: REAL, desc: "Supply, stalls"}
+      effective_supply_stalls: {type: REAL, desc: "Supply with private share applied"}
+  Hex_Gap_Daypart:
+    desc: "Demand − effective supply per hex and daypart (Phase D)."
+    fields:
+      run_id:     {type: TEXT, nullable: false, desc: "Run id"}
+      hex_id:     {type: TEXT, nullable: false, desc: "HexGrid.hex_id"}
+      daypart:    {type: TEXT, nullable: false, domain: dm_Daypart, desc: "Daypart"}
+      gap_stalls: {type: REAL, desc: "demand − effective supply"}
+      gap_ratio:  {type: REAL, desc: "demand / supply"}
+      rate_index: {type: REAL, desc: "Normalized achievable rate"}
+
+# SCOPE §4.5. Subtypes are declared on the layer (subtype_field). Relationships are recorded in
+# the GeoPackage table _ParkIQ_Relationships by BuildSchema and become relationship classes in
+# the file-geodatabase export (M7).
+relationships:
+  - {name: CandidateParcels_SiteScores,     origin: CandidateParcels, destination: SiteScores,       cardinality: "1:M", origin_key: parcel_id, destination_key: parcel_id}
+  - {name: CandidateParcels_SiteFinancials, origin: CandidateParcels, destination: SiteFinancials,   cardinality: "1:1", origin_key: parcel_id, destination_key: parcel_id, note: "one row per tenure (Buy, Lease)"}
+  - {name: CandidateParcels_WalkSheds,      origin: CandidateParcels, destination: WalkSheds,        cardinality: "1:M", origin_key: parcel_id, destination_key: parcel_id}
+  - {name: ScoreRuns_SiteScores,            origin: ScoreRuns,        destination: SiteScores,       cardinality: "1:M", origin_key: run_id,    destination_key: run_id}
+  - {name: CriteriaDefinitions_WeightScenarios, origin: CriteriaDefinitions, destination: WeightScenarios, cardinality: "1:M", origin_key: criterion_id, destination_key: criterion_id}
+  - {name: DataSourceRegistry_Sources,      origin: DataSourceRegistry, destination: "*",            cardinality: "1:M", origin_key: source_id, destination_key: source_id, note: "every source-derived feature class"}
+  - {name: Venues_DemandAnchors,            origin: Venues,           destination: DemandAnchors,    cardinality: "1:M", origin_key: venue_id,  destination_key: venue_id}
+  - {name: Parcels_CandidateParcels,        origin: Parcels,          destination: CandidateParcels, cardinality: "1:1", origin_key: parcel_id, destination_key: parcel_id, note: addition}
+  - {name: HexGrid_HexDemand,               origin: HexGrid,          destination: Hex_Demand_Daypart, cardinality: "1:M", origin_key: hex_id, destination_key: hex_id, note: addition}
+  - {name: HexGrid_HexSupply,               origin: HexGrid,          destination: Hex_Supply_Daypart, cardinality: "1:M", origin_key: hex_id, destination_key: hex_id, note: addition}
+  - {name: HexGrid_HexGap,                  origin: HexGrid,          destination: Hex_Gap_Daypart,  cardinality: "1:M", origin_key: hex_id,    destination_key: hex_id, note: addition}
+
+rules:
+  topology:
+    - {layer: Parcels, rule: must not overlap, tolerance_ft: 0.1}
+    - {layer: HexGrid, rule: must not overlap or have gaps}
+  attribute:
+    - {layer: Parcels, field: lot_sqft, rule: "= Shape_Area (market units)"}
+    - {layer: Parcels, field: improvement_value_ratio, rule: "assessed_improvement_value / NULLIF(assessed_land_value, 0)"}
+    - {layer: SiteScores, field: composite, rule: "BETWEEN 0 AND 100 (rg_Score)"}
+    - {layer: SiteFinancials, field: "occ_*", rule: "BETWEEN 0 AND 1 (rg_Occupancy)"}

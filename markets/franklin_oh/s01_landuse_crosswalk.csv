@@ -1,0 +1,192 @@
+county_code,county_description,land_use_class,auto_oriented_commercial,excluded_use,special_rule,notes
+100,AGRICULTURAL VACANT LAND,Vacant,N,N,,vacant-land code
+101,CASH GRAIN OR GENERAL FARM,Other,N,N,,agricultural
+102,LIVESTOCK FARMS EXCEPT DAIRY&POULTRY,Other,N,N,,agricultural
+104,POULTRY FARMS,Other,N,N,,agricultural
+108,NURSERIES,Other,N,N,,agricultural
+109,"GREENHOUSES, VEGETABLES & FLORACULT.",Other,N,N,,agricultural
+110,AGRICULTURAL VACANT LAND,Vacant,N,N,,vacant-land code
+111,CASH GRAIN OR GENERAL FARM,Other,N,N,,agricultural
+112,LIVESTOCK FARM OTHER THAN DRY&POLRY,Other,N,N,,agricultural
+122,CAUV-COMMERICAL TIMBER,Other,N,N,,agricultural
+123,FOREST LAND PRIOR 11/7/94,Other,N,N,,agricultural
+124,FOREST LAND AFTER 11/7/94,Other,N,N,,agricultural
+199,OTHER AGRICULTURAL USE,Other,N,N,,agricultural
+300,"INDUSTRIAL, VACANT LAND",Vacant,N,N,,vacant-land code
+301,LANDFILL OR OTHER INDUSTRIAL,Industrial,N,N,,
+302,LUMBER YARD/OTHER INDUSTRIAL,Industrial,N,N,,
+303,TANK FARM/OTHER INDUSTRIAL,Industrial,N,N,,
+304,AVIATION FACILITY,Industrial,N,N,,
+305,OTHER INDUSTRIAL RESEARCH/CHEMICAL LAB,Industrial,N,N,,
+310,FOOD&DRINK PROCESS PLANTS AND STORAE,Industrial,N,N,,
+320,FOUNDERIES&HEAVY MANUFACT PLANTS,Industrial,N,N,,
+330,MANUFACTURING & ASSEMBLY MEDIUM,Industrial,N,N,,
+340,MANUFACTURING & ASSEMBLY LIGHT,Industrial,N,N,,
+341,LIGHT MANUF & ASMB .11-20% OFC,Industrial,N,N,,
+342,LIGHT MANUF & ASMB .21-30% OFC,Industrial,N,N,,
+343,LIGHT MANUF  :OVER 30% OFC,Industrial,N,N,,
+350,INDUSTRIAL WAREHOUSES    LIGHT,Industrial,N,N,,
+351,WAREHOUSE: 6% TO 15% OFC,Industrial,N,N,,
+352,WAREHOUSE: 16% TO 25% OFC,Industrial,N,N,,
+353,WAREHOUSE: 26% TO 35% OFC,Industrial,N,N,,
+354,WAREHOUSE: 36% TO 50% OFC,Industrial,N,N,,
+355,DISTRIBUTION WHSE CENTERS,Industrial,N,N,,
+356,AUTOMATED WAREHOUSE,Industrial,N,N,,
+357,COLD STORAGE FACILITY,Industrial,N,N,,
+358,MULTI-STORY WAREHOUSE,Industrial,N,N,,
+360,INDUSTRIAL TRUCK TERMINALS,Industrial,N,N,,
+370,"SMALL SHOPS (MACHINE,TOOL & DIE ETC)",Industrial,N,N,,
+371,SMALL SHOPS: 11% TO 20% OFC,Industrial,N,N,,
+372,SMALL SHOPS: OVER 20% OFC,Industrial,N,N,,
+375,data center,Industrial,N,N,,
+380,MINES AND QUARRIES,Industrial,N,N,,
+390,GRAIN ELEVATORS,Industrial,N,N,,
+391,INDUSTRIAL CONDO,Industrial,N,N,,
+392,INDUSTRIAL FLX SPACE>50% OFC,Industrial,N,N,,
+399,OTHER INDUSTRIAL STRUCTURES,Industrial,N,N,,
+400,COMMERCIAL VACANT LAND,Vacant,N,N,,vacant-land code
+401,APARTMENTS 4-19 RENTAL UNITS,Residential,N,N,,commercial-class housing
+402,APARTMENTS 20-39 RENTAL UNITS,Residential,N,N,,commercial-class housing
+403,APARTMENTS 40 OR MORE RENTAL UNITS,Residential,N,N,,commercial-class housing
+404,RETAIL/APTS OVER-WALKUP,MixedUse,N,N,,over-walkup / converted mixed
+405,RETAIL/OFFICE OVER-WALKUP,MixedUse,N,N,,over-walkup / converted mixed
+406,RETAIL/STORAGE OVER-WALKUP,MixedUse,N,N,,over-walkup / converted mixed
+407,COMMERCIAL LAWN/GARDEN SALES,Commercial,N,N,,
+408,BED AND BREAKFAST INN,Commercial,N,N,,
+409,HOUSING-ELDERLY/OTHER COMM,Residential,N,N,,commercial-class housing
+410,MOTELS AND TOURIST CABINS,Commercial,N,N,,
+411,MOTELS,Commercial,N,N,,
+412,NURSING HOMES & PRIVATE HOSPITALS,Institutional,N,N,,care/medical/education use
+413,NURSING HOME - CUSTODIAL,Institutional,N,N,,care/medical/education use
+414,COMMERCIAL ROOMING HOUSE,Residential,N,N,,commercial-class housing
+415,TRAILER OR MOBILE HOME PARK,Residential,N,N,,commercial-class housing
+416,COMMERCIAL CAMPGROUNDS,Commercial,N,N,,
+417,DAY/CARE PRESCHOOL,Institutional,N,N,,care/medical/education use
+418,FRATERNITIES OR SORORITIES,Institutional,N,N,,care/medical/education use
+419,OTHER COMMERCIAL HOUSING,Residential,N,N,,commercial-class housing
+420,"SMALL (UNDER 10,000SF) DETACH RETAI",Commercial,N,N,,
+421,SUPERMARKETS,Commercial,N,N,,
+422,DISCOUNT STORES & JR. DEPT STORES,Commercial,N,N,,
+423,CATALOG SHOWROOM SALES,Commercial,N,N,,
+424,FULL LINE DEPARTMENT STORES,Commercial,N,N,,
+425,NEIGHBORHOOD SHOPPING CENTER,Commercial,N,N,,
+426,COMMUNITY SHOPPING CENTER,Commercial,N,N,,
+427,REGIONAL SHOPPING CENTER,Commercial,N,N,,
+429,OTHER RETAIL STRUCTURES,Commercial,N,N,,
+430,"RESTURANT, CAFETERIA, AND/OR BAR",Commercial,N,N,,
+431,OFFICE/APTS OVER-WALKUP,MixedUse,N,N,,over-walkup / converted mixed
+432,OFFICE/RETAIL OVER WALK-UP,MixedUse,N,N,,over-walkup / converted mixed
+433,OFFICE/STORAGE OVER WALK-UP,MixedUse,N,N,,over-walkup / converted mixed
+434,SUPPER CLUB/NIGHT CLUB,Commercial,N,N,,
+435,DRIVE-IN REST/FOOD SERVICE FACILITY,Commercial,Y,N,,
+436,FAMILY RESTAURANT/DINING ROOM,Commercial,N,N,,
+437,OTHER FOOD SERVICE STRUCTURE,Commercial,N,N,,
+438,DRIVE THRU CARRY OUT,Commercial,Y,N,,
+439,OTHER FOOD SERVICE STRUCTURE,Commercial,N,N,,
+440,DRY CLEANING PLANTS & LAUNDRIES,Commercial,N,N,,
+441,FUNERAL HOMES,Commercial,N,N,,
+442,MEDICAL CLINICS AND OFFICES,Commercial,N,N,,
+443,CARWASH-FULL SERVICE OR AUTO,Commercial,Y,N,,
+444,FULL SERVICE BANKS,Commercial,N,N,,
+445,SAVINGS AND LOAN,Commercial,N,N,,
+446,RADIO/TV STATIONS,Commercial,N,N,,
+447,OFFICE BUILDING 1-2 STORIES,Commercial,N,N,,
+448,OFFICE BULD 3 OR MORE STORIES WALKUP,Commercial,N,N,,
+449,OFFICE BULD 3 OR MORE STORIES ELEVAT,Commercial,N,N,,
+450,CONDOMINIUM OFFICE UNITS,Commercial,N,N,,
+451,GAS STATION NO BAYS,Commercial,Y,N,,
+452,AUTOMOTIVE SERVICE STATION,Commercial,Y,N,,
+453,CAR WASHES,Commercial,Y,N,,
+454,AUTO CAR SALES AND SERVICES,Commercial,Y,N,,
+455,COMMERCIAL GARAGES,Commercial,Y,N,,
+456,PARKING GARAGE STRUCTURE & LOTS,SurfaceParking,N,N,confirm_surface_parking,code covers garages AND lots; split by improvement ratio/buildings
+457,CARRY OUT/ DRIVE THRU,Commercial,Y,N,,
+458,GAS STATION/CONVEINIENT FOOD SERVICE,Commercial,Y,N,,
+459,GAS STATION/CAR WASH,Commercial,Y,N,,
+460,THEATERS,Commercial,N,N,,
+461,DRIVE-IN THEATERS,Commercial,N,N,,
+462,GOLF DRIV RANGE & MINI GOLF COURSES,Commercial,N,N,,
+463,GOLF COURSES,Commercial,N,N,,
+464,BOWLING ALLEYS,Commercial,N,N,,
+465,LODGE HALLS AND AMUSEMENT PARKS,Commercial,N,N,,
+466,TRUCK/FARM EQUIP SALES/SERVICE,Commercial,Y,N,,
+467,USED CAR LOT,Commercial,Y,N,,
+468,BIG BOX RETAIL/SUPER CENTER,Commercial,N,N,,
+469,FRANCISED DRUG STORE,Commercial,N,N,,
+470,DWELLING CONVERTED TO OFFICE,Commercial,N,N,,
+471,DWELLING CONVERTED TO RETAIL,Commercial,N,N,,
+472,CNVT DWLG; 1ST FL RETL/APT UP,MixedUse,N,N,,over-walkup / converted mixed
+473,CNVT DWLG; 1ST FL OFC/APT UP,MixedUse,N,N,,over-walkup / converted mixed
+475,RETAIL CONDOMINUM,Commercial,N,N,,
+476,CONDO PARKING/GARAGE,Other,N,N,,"condo parking/garage units (structured, not a lot)"
+477,FAST FOOD AND CONV STORE,Commercial,Y,N,,
+479,DOG/CAT KENNELS,Commercial,N,N,,
+480,COMMERCIAL WAREHOUSES,Commercial,N,N,,
+481,MINI WAREHOUSE,Commercial,N,N,,
+482,COMMERCIAL TRUCK TERMINALS,Commercial,N,N,,
+483,BUS GARAGES & TERMINALS,Commercial,N,N,,
+484,HOSPITALS,Institutional,N,N,,care/medical/education use
+485,MEDICAL CONDO,Institutional,N,N,,care/medical/education use
+486,SURGICAL CENTER,Institutional,N,N,,care/medical/education use
+488,COMMERCIAL WAREHOUSE>50% OFC,Commercial,N,N,,
+489,PUBLIC UTILITY,Other,N,Y,,utility; public utility
+490,MARINE SERVICE FACILITIES,Commercial,N,N,,
+491,RACQUETBALL COURTS,Commercial,N,N,,
+492,TENNIS BARNS,Commercial,N,N,,
+493,SWIMMING CLUB,Commercial,N,N,,
+494,ARENA,Commercial,N,N,,
+495,CELL SITE AND IMPROVEMENTS,Commercial,N,Y,,cell site
+496,FED SUBS HOUSING / LIHTC,Residential,N,N,,commercial-class housing
+497,AUTO RACETRACKS/HORSE TRACK,Commercial,N,N,,
+498,SKATING RINKS,Commercial,N,N,,
+499,OTHER COMMERCIAL STRUCTURES,Commercial,N,N,,
+500,"RESIDENTIAL, VACANT LAND, LOT",Vacant,N,N,,vacant-land code
+501,"RESIDENTIAL, 0-9.999 AC",Vacant,N,N,,vacant-land code
+502,"RESIDENTIAL, 10-19.999 AC",Vacant,N,N,,vacant-land code
+503,"RESIDENTIAL, 20-29.999 AC",Vacant,N,N,,vacant-land code
+504,"RESIDENTIAL, 30-39.999 AC",Vacant,N,N,,vacant-land code
+505,"RESIDENTIAL, 40+ ACRES",Vacant,N,N,,vacant-land code
+510,"SINGLE FAMILY DWELLING, PLATTED LOT",Residential,N,N,,
+511,"SINGLE FAMILY, O-9.999 AC",Residential,N,N,,
+512,"SINGLE FAMILY, 10-19.999 AC",Residential,N,N,,
+513,"SINGLE FAMILY, 20-29.999 AC",Residential,N,N,,
+514,"SINGLE FAMILY, 30-39.999 AC",Residential,N,N,,
+515,"SINGLE FAMILY, 40+ AC",Residential,N,N,,
+520,"TWO FAMILY DWELLING, PLATTED LOT",Residential,N,N,,
+521,"TWO FAMILY, 0-9.999 AC",Residential,N,N,,
+522,"TWO FAMILY, 10-19.999 AC",Residential,N,N,,
+525,"TWO FAMILY, 40+ AC",Residential,N,N,,
+530,"THREE FAMILY DWELLING, PLATTED LOT",Residential,N,N,,
+531,"THREE FAMILY, 0-9.999 AC",Residential,N,N,,
+534,"THREE FAMILY, 30-39.999 AC",Residential,N,N,,
+540,HOMEOWNER ASSOC FOR A SUBDIVISION,Residential,N,Y,,HOA common area
+550,CONDOMINIUM,Residential,N,N,,
+551,CONDO 4-19 RENTAL UNITS,Residential,N,N,,
+552,CONDO 20-39 RENTAL UNITS,Residential,N,N,,
+553,CONDO 40+ RENTAL UNITS,Residential,N,N,,
+555,CONDO ASSOCIATION HOLDINGS,Residential,N,Y,,condo association holdings
+559,CONDOMINIUM GARAGE FOR UNITS,Residential,N,N,,condo garage units
+560,HTRL/MOBILE HOME ON REAL ESTATE,Residential,N,N,,
+585,RESIDENTIAL ROOMING HOUSE,Residential,N,N,,
+591,AFFORDABLE HOUSING 1 UNIT DWELLING,Residential,N,N,,
+592,AFFORDABLE HOUSING 2 UNIT DWELLING,Residential,N,N,,
+599,OTHER RESIDENTIAL,Residential,N,N,,
+600,EXEMPT PROPERTY OWNED BY USA,Institutional,N,N,exempt_low_improvement_review,"exempt-owner code: says who owns it, not the use"
+610,EXEMPT PROPERTY OWNED BY STATE OF OH,Institutional,N,N,exempt_low_improvement_review,"exempt-owner code: says who owns it, not the use"
+615,EXEMPT FORFEITED LAND,Other,N,N,exempt_low_improvement_review,exempt status code; use not stated
+620,EXEMPT PROPERTY OWNED BY COUNTIES,Institutional,N,N,exempt_low_improvement_review,"exempt-owner code: says who owns it, not the use"
+625,SUSPENSION LIST,Other,N,N,exempt_low_improvement_review,exempt status code; use not stated
+630,EXEMPT PROPERTY OWNED BY TOWNSHIP,Institutional,N,N,exempt_low_improvement_review,"exempt-owner code: says who owns it, not the use"
+640,EXEMPT PROPERTY OWNED BY MUNICIPALS,Institutional,N,N,exempt_low_improvement_review,"exempt-owner code: says who owns it, not the use"
+645,EXEMPT PROP OWN/ACQUIRE BY MET AUTH,Institutional,N,N,exempt_low_improvement_review,"exempt-owner code: says who owns it, not the use"
+650,EXEMPT PROPERTY OWNED BY BD OF EDUC.,Institutional,N,N,exempt_low_improvement_review,"exempt-owner code: says who owns it, not the use"
+660,EXEMPT PROPERTY OWNED PARK DIST.PUB,Other,N,Y,,park / cemetery; public park district
+670,EXEMPT PROP OWNED COL-ACAD-PRI SCHOO,Institutional,N,N,exempt_low_improvement_review,"exempt-owner code: says who owns it, not the use"
+680,"CHARIT EXEMT HOSP HOMS AGED ETC,PRIV",Institutional,N,N,exempt_low_improvement_review,"exempt-owner code: says who owns it, not the use"
+681,OTHER EXEMPT,Institutional,N,N,exempt_low_improvement_review,"exempt-owner code: says who owns it, not the use"
+685,CHURCHES ETC PUBLIC WORSHIP    PRIVE,Institutional,N,N,exempt_low_improvement_review,"exempt-owner code: says who owns it, not the use"
+690,"GRAVEYARDS MONUMENTS, CEMETERIES",Other,N,Y,,park / cemetery; cemetery
+710,COMM REINVEST AREA TAX ABATEMENT,Other,N,N,,tax-abatement code; use not stated
+750,OTHER TAX ABATEMENT - TIF,Other,N,N,,tax-abatement code; use not stated
+840,RR REAL PROP USED IN OPERATION,Other,N,Y,,railroad operating property
+899,ZERO VALUE-PARCELS IN RIGHT OF WAY/ROW,Other,N,Y,,"right-of-way, zero value"

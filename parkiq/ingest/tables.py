@@ -71,10 +71,15 @@ class _TableAdapter(SourceAdapter):
         url = self.render_url(self.entry.url or "", ctx)
         if "/MapServer/" in url or "/FeatureServer/" in url:
             bbox = tuple(study_area(ctx).to_crs(WGS84).total_bounds)
+            o = self.entry.options
             return query_to_geojson(
                 url,
                 bbox,
                 self.cache_dir(ctx) / f"{self.source_id}.geojson",
+                where=o.get("where", "1=1"),
+                page_size=int(o.get("page_size", 1000)),
+                max_allowable_offset=o.get("max_allowable_offset"),
+                geometry_precision=o.get("geometry_precision"),
             )
         return download(url, self.cache_dir(ctx))
 

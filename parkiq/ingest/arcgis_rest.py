@@ -24,6 +24,8 @@ def query_to_geojson(
     out: Path,
     where: str = "1=1",
     page_size: int = 1000,
+    max_allowable_offset: float | None = None,
+    geometry_precision: int | None = None,
 ) -> Path:
     """Download all features intersecting ``bbox_4326`` as one GeoJSON file (cached).
 
@@ -33,6 +35,9 @@ def query_to_geojson(
         out: Output GeoJSON path (returned as-is if it already exists).
         where: SQL filter.
         page_size: Records per request (server max may be lower; paging continues either way).
+        max_allowable_offset: Server-side generalization tolerance in output units (degrees);
+            keeps very detailed polygons (e.g. FEMA NFHL) to a transferable size.
+        geometry_precision: Decimal places for output coordinates.
 
     Returns:
         Path to the GeoJSON.
@@ -56,6 +61,10 @@ def query_to_geojson(
             "resultRecordCount": page_size,
             "returnGeometry": "true",
         }
+        if max_allowable_offset is not None:
+            params["maxAllowableOffset"] = str(max_allowable_offset)
+        if geometry_precision is not None:
+            params["geometryPrecision"] = geometry_precision
         try:
             r = requests.get(
                 layer_url.rstrip("/") + "/query", params=params, timeout=HTTP_TIMEOUT_S

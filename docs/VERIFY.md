@@ -30,31 +30,33 @@ Status: **Open** unless noted. "Owner" = who can close it (A = analyst, P = part
 
 | ID | Item | Where | Owner |
 |---|---|---|---|
-| V-13 | Overture release id and S3 path; whether Places has a parking category; current Places taxonomy fields (`categories.primary`) | S02, S03a | A |
-| V-14 | LODES version (LODES8) and latest year for Ohio; WAC `CNS01–20` → sector mapping; crosswalk columns `tabblk2020, blklatdd, blklondd` | S04 | A |
-| V-15 | **Finding 2026-09-24: the Census Data API now requires a key** (unkeyed calls redirect to `missing_key.html`) — set `CENSUS_API_KEY`. Also: ACS vintage and variable IDs (B01003_001E, B08301_001E/002E, B25024_001E/006E–009E, B25044_001E/003E/010E); API key policy; a workplace-based mode-share source (CTPP / ACS place-of-work) | S05 | A |
-| V-16 | COTA GTFS current URL via Mobility Database (token requirement) | S09 | A |
 | V-17 | Ticketmaster Discovery API terms (analytics/storage) and key | S10 (M2) | A/P |
 | V-18 | Hospitals with beds: HIFLD Open availability (believed changed in 2025, unconfirmed) or CMS provider files; bed field | S12a | A |
 | V-19 | IPEDS HD/EFFY file names by year; enrollment field (`EFYTOTLT`) and all-students filter (`EFFYLEV = 1`); main-campus location vs. satellites | S12b | A |
 | V-20 | ODOT TIMS traffic-count layer URL (workbook) — layer index, AADT and year field names | S13 | A |
-| V-21 | FEMA NFHL service layer (`…/NFHL/MapServer/28`) and floodway encoding (`ZONE_SUBTY` contains "FLOODWAY"; `SFHA_TF = 'T'`) | S14 | A |
-| V-22 | EPA FRS / ACRES download or service; program field and which programs count as brownfield | S15 | A |
-| V-23 | USGS TNM Access API product search (`/api/v1/products`, dataset name "National Elevation Dataset (NED) 1/3 arc-second") and tile download volume for Franklin (~4 × 1° tiles) | S18 | A |
 | V-24 | Regrid API/bulk format, fields, zoning add-on, storage/derivation terms | S01 Regrid (M2) | P |
 | V-25 | Placer.ai / Advan delivery format and terms | S19 (M2) | P |
 | V-26 | CoStar / LoopNet / Crexi terms (many prohibit scraping/redistribution) | S16 (M2) | P |
 | V-27 | RSMeans city cost index licence | S17 (M6) | P |
-| V-28 | Franklin County Auditor parcel + CAMA sources: which file carries land/improvement values and the land-use code; join key; field names (run `arcgis/manual/02_inspect_layer.py` and paste the profile) | S01 | A |
+| V-28 | Franklin County Auditor parcel + CAMA sources: which file carries land/improvement values and the land-use code; join key; field names. **Profiled 2026-09-24 (extract 2026-09-23):** the parcel shapefile carries everything needed (PARCELID, CLASSCD, LNDVALUEBA/BLDVALUEBA, OWNERNME1, SITEADDRES, CVTTXCD); LNDVALUEBA = appraisal COSTLAND for 94.7% of parcels, i.e. 100% appraised value, not 35% taxable; CAMA join not needed for v1 (key differs: `010-000001` vs `010-000001-00`). Field map, land-use crosswalk and owner rules drafted — open until reviewed (F3) | S01 | A |
 | V-29 | Basemap terms for Esri Light Gray Canvas outside ArcGIS (matplotlib maps) | M7 | A |
-| V-30 | Finance placeholders from SCOPE §2.1 (assessed_to_market_ratio 1.20, soft 0.15, opex 450, tax 0.012, discount 0.10, caps, cap rate 0.075, discount rate 0.12) — Franklin effective commercial tax rate by district (Auditor) | finance | A |
+| V-30 | Finance placeholders from SCOPE §2.1 (assessed_to_market_ratio 1.20, soft 0.15, opex 450, tax 0.012, discount 0.10, caps, cap rate 0.075, discount rate 0.12) — Franklin effective commercial tax rate by district (Auditor). **Note 2026-09-25 (for M6):** Franklin `LNDVALUEBA` is already 100% appraised market value, so the 1.20 assessed-to-market placeholder likely does not apply as written. Calibrate the ratio from recent arm's-length sales, not listings: the Auditor appraisal files (Sales010/020-277/410-610.txt) carry SALEDT, PRICE, VALID ('0 - VALID') and SALETYPE ('1 - LAND ONLY'); 459 valid single-parcel land-only sales since 2021 on 3xx/4xx/vacant codes. Value unchanged until M6 | finance | A |
 | V-31 | Walking speed 1.3 m/s; transit factor 0.85 within 400 m; high-frequency headway threshold | market | A |
 | V-32 | `formulas` package IRR/NPV support for the parity test | M6 | dev |
-| V-33 | TIGER/Line URL pattern and year (`TIGER{year}/COUNTY/tl_{year}_us_county.zip`; PLACE per state) | S00 | A |
+| V-13b | Overture Places: whether a parking category exists; current taxonomy field (`categories.primary`) — S03a still disabled | S03a | A |
 | V-34 | Columbus open-data layers (zoning, meters, permits) — currency (the meters item dates from 2017, per workbook) | S20–S23 (M2) | A |
+| V-35 | Downtown parking zones A/B (S23c) are DERIVED from City Code Map 2 (ADR-0061): Bernard is asking the City whether an official GIS layer exists; if so it replaces S23c. Until then DD parcels within 150 ft of the A/B line route to Review | S23c | A |
 
 ## Closed
 
 | ID | Item | Closed | Evidence |
 |---|---|---|---|
-| — | — | — | — |
+| V-13 | Overture release id and S3 path (S02 buildings) | 2026-09-25 | Release `2026-09-23.1` (S3 listing 2026-09-25); S02 buildings loaded live: 560,474 footprints. Places (S03a) still disabled — parking category/taxonomy part stays open as V-13b |
+| V-14 | LODES8 latest Ohio year; WAC/xwalk columns | 2026-09-25 | LODES8 listing 2002–2023 (files dated 2025-12-03); `oh_wac_S000_JT00_2023.csv.gz` + `oh_xwalk.csv.gz` headers match the adapter; loaded 7,401 blocks |
+| V-15 | ACS vintage and variable IDs; API key | 2026-09-25 | ACS 5-year 2024 (2025 → 404); all 11 variable IDs present in 2024 variables.json; key required (from env); loaded 1,033 block groups |
+| V-16 | COTA GTFS URL | 2026-09-25 | `https://www.cota.com/data/cota.gtfs.zip` (Mobility Database mdb 404, official); feed 2026-09-07..2027-01-03; service_date 20261014; terms cota.com/data; loaded 2,975 stops |
+| V-21 | FEMA NFHL layer 28 and floodway encoding | 2026-09-25 | Layer 28 = Flood Hazard Zones; ZONE_SUBTY = 'FLOODWAY', SFHA_TF = T/F. Full-detail geometry ~75 KB/polygon, so the query drops minimal-hazard X, pages 100 and generalizes ~1 m server-side (`maxAllowableOffset` 1e-5°); loaded 8,327 polygons |
+| V-22 | EPA FRS/ACRES source and brownfield programs | 2026-09-25 | `geodata.epa.gov/.../OEI/FRS_INTERESTS/MapServer/0` (ACRES); fields REGISTRY_ID/PRIMARY_NAME/PGM_SYS_ACRNM; brownfield = ACRES; FIPS_CODE unreliable → spatial filter; loaded 40 sites |
+| V-23 | 3DEP DEM access | 2026-09-25 | Replaced by one 3DEP ImageServer exportImage at 10 m (approved 2026-09-24; maxImage 8000²). First attempt 2026-09-25 returned **504 Gateway Time-out**; the identical request succeeded on one manual retry (16 s) — transient; slope built |
+| — | S03b QA: 5 OSM POIs mapped as polygons at the study-area edge had their representative point outside StudyArea (7–211 ft) | 2026-09-25 | Fixed in code: points re-clipped after conversion; QA 57/57 pass |
+| V-33 | TIGER/Line county URL pattern `TIGER{year}/COUNTY/tl_{year}_us_county.zip` (county only; the PLACE pattern is still unexercised) | 2026-09-24 | Live Franklin setup downloaded `tl_2025_us_county.zip` (83,989,800 bytes) and selected GEOID 39049 (543.609 sq mi); network smoke test `HEAD` returned 200 |

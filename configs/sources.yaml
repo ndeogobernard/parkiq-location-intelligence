@@ -16,13 +16,37 @@ sources:
     license: Public domain
     url: "https://www2.census.gov/geo/tiger/TIGER{year}/COUNTY/tl_{year}_us_county.zip"
     options: {place_url: "https://www2.census.gov/geo/tiger/TIGER{year}/PLACE/tl_{year}_{state_fips}_place.zip"}
-    verify: true            # V-33 URL pattern by year
+    verify: false           # county URL confirmed 2026-09-24 (V-33 closed); PLACE url not yet exercised
   S01:
     provider: County assessor / auditor (Regrid fallback)
     dataset: Parcel polygons + CAMA attributes
     license: per county portal
     license_flag: null       # county fallback is free; Regrid (M2) uses license_flag regrid
-    url: null                # per market (V-28)
+    url: null                # per market (V-28); Franklin: markets/franklin_oh.yaml S01.url
+    verify: true
+  S01R:
+    provider: Regrid
+    dataset: Nationwide parcels (licensed)
+    license: Regrid licence
+    license_flag: regrid
+    url: null
+    enabled: false           # stub (M2); county fallback S01 in use
+    verify: true
+  S07:
+    provider: SpotHero / ParkWhiz / ParkMobile
+    dataset: Parking facility listings with rates
+    license: per provider terms [VERIFY]
+    license_flag: parking_apps
+    url: null
+    enabled: false           # stub (M2); never scraped without confirmed terms
+    verify: true
+  S16:
+    provider: CoStar / LoopNet / Crexi
+    dataset: Land listings (asking price, size)
+    license: licensed / per site terms [VERIFY]
+    license_flag: land_listings
+    url: null
+    enabled: false           # stub (M2)
     verify: true
   S02:
     provider: Overture Maps Foundation
@@ -122,6 +146,36 @@ sources:
     license: Public domain
     url: null                # V-22 — download to a local file for now
     verify: true
+  S23:
+    enabled: false           # enabled per market
+    provider: City of Columbus
+    dataset: Base Zoning Districts (Title 33 + Title 34 codes; L- prefix fused, e.g. LC4)
+    license: Open data, 'AS IS'
+    url: "https://maps2.columbus.gov/arcgis/rest/services/Schemas/BuildingZoning/MapServer/4"
+    verify: false            # confirmed 2026-09-24: 18,871 polygons, 78 CLASSIFICATION values
+  S23b:
+    enabled: false           # enabled per market
+    provider: City of Columbus
+    dataset: Commercial Zoning Overlays (UCO/CCO/RCO) and Planning Overlays (incl. University NC/RC)
+    license: Open data, 'AS IS'
+    url: "https://maps2.columbus.gov/arcgis/rest/services/Schemas/Development/MapServer/15"
+    options: {planning_overlays_url: "https://maps2.columbus.gov/arcgis/rest/services/Schemas/Development/MapServer/20"}
+    verify: false            # confirmed 2026-09-24: 29 commercial + 10 planning overlay polygons
+  S23c:
+    enabled: false           # enabled per market
+    provider: City of Columbus
+    dataset: Downtown District parking zones A/B (§3359.27, Map 2) — DERIVED
+    license: City code (public record)
+    url: "https://mcclibrary.blob.core.usgovcloudapi.net/codecontent/16219/487713/3359.27map.png"
+    options:
+      source_page: "Columbus City Code §3359.27 (Municode job 487713), Map 2 Downtown Parking Overlay Areas, Ord. 1532-2013"
+      method: >-
+        Map 2 image georeferenced to TIGER 2025 road centerlines (6 intersection control points,
+        affine refined by chamfer matching; median residual 0.56 px = 4 ft at 7.13 ft/px); pixels
+        classified Zone A (gray 175) / Zone B (gray 217) inside the overlay outline; each parcel
+        assigned the majority zone; zones = dissolved parcels (traced on parcel lines, no freehand).
+      derived_date: "2026-09-25"
+    verify: true             # not published as GIS (checked 2026-09-24); City asked whether an official layer exists
   S18:
     provider: USGS
     dataset: 3DEP 1/3 arc-second DEM

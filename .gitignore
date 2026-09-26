@@ -44,5 +44,5 @@ tests/fixtures/**/_variant_*.yaml
 # ArcGIS Pro local workspace (machine-specific paths; rebuilt by arcgis/build_workspace.py)
 arcgis/*.aprx
 arcgis/*.gdb/
-arcgis/*.atbx
+*.atbx
 arcgis/.backups/

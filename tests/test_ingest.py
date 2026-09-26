@@ -155,7 +155,9 @@ def test_disabled_source_takes_not_configured_path(variant, fresh_out) -> None: 
     reg = ctx.store.read_table("DataSourceRegistry").set_index("source_id")
     assert reg.loc["S12a", "status"] == "not configured"
     assert reg.loc["S12a", "row_count"] == 0
-    assert not ctx.store.has("Hospitals")
+    # BuildSchema creates the layer empty; the disabled adapter writes nothing to it
+    assert "Hospitals" not in ctx.store.written_layers()
+    assert len(ctx.store.read_layer("Hospitals")) == 0
     log = ctx.log_path.read_text(encoding="utf-8")  # type: ignore[union-attr]
     assert "S12a" in log and "not configured" in log and "effect:" in log
 

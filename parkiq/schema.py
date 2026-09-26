@@ -1,8 +1,7 @@
 """Schema model (``schema/schema.yaml``) and write-time validation.
 
-M1 scope: load the schema, validate/coerce frames against it, and write the config tables.
-M2 adds the full BuildSchema (empty layers, GeoPackage schema-extension constraints, related
-tables), schema-diff, ERD and data-dictionary generation.
+Loads ``schema/schema.yaml`` and validates/coerces frames against it on every write.
+BuildSchema, schema-diff, the ERD and the data dictionary live in :mod:`parkiq.schema_build`.
 """
 
 from __future__ import annotations
@@ -30,6 +29,7 @@ class FieldDef:
     nullable: bool = True
     unique: bool = False
     domain: str | None = None
+    desc: str = ""
 
 
 @dataclass(frozen=True)
@@ -42,6 +42,9 @@ class LayerDef:
     crs: str = "none"  # analysis | wgs84 | none
     feature_dataset: str | None = None
     raw: bool = False
+    desc: str = ""
+    subtype_field: str | None = None
+    is_table: bool = False
 
     @property
     def is_spatial(self) -> bool:
@@ -59,6 +62,8 @@ class Schema:
     layers: dict[str, LayerDef] = field(default_factory=dict)
     rasters: dict[str, dict[str, Any]] = field(default_factory=dict)
     path: Path | None = None
+    relationships: list[dict[str, Any]] = field(default_factory=list)
+    rules: dict[str, Any] = field(default_factory=dict)
 
     @classmethod
     def load(cls, path: str | Path) -> Schema:
@@ -90,6 +95,7 @@ class Schema:
                         f.get("nullable", True),
                         f.get("unique", False),
                         f.get("domain"),
+                        f.get("desc", ""),
                     )
                 )
             return tuple(out)
@@ -97,19 +103,54 @@ class Schema:
         lineage = _fields(d["lineage_fields"])
         layers: dict[str, LayerDef] = {}
         for name, spec in d.get("layers", {}).items():
+            fields = _fields(spec.get("fields", {}))
+            sub = spec.get("subtype_field")
+            if sub and sub not in {f.name for f in fields}:
+                raise SchemaError(f"{name}: subtype_field {sub} is not a field")
             layers[name] = LayerDef(
                 name,
-                _fields(spec.get("fields", {})),
+                fields,
                 spec["geometry"],
                 spec.get("crs", "analysis"),
                 spec.get("feature_dataset"),
+                desc=spec.get("desc", ""),
+                subtype_field=sub,
             )
         for name, spec in d.get("tables", {}).items():
-            layers[name] = LayerDef(name, _fields(spec.get("fields", {})), None, "none")
+            layers[name] = LayerDef(
+                name,
+                _fields(spec.get("fields", {})),
+                None,
+                "none",
+                desc=spec.get("desc", ""),
+                is_table=True,
+            )
         raw = d.get("raw_layers", {})
         for name in raw.get("names", []):
-            layers[name] = LayerDef(name, (), "Geometry", raw.get("crs", "wgs84"), "Raw", raw=True)
-        return cls(str(d["version"]), lineage, d["domains"], layers, d.get("rasters", {}), p)
+            layers[name] = LayerDef(
+                name,
+                (),
+                "Geometry",
+                raw.get("crs", "wgs84"),
+                "Raw",
+                raw=True,
+                desc="Immutable source snapshot, attributes as delivered (EPSG:4326)",
+            )
+        rels = d.get("relationships", [])
+        for r in rels:
+            for end in ("origin", "destination"):
+                if r[end] != "*" and r[end] not in layers:
+                    raise SchemaError(f"relationship {r['name']}: unknown {end} {r[end]}")
+        return cls(
+            str(d["version"]),
+            lineage,
+            d["domains"],
+            layers,
+            d.get("rasters", {}),
+            p,
+            rels,
+            d.get("rules", {}),
+        )
 
     def layer(self, name: str) -> LayerDef:
         """Return a layer definition or raise."""

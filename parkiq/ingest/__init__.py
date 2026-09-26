@@ -2,8 +2,8 @@
 
 M1 adapters (free sources): S01 county parcels, S02/S03a Overture, S03b/S06 OSM, S04 LODES,
 S05 ACS, S09 GTFS, S10 venues, S12a hospitals, S12b IPEDS, S13 AADT, S14 FEMA, S15 EPA.
-S00/S08/S18 are consumed by SetupMarket. M2 adds Regrid, listings, foot traffic, city open data
-and manual observations.
+S00/S08/S18 are consumed by SetupMarket. M2 adds city zoning (S23/S23b/S23c, with the parcel
+zoning join) and not-configured stubs for Regrid (S01R) and listings (S07, S16).
 """
 
 from __future__ import annotations
@@ -17,6 +17,13 @@ import pandas as pd
 from parkiq.ingest.aadt import AadtAdapter
 from parkiq.ingest.acs import AcsAdapter
 from parkiq.ingest.base import IngestError, SourceAdapter, collect, register_source
+from parkiq.ingest.city_open_data import (
+    ParkingZonesAdapter,
+    ZoningDistrictsAdapter,
+    ZoningOverlaysAdapter,
+    assign_zoning,
+    load_table,
+)
 from parkiq.ingest.county_parcels import CountyParcelsAdapter
 from parkiq.ingest.epa import EpaAdapter
 from parkiq.ingest.events import VenuesAdapter
@@ -24,9 +31,11 @@ from parkiq.ingest.fema import FemaAdapter
 from parkiq.ingest.gtfs import GtfsAdapter
 from parkiq.ingest.hospitals import HospitalsAdapter
 from parkiq.ingest.ipeds import IpedsAdapter
+from parkiq.ingest.listings import LandListingsAdapter, ParkingListingsAdapter
 from parkiq.ingest.lodes import LodesAdapter
 from parkiq.ingest.osm import OsmParkingAdapter, OsmPoiAdapter
 from parkiq.ingest.overture import OvertureBuildingsAdapter, OverturePlacesAdapter
+from parkiq.ingest.regrid import RegridParcelsAdapter
 from parkiq.runner import RunContext, register
 from parkiq.store import WGS84
 
@@ -47,6 +56,12 @@ ADAPTERS: tuple[type[SourceAdapter], ...] = (
     AadtAdapter,
     FemaAdapter,
     EpaAdapter,
+    ZoningDistrictsAdapter,
+    ZoningOverlaysAdapter,
+    ParkingZonesAdapter,
+    RegridParcelsAdapter,
+    ParkingListingsAdapter,
+    LandListingsAdapter,
 )
 SOURCE_IDS = tuple(a.source_id for a in ADAPTERS)
 
@@ -104,6 +119,8 @@ def run_ingest(ctx: RunContext) -> dict[str, Any]:
             notes="; ".join(std.notes),
         )
         summary[sid] = n
+    if "Parcels" in targets:
+        summary["zoning"] = _zone_parcels(ctx, targets)
     for layer, frames in targets.items():
         rerun = {str(s) for f in frames for s in f["source_id"].unique()}
         if ctx.source_filter and ctx.store.has(layer):
@@ -114,3 +131,46 @@ def run_ingest(ctx: RunContext) -> dict[str, Any]:
         merged = gpd.GeoDataFrame(pd.concat(frames, ignore_index=True), crs=frames[-1].crs)
         ctx.store.write_layer(layer, merged, None)
     return {"sources": summary}
+
+
+ZONING_LAYERS = ("ZoningDistricts", "ZoningOverlays", "ParkingZones")
+
+
+def _zone_parcels(ctx: RunContext, targets: dict[str, list[gpd.GeoDataFrame]]) -> Any:
+    """Put zoning code, overlays, parking zone and zoning screen on the Parcels frame (in place).
+
+    Zoning layers come from this ingest (``targets``) or, when not re-ingested, from the run
+    GeoPackage. Without a zoning table (S23 ``options.zoning_table_path``) nothing is resolved.
+    """
+    opts = ctx.cfg.sources["S23"].options if "S23" in ctx.cfg.sources else {}
+    table = load_table(opts)
+    if table is None:
+        log.warning("no zoning table configured (sources.S23.options.zoning_table_path)")
+        return "no zoning table"
+    written = set(ctx.store.written_layers())
+    layers: dict[str, gpd.GeoDataFrame | None] = {}
+    for name in ZONING_LAYERS:
+        if name in targets:
+            layers[name] = gpd.GeoDataFrame(pd.concat(targets[name]), crs=targets[name][-1].crs)
+        elif name in written:
+            layers[name] = ctx.store.read_layer(name)
+        else:
+            layers[name] = None
+    review_ft = float(
+        ctx.cfg.sources["S23c"].options.get("boundary_review_ft", 0)
+        if "S23c" in ctx.cfg.sources
+        else 0
+    )
+    frames = targets["Parcels"]
+    parcels = gpd.GeoDataFrame(pd.concat(frames, ignore_index=True), crs=frames[-1].crs)
+    zoned, stats = assign_zoning(
+        parcels,
+        table,
+        layers["ZoningDistricts"],
+        layers["ZoningOverlays"],
+        layers["ParkingZones"],
+        review_ft,
+    )
+    targets["Parcels"] = [zoned]
+    log.info("zoning assigned: %s", stats)
+    return stats

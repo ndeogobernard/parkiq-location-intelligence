@@ -171,5 +171,9 @@ class OsmPoiAdapter(_OsmBase):
             geometry=pts,
             crs=a.crs,
         )
+        # polygons kept whole at the edge can put their point outside: clip the points again
+        inside = out.within(study_area(ctx).union_all())
+        notes = [f"{int((~inside).sum())} edge features with their point outside StudyArea dropped"]
+        out = out[inside]
         out = out.drop_duplicates("place_id").sort_values("place_id").reset_index(drop=True)
-        return Standardized("Raw_OSM_POI", g, {"Places": out}, native, transf)
+        return Standardized("Raw_OSM_POI", g, {"Places": out}, native, transf, notes)

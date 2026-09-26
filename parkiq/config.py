@@ -26,6 +26,19 @@ from pyproj import CRS
 from parkiq import units
 
 Daypart = Literal["wd_day", "wd_eve", "we_day", "we_eve", "event"]
+AnchorCategory = Literal[
+    "Office",
+    "Medical",
+    "University",
+    "Hotel",
+    "RestaurantBar",
+    "Retail",
+    "Venue",
+    "Transit",
+    "ResidentialBlock",
+    "Government",
+    "Other",
+]  # dm_AnchorCategory (SCOPE §4.4)
 DAYPARTS: tuple[str, ...] = ("wd_day", "wd_eve", "we_day", "we_eve", "event")
 SCENARIOS: tuple[str, ...] = ("Balanced", "DemandFirst", "CostFirst")
 CRITERIA: tuple[str, ...] = tuple(f"C{i:02d}" for i in range(1, 11))
@@ -159,6 +172,7 @@ class DemandSection(_Strict):
     transit_adjustment: TransitAdjustment
     mode_adjustment: Literal["relative", "none"] | None = None
     residential_offstreet_share: float | None = None
+    excluded_anchor_categories: list[AnchorCategory] = Field(default_factory=list)
 
     @model_validator(mode="after")
     def _consistent(self) -> DemandSection:
@@ -282,6 +296,7 @@ class WeightsConfig(_Strict):
 class RateRow(_Strict):
     """One parking-generation rate row (SCOPE Appendix C)."""
 
+    anchor_category: AnchorCategory
     unit: str
     wd_day: float = Field(ge=0)
     wd_eve: float = Field(ge=0)
@@ -686,8 +701,9 @@ def verify_items(cfg: ResolvedConfig) -> list[tuple[str, str]]:
     for k, p in sorted(cfg.provenance.items()):
         if p.status == "VERIFY":
             out.append((k, p.source))
+    excluded = set(cfg.market.demand.excluded_anchor_categories)
     for cat, row in sorted(cfg.rates.rates.items()):
-        if row.verify:
+        if row.verify and row.anchor_category not in excluded:
             out.append((f"rates.{cat}", row.source))
     custom_boundary = cfg.market.market.boundary.type == "custom"
     for sid, s in sorted(cfg.sources.items()):
@@ -696,6 +712,18 @@ def verify_items(cfg: ResolvedConfig) -> list[tuple[str, str]]:
         if s.enabled and s.verify and s.path is None:
             out.append((f"sources.{sid}", f"{s.dataset} — endpoint {s.url!r} unconfirmed"))
     return out
+
+
+def unused_items(cfg: ResolvedConfig) -> list[tuple[str, str]]:
+    """Config items this market does not use (so their [VERIFY] tags are not open items here)."""
+    excluded = set(cfg.market.demand.excluded_anchor_categories)
+    prov = cfg.provenance.get("demand.excluded_anchor_categories")
+    why = prov.source if prov and prov.source else "demand.excluded_anchor_categories"
+    return [
+        (f"rates.{cat}", f"not used in this market; {row.anchor_category} excluded ({why})")
+        for cat, row in sorted(cfg.rates.rates.items())
+        if row.anchor_category in excluded
+    ]
 
 
 def parameter_report(cfg: ResolvedConfig) -> list[dict[str, Any]]:

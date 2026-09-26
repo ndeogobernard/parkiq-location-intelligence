@@ -13,9 +13,21 @@ licensed (SCOPE §14). Field names differ by county, so everything is mapped in 
           cama_field_map: {assessed_land_value: LAND_VAL, ...}
           land_use_crosswalk_path: data/xwalk.csv  # county_code,land_use_class[,...]
           owner_rules: [{pattern: "\\b(CITY|COUNTY|STATE)\\b", owner_type: Public}, ...]
+          owner_overrides_path: data/owner_overrides.csv  # owner_name_pattern,owner_type,note
+          drop_if_null: [CLASSCD]         # source columns; rows with a null/blank value dropped
+          jurisdiction_join:              # zoning authority from a tax-district attribute table
+            path: data/taxdistricts.shp
+            key: CVTTXCD                  # same column name on both sides
+            name_field: City              # municipality; blank -> fallback_field
+            fallback_field: Township
+            rename: {"COLUMBUS CITY": Columbus}   # to the zoning table's jurisdiction names
 
 Unmatched land-use codes → ``Other`` (counted); no crosswalk → ``land_use_class`` null + warning.
-Owners matching no rule → ``Unknown``. Rules are regular expressions, case-insensitive, first wins.
+Optional crosswalk columns ``auto_oriented_commercial`` and ``excluded_use`` (Y/N) become
+``auto_oriented_flag`` / ``excluded_use_flag``.
+Owners matching no rule → ``Unknown``. Rules are regular expressions, case-insensitive, first wins;
+overrides (also regular expressions) are applied after the rules and win. Owner type is a
+due-diligence flag only, never a screen filter.
 """
 
 from __future__ import annotations
@@ -55,7 +67,9 @@ TARGET_FIELDS = [
     "assessed_land_value",
     "assessed_improvement_value",
     "year_built",
+    "jurisdiction",
 ]
+OWNER_TYPES = {"Private", "Corporate", "Public", "Institutional", "Unknown"}
 LAND_USE_CLASSES = {
     "Vacant",
     "SurfaceParking",
@@ -87,6 +101,52 @@ def classify_owner(owner: Any, rules: list[dict[str, str]]) -> str:
     return "Unknown"
 
 
+def load_owner_overrides(path: str | Path) -> list[dict[str, str]]:
+    """Read ``owner_name_pattern, owner_type, note`` overrides and check the owner types."""
+    df = pd.read_csv(path, dtype=str).fillna("")
+    need = {"owner_name_pattern", "owner_type", "note"}
+    if not need <= set(df.columns):
+        raise IngestError(f"{path}: owner overrides need columns {sorted(need)}")
+    bad = set(df["owner_type"]) - OWNER_TYPES
+    if bad:
+        raise IngestError(f"{path}: owner_type outside dm_OwnerType: {sorted(bad)}")
+    return [
+        {"pattern": r.owner_name_pattern, "owner_type": r.owner_type}
+        for r in df.itertuples(index=False)
+    ]
+
+
+def apply_owner_overrides(
+    owner: pd.Series, owner_type: pd.Series, overrides: list[dict[str, str]]
+) -> tuple[pd.Series, int]:
+    """Replace ``owner_type`` where an override pattern matches the owner name."""
+    out = owner_type.copy()
+    names = owner.fillna("").astype(str)
+    n = 0
+    for o in overrides:
+        hit = names.str.contains(o["pattern"], case=False, regex=True)
+        n += int(hit.sum())
+        out[hit] = o["owner_type"]
+    return out, n
+
+
+def join_jurisdiction(parcels: pd.DataFrame, spec: dict[str, Any]) -> tuple[pd.Series, int]:
+    """Zoning jurisdiction per parcel from a district attribute table (see module docstring)."""
+    for k in ("path", "key", "name_field"):
+        if k not in spec:
+            raise IngestError(f"S01 options.jurisdiction_join needs {k!r}")
+    key = spec["key"]
+    tbl = _read_table(Path(spec["path"]))
+    raw = tbl[spec["name_field"]].astype(str).str.strip()
+    name = raw.where(~raw.isin(["", "None", "nan"]))
+    if spec.get("fallback_field"):
+        name = name.fillna(tbl[spec["fallback_field"]].astype(str).str.strip())
+    name = name.replace(spec.get("rename", {}))
+    lookup = dict(zip(tbl[key].astype(str), name, strict=True))
+    j = parcels[key].astype(str).map(lookup)
+    return j, int(j.isna().sum())
+
+
 def improvement_ratio(land: pd.Series, impr: pd.Series) -> pd.Series:
     """``improvement / land``; null where land is null or 0 (SCOPE §4.5 NULLIF)."""
     land = pd.to_numeric(land, errors="coerce")
@@ -105,6 +165,15 @@ class CountyParcelsAdapter(SourceAdapter):
         opts = self.entry.options
         parcels = read_vector(raw if not isinstance(raw, list) else raw[0])
         notes: list[str] = []
+        for col in opts.get("drop_if_null") or []:
+            if col not in parcels.columns:
+                raise IngestError(f"S01 options.drop_if_null: column {col!r} not in the file")
+            blank = parcels[col].isna() | (parcels[col].astype(str).str.strip() == "")
+            parcels = parcels[~blank].copy()
+            notes.append(f"dropped {int(blank.sum())} rows with null {col}")
+        if opts.get("jurisdiction_join"):
+            parcels["jurisdiction"], miss = join_jurisdiction(parcels, opts["jurisdiction_join"])
+            notes.append(f"jurisdiction joined; {miss} parcels unmatched")
         if opts.get("cama_path"):
             join = opts.get("cama_join") or {}
             if set(join) != {"parcels", "cama"}:
@@ -158,9 +227,17 @@ class CountyParcelsAdapter(SourceAdapter):
                 raise IngestError(
                     f"land_use_crosswalk_path has classes outside dm_LandUseClass: {bad}"
                 )
-            m = dict(zip(xw["county_code"].str.strip(), xw["land_use_class"], strict=True))
+            keys = xw["county_code"].str.strip()
+            m = dict(zip(keys, xw["land_use_class"], strict=True))
             codes = out["land_use_code"].astype(str).str.strip()
             out["land_use_class"] = codes.map(m)
+            for src, dst in (
+                ("auto_oriented_commercial", "auto_oriented_flag"),
+                ("excluded_use", "excluded_use_flag"),
+            ):
+                if src in xw.columns:
+                    yn = dict(zip(keys, xw[src].str.strip().str.upper() == "Y", strict=True))
+                    out[dst] = codes.map(yn).fillna(False).astype(bool)
             unmatched = int(out["land_use_class"].isna().sum())
             out["land_use_class"] = out["land_use_class"].fillna("Other")
             notes.append(f"land_use_class: {unmatched} parcels with unmatched codes set to Other")
@@ -175,6 +252,12 @@ class CountyParcelsAdapter(SourceAdapter):
         if not rules:
             notes.append("no owner_rules (owner_type Unknown)")
         out["owner_type"] = out["owner"].map(lambda o: classify_owner(o, rules))
+        if opts.get("owner_overrides_path"):
+            overrides = load_owner_overrides(opts["owner_overrides_path"])
+            out["owner_type"], n_over = apply_owner_overrides(
+                out["owner"], out["owner_type"], overrides
+            )
+            notes.append(f"owner overrides applied to {n_over} parcels")
         out["zoning_screen"] = None  # M2: zoning table join (S23 / Regrid zoning)
         for c in ("frontage_ft", "shape_index", "corner_flag", "listing_price", "listing_source"):
             out[c] = None  # computed in the screen step (M5) / listings (M2)

@@ -12,6 +12,7 @@ from __future__ import annotations
 import logging
 import sqlite3
 from collections.abc import Mapping
+from contextlib import closing
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -22,6 +23,7 @@ import pyogrio
 from pyproj import CRS
 
 from parkiq.schema import Schema, SchemaError, conform
+from parkiq.schema_build import apply_constraints
 
 log = logging.getLogger(__name__)
 
@@ -138,9 +140,16 @@ class Store:
             geometry_type=gtype or "Unknown",
             promote_to_multi=False,
         )
+        apply_constraints(self.gpkg, self.schema, [name])
         self._register(name, "features", want.to_string())
         log.info("wrote %s: %d features", name, len(gdf2))
         return len(gdf2)
+
+    def written_layers(self) -> list[str]:
+        """Layers/tables a step has written in this run (BuildSchema's empty layers excluded)."""
+        if not self.has(LAYER_REGISTRY):
+            return []
+        return [str(x) for x in self.read_table(LAYER_REGISTRY)["layer"]]
 
     def read_layer(self, name: str, **kwargs: Any) -> gpd.GeoDataFrame:
         """Read a feature layer (optionally with pyogrio kwargs such as ``columns``)."""
@@ -156,7 +165,7 @@ class Store:
         if not self.has(table):
             return 0
         clause = " AND ".join(f'"{k}" = ?' for k in where)
-        with self._connect() as con:
+        with closing(self._connect()) as con, con:
             cur = con.execute(f'DELETE FROM "{table}" WHERE {clause}', tuple(where.values()))
             return cur.rowcount
 
@@ -204,6 +213,7 @@ class Store:
         self._delete_where(name, {"run_id": self.run_id, **(key or {})})
         if len(d):
             self._append_table(name, d)
+            apply_constraints(self.gpkg, self.schema, [name])
         if not self.has(LAYER_REGISTRY) or name != LAYER_REGISTRY:
             self._register(name, "attributes", None)
         return len(d)

@@ -36,7 +36,8 @@ demand:
     high_frequency_headway_max_min: null   # DECIDE
     peak_window: null                      # DECIDE, e.g. ["07:00", "09:00"] (manual §6.3)
   mode_adjustment: null         # DECIDE: relative (ADR-0014, proposed) needs baseline drive shares
-  residential_offstreet_share: null        # DECIDE or exclude residential (ADR-0015)
+  residential_offstreet_share: null        # not used: residential excluded for the pilot (ADR-0015)
+  excluded_anchor_categories: [ResidentialBlock]   # ADR-0015: no residential demand generation; rates stay in config
 network:
   backend: osmnx                # ADR-0004 confirmed 2026-09-24
   walking_speed_m_s: 1.3
@@ -48,7 +49,7 @@ supply:
   dedupe_distance_m: 40
   dedupe_name_similarity: null  # DECIDE (ADR-0020)
 finance: {}                     # all SCOPE defaults from configs/finance_defaults.yaml; DECIDE keys null
-ranking: {financial_weight: 0.70, suitability_weight: 0.30, shortlist_size: null}   # shortlist DECIDE (5–10)
+ranking: {financial_weight: 0.70, suitability_weight: 0.30, shortlist_size: 10}   # SCOPE range 5–10
 data_licenses:
   regrid: false                 # county auditor fallback (S01)
   foot_traffic: none
@@ -58,25 +59,55 @@ sources:
   S00:
     vintage: "2025"             # TIGER/Line year [VERIFY V-33]
   S01:
-    enabled: false              # enable once the Auditor parcels + CAMA are downloaded and inspected
-    path: null                  # e.g. C:/GIS/ParkIQ_data/franklin_oh/S01_parcels/parcels.shp
-    field_map: {}               # fill from 02_inspect_layer.py output (target: source column)
-    options: {}
-  S02: {enabled: false, vintage: null}      # Overture release id [VERIFY V-13]
+    enabled: true               # field map / crosswalk / owner rules approved at F3 (2026-09-25)
+    url: "https://apps.franklincountyauditor.com/GIS_Shapefiles/CurrentExtracts/20260923_Parcel_Polygons.zip"
+    vintage: "2026-09-23"       # Auditor extract date; appraisal tab-delimited file 2026-09-15; downloaded 2026-09-24
+    path: "C:/GIS/ParkIQ_cache/franklin_oh/S01/2026-09-23/20260923_Parcel_Polygons/TAXPARCEL_CONDOUNITSTACK_LGIM.shp"
+    field_map:
+      parcel_id: PARCELID
+      address: SITEADDRES
+      owner: OWNERNME1
+      land_use_code: CLASSCD            # Ohio DTE class code (= appraisal LUC 99.99%)
+      assessed_land_value: LNDVALUEBA   # 100% appraised value (= appraisal COSTLAND 94.7%), not 35% taxable
+      assessed_improvement_value: BLDVALUEBA
+      year_built: RESYRBLT
+    options:
+      drop_if_null: [CLASSCD]           # 1,816 rows: out-of-county pieces and unclassed
+      jurisdiction_join:
+        path: "C:/GIS/ParkIQ_cache/franklin_oh/S01/2026-09-23/20260923_TaxDistricts/LOCALTAXDISTRICT.shp"
+        key: CVTTXCD
+        name_field: City
+        fallback_field: Township
+        rename: {"COLUMBUS CITY": Columbus}
+      land_use_crosswalk_path: franklin_oh/s01_landuse_crosswalk.csv
+      owner_overrides_path: franklin_oh/owner_overrides.csv
+      owner_rules:                # ordered, case-insensitive, first match wins (reviewed F3, 2026-09-25)
+        - {owner_type: Public, pattern: '\b(OHIO STATE UNIV|COLUMBUS STATE COMMUNITY|COLUMBUS TECHNICAL INSTITUTE)'}   # public universities
+        - {owner_type: Public, pattern: '\b(CITY OF|VILLAGE OF|TOWNSHIP|TWP|COUNTY|STATE OF OHIO|STATE OF OH|UNITED STATES|USA)\b'}   # governments
+        - {owner_type: Public, pattern: '\b(AUTHORITY|BOARD OF|BD OF|COMMISSIONERS|SCHOOL DISTRICT|CITY SCHOOL|LAND BANK|LAND REUTILIZATION|COMMUNITY IMPROVEMENT CORP|DISTRICT|METRO PARKS|METROPOLITAN PARK|DEPARTMENT OF|DEPT OF)'}   # public bodies
+        - {owner_type: Corporate, pattern: '\b(LLC|L L C|INC|CORP|CORPORATION|CO|COMPANY|LTD|LP|L P|LLP|LC|PLLC|LIMITED)\b\.?'}   # entity suffix
+        - {owner_type: Institutional, pattern: '\b(UNIVERSITY|COLLEGE|ACADEMY|SCHOOL|HOSPITAL|HEALTH|CHURCH|MINISTR\w*|CHRISTIAN|CONGREGATION|DIOCESE|BISHOP|TEMPLE|MOSQUE|MASJID|SYNAGOGUE|TABERNACLE|FELLOWSHIP|BAPTIST|METHODIST|LUTHERAN|CATHOLIC|PRESBYTERIAN|APOSTOLIC|GOSPEL|FOUNDATION|ASSOCIATION|ASSN|SOCIETY|CEMETERY|YMCA|YWCA|LODGE|CATHEDRAL|ORTHODOX|SISTERS|CONFERENCE|ASAMBLEAS|AERIE|CENTER FOR)\b'}   # non-profit / religious / care
+        - {owner_type: Corporate, pattern: '\b(HOLDINGS?|PROPERT(Y|IES)|INVESTMENTS?|REALTY|BANK|ENTERPRISES?|GROUP|DEVELOPMENT|ACQUISITIONS?|PARTNERS(HIP)?|FUND|APARTMENTS|RAILROAD|RAILWAY|POWER|ELECTRIC|LABORATORIES|VENTURES?|CAPITAL|OWNER)\b'}   # business words
+        - {owner_type: Private, pattern: '^\s*[A-Z''\-]+ [A-Z''\-]+( [A-Z''\-]+){0,3}( (TR|TRS|TTEE|TRUSTEE|JR|SR|II|III|IV))?\s*$'}   # individual (SURNAME GIVEN ...), incl. personal trusts
+        - {owner_type: Private, pattern: '\b(TR|TRS|TTEE|TRUSTEE|TRUST|REVOCABLE|LIVING|ESTATE OF|ETAL|ET AL)\b'}   # personal trust / estate
+  S02:
+    enabled: true               # footprints for the code-456 surface/garage check (F3); latest release 2026-09-25
+    vintage: "2026-09-23.1"     # Overture release id (S3 listing 2026-09-25)
   S03a: {enabled: false, vintage: null}     # Overture release id [VERIFY V-13]
   S03b: {enabled: true}                     # OSM POIs via Overpass
   S04:
-    enabled: false              # set vintage to the latest LODES8 year for Ohio [VERIFY V-14]
-    vintage: null
+    enabled: true               # LODES8 latest Ohio year = 2023 (listing checked 2026-09-25; files dated 2025-12-03)
+    vintage: "2023"
     options: {url_params: {state_abbr: oh}}
   S05:
-    enabled: false              # set ACS 5-year vintage [VERIFY V-15]
-    vintage: null
+    enabled: true               # ACS 5-year 2020-2024 (2025 not published, checked 2026-09-25); key from CENSUS_API_KEY
+    vintage: "2024"
   S06: {enabled: true}                      # OSM parking via Overpass
   S09:
-    enabled: false              # COTA GTFS — current URL from Mobility Database [VERIFY V-16]
-    url: null
-    options: {service_date: null}
+    enabled: true               # COTA official feed (Mobility Database mdb 404); terms: cota.com/data "Terms of Agreement"
+    url: "https://www.cota.com/data/cota.gtfs.zip"
+    vintage: "2026-09-07"       # feed_version 2026-SEP-07-BB_20260904, valid 2026-09-07..2027-01-03
+    options: {service_date: "20261014"}   # a plain Wednesday: no event supplements or holiday swaps
   S10:
     enabled: false              # analyst venue table (Nationwide Arena, Lower.com Field, Ohio Stadium, ...)
     path: null
@@ -86,10 +117,56 @@ sources:
     enabled: false              # ODOT TIMS traffic count layer (admin Source_Register) [VERIFY V-20]
     url: "https://tims.dot.state.oh.us/ags/rest/services/Roadway_Information/Traffic_Count_Stations/MapServer"
     field_map: {}
-  S14: {enabled: false}                     # FEMA NFHL [VERIFY V-21]
-  S15: {enabled: false, path: null}         # EPA FRS/ACRES [VERIFY V-22]
+  S14:
+    enabled: true               # NFHL layer 28; 9,137 polygons in the county envelope (2026-09-25)
+    vintage: "2026-09"
+    options:
+      where: "ZONE_SUBTY IS NULL OR ZONE_SUBTY <> 'AREA OF MINIMAL FLOOD HAZARD'"  # 539 minimal-hazard X polygons carry no screen meaning
+      page_size: 100              # full-detail polygons are ~75 KB each
+      max_allowable_offset: 0.00001   # ~1 m server-side generalization, keeps pages transferable
+      geometry_precision: 6
+  S15:
+    enabled: true               # EPA FRS_INTERESTS layer 0 = ACRES brownfields (41 in the envelope, 2026-09-25)
+    url: "https://geodata.epa.gov/arcgis/rest/services/OEI/FRS_INTERESTS/MapServer/0"
+    vintage: "2026-09"
+    field_map: {site_id: REGISTRY_ID, name: PRIMARY_NAME, program: PGM_SYS_ACRNM}
+    options: {brownfield_programs: [ACRES]}
+  S23:
+    enabled: true               # Columbus Base Zoning Districts (18,871 polygons, 78 codes; checked 2026-09-24)
+    url: "https://maps2.columbus.gov/arcgis/rest/services/Schemas/BuildingZoning/MapServer/4"
+    vintage: "2026-09"
+    field_map: {zoning_code: CLASSIFICATION, general_category: GENERAL_ZONING_CATEGORY, zoning_status: ZONING_STATUS, ord_no: ORD_NO, case_number: CASE_NUMBER}
+    options:
+      jurisdiction: Columbus
+      zoning_table_path: franklin_oh/zoning_screen.csv
+      code_aliases: {RURAL: R}
+  S23b:
+    enabled: true               # Columbus commercial (29) + planning (10) overlays
+    url: "https://maps2.columbus.gov/arcgis/rest/services/Schemas/Development/MapServer/15"
+    vintage: "2026-09"
+    options:
+      jurisdiction: Columbus
+      planning_overlays_url: "https://maps2.columbus.gov/arcgis/rest/services/Schemas/Development/MapServer/20"
+      type_codes:
+        URBAN COMMERCIAL OVERLAY: "overlay:UCO"
+        COMMUNITY COMMERCIAL OVERLAY: "overlay:CCO"
+        REGIONAL COMMERCIAL OVERLAY: "overlay:RCO"
+  S23c:
+    enabled: true               # DERIVED from City Code Map 2 (ADR-0061) [VERIFY]; replaced if the City publishes GIS
+    path: "C:/GIS/ParkIQ_cache/franklin_oh/S23c/S23c_parking_zones.gpkg"
+    vintage: "Ord. 1532-2013 (Map 2 image dated 2026-07-01)"
+    options:
+      layer: ParkingZones
+      jurisdiction: Columbus
+      boundary_review_ft: 150     # SET by Bernard at F3 (2026-09-25): parcels this close to the A/B line -> Review
   S18:
-    enabled: false              # 3DEP 1/3" tiles for Franklin ≈ 4 × 1°-tiles (~1–2 GB); enable when OK'd
+    enabled: true               # approved 2026-09-24: one ImageServer export of the study area, cached
+    url: "https://elevation.nationalmap.gov/arcgis/rest/services/3DEPElevation/ImageServer"
+    vintage: "2026-08"          # service copyright "3DEP. August 25, 2026"
+    options:
+      mode: imageserver
+      imageserver_url: "https://elevation.nationalmap.gov/arcgis/rest/services/3DEPElevation/ImageServer"
+      cell_size_m: 10
 
 provenance:
   study.buffer_miles:              {status: SCOPE,  source: "SCOPE §2.2"}
@@ -107,7 +184,7 @@ provenance:
   demand.transit_adjustment.high_frequency_radius_m: {status: VERIFY, source: "SCOPE §2.1"}
   demand.transit_adjustment.demand_factor:           {status: VERIFY, source: "SCOPE §2.1"}
   demand.transit_adjustment.high_frequency_headway_max_min: {status: DECIDE, source: ""}
-  demand.residential_offstreet_share: {status: DECIDE, source: "or exclude residential (ADR-0015)"}
+  demand.excluded_anchor_categories: {status: SET, source: "ADR-0015 — Bernard 2026-09-24; revisit after Phase K validation"}
   network.walking_speed_m_s:       {status: VERIFY, source: "SCOPE §5.1 [PARAMETER]; needs citation"}
   supply.private_effective_share:  {status: SCOPE,  source: "SCOPE §2.1"}
   supply.onstreet_stall_length_ft: {status: SCOPE,  source: "SCOPE §2.1"}
@@ -115,4 +192,5 @@ provenance:
   supply.dedupe_name_similarity:   {status: DECIDE, source: "ADR-0020"}
   ranking.financial_weight:        {status: SCOPE,  source: "SCOPE §5.8"}
   ranking.suitability_weight:      {status: SCOPE,  source: "SCOPE §5.8"}
-  ranking.shortlist_size:          {status: DECIDE, source: "SCOPE says 5–10"}
+  sources.S18.options.cell_size_m: {status: SET,    source: "Bernard 2026-09-24: 10 m, slope matters little in central Columbus"}
+  ranking.shortlist_size:          {status: SET,    source: "SCOPE §5.8 range 5–10; Bernard 2026-09-24"}

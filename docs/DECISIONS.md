@@ -7,8 +7,9 @@ One register for every method choice. It merges two earlier registers whose IDs 
   the manual pilot's decision log
 
 Decisions are cited by **ADR number**; the two ID columns keep the older IDs traceable.
-Status: **Accepted** = confirmed; **Proposed** = recorded, awaiting confirmation (both registers
-agree unless noted); **Open** = needs a call before the milestone shown.
+Status: **Accepted** = confirmed; **Proposed — review at Mx** = recorded but not confirmed; at the
+start of milestone Mx each such ADR is restated in plain language with its Franklin-specific
+consequence and confirmed before any code builds on it.
 
 ## Index
 
@@ -18,59 +19,61 @@ agree unless noted); **Open** = needs a call before the milestone shown.
 | 0002 | Build path: code toolkit, Franklin as pilot, manual method = reference spec | — | — | **Accepted** 2026-09-24 | — |
 | 0003 | Repo `C:\GIS\ParkIQ`; env `C:\GIS\envs\parkiq` (ArcGIS Pro's conda, separate env) | Q9 | — | **Accepted** 2026-09-24 | — |
 | 0004 | Network backend = OSMnx + pandana | D-02 | D-05 | **Accepted** 2026-09-24 | — |
-| 0005 | Brief-over-scope precedence; `StudyArea` layer added | D-04 | — | Proposed | — |
-| 0006 | Intermediate standardized input layers (Places, BlockJobs, …) | — | — | Proposed | M2 |
-| 0007 | Analysis CRS for Franklin = EPSG:3735 (ftUS) | — | D-02 | Proposed | — |
+| 0005 | Brief-over-scope precedence; `StudyArea` layer added | D-04 | — | **Accepted** 2026-09-24 | — |
+| 0006 | Intermediate standardized input layers (Places, BlockJobs, …) | — | — | **Accepted** 2026-09-24 | M2 |
+| 0007 | Analysis CRS for Franklin = EPSG:3735 (ftUS) | — | D-02 | **Accepted** 2026-09-24 | — |
 | 0008 | Two-stage study extent (county scan → focus submarkets) | — | D-03 | **Accepted** 2026-09-24 | M4 |
 | 0009 | Grid = H3 r9 (h3-py v4, centroid rule) | D-01 | D-04 | **Accepted** 2026-09-24 | — |
-| 0010 | One GeoPackage per run | D-05 | — | Proposed | M2 |
-| 0011 | GDB concepts mapped onto GeoPackage | D-06 | — | Proposed | M2 |
-| 0012 | Rasters as GeoTIFF beside the GeoPackage | D-07 | — | Proposed | — |
+| 0010 | One GeoPackage per run | D-05 | — | **Accepted** 2026-09-24 | M2 |
+| 0011 | GDB concepts mapped onto GeoPackage | D-06 | — | **Accepted** 2026-09-24 | M2 |
+| 0012 | Rasters as GeoTIFF beside the GeoPackage | D-07 | — | **Accepted** 2026-09-24 | — |
 | 0013 | Demand-/supply-conserving walk-shed allocation | D-08 | D-08 | **Accepted** 2026-09-24 | M3 |
 | 0014 | Mode-share adjustment = local ÷ rate-source baseline | D-09 | D-06 | **Accepted** 2026-09-24 | M4 |
-| 0015 | Residential demand input | D-10 | D-07 | **Open** | M4 |
-| 0016 | `.pyt` shells out to the CLI in the parkiq env | D-11 | — | Proposed | M7 |
-| 0017 | Market `ranking:` overrides shared weights | D-12 | — | Proposed | — |
-| 0018 | Microsoft footprints via Overture (no separate adapter) | D-13 | — | Proposed | — |
-| 0019 | Units in field names; conversions only in `parkiq/units.py` | D-14 | — | Proposed | — |
-| 0020 | Supply dedupe rule | D-15 | — | Proposed | M3 |
-| 0021 | On-street curb length | D-16 | — | Proposed | M3 |
-| 0022 | Anchor category crosswalk `configs/anchor_crosswalk.yaml` | D-17 | — | Proposed | M4 |
-| 0023 | Listing-rate → daypart mapping | D-18 | — | Proposed | M3 |
-| 0024 | Hot-zone contiguity = H3 k=1 components | D-19 | — | Proposed | M4 |
+| 0015 | Residential demand input — excluded for the Franklin pilot | D-10 | D-07 | **Accepted** 2026-09-24 | M4 |
+| 0016 | `.pyt` shells out to the CLI in the parkiq env | D-11 | — | **Accepted** 2026-09-24 | M7 |
+| 0017 | Market `ranking:` overrides shared weights | D-12 | — | **Accepted** 2026-09-24 | — |
+| 0018 | Microsoft footprints via Overture (no separate adapter) | D-13 | — | **Accepted** 2026-09-24 | — |
+| 0019 | Units in field names; conversions only in `parkiq/units.py` | D-14 | — | **Accepted** 2026-09-24 | — |
+| 0020 | Supply dedupe rule | D-15 | — | Proposed — **review at M3** | M3 |
+| 0021 | On-street curb length | D-16 | — | Proposed — **review at M3** | M3 |
+| 0022 | Anchor category crosswalk `configs/anchor_crosswalk.yaml` | D-17 | — | **Accepted** 2026-09-24 | M4 |
+| 0023 | Listing-rate → daypart mapping | D-18 | — | Proposed — **review at M3** | M3 |
+| 0024 | Hot-zone contiguity = H3 k=1 components | D-19 | — | Proposed — **review at M4** | M4 |
 | 0025 | Shape index = rectangularity | D-20 | D-09 | **Accepted** 2026-09-24 | M5 |
-| 0026 | Frontage / corner definitions | D-21 | — | Proposed | M5 |
-| 0027 | Walk-shed polygons = buffered reachable edges | D-22 | — | Proposed | M5 |
-| 0028 | Criteria C01–C10 measurement details | D-23 | — | Proposed | M5 |
+| 0026 | Frontage / corner definitions | D-21 | — | Proposed — **review at M5** | M5 |
+| 0027 | Walk-shed polygons = buffered reachable edges | D-22 | — | **Accepted** 2026-09-24 | M5 |
+| 0028 | Criteria C01–C10 measurement details | D-23 | — | Proposed — **review at M5** | M5 |
 | 0029 | Dirichlet sensitivity = flat (α = 1) | D-24 | D-11 | **Accepted** 2026-09-24 | M5 |
-| 0030 | 40–200 candidate rule: report, don't auto-adjust | D-25 | — | Proposed | M5 |
+| 0030 | 40–200 candidate rule: report, don't auto-adjust | D-25 | — | **Accepted** 2026-09-24 | M5 |
 | 0031 | Size vs stall range: apply both | Q2 | D-10 | **Accepted** 2026-09-24 | M5 |
 | 0032 | Occupancy = min(cap, g(gap_ratio), absorption) | D-26 | D-12 | **Accepted** 2026-09-24 | M6 |
-| 0033 | Billing basis / days / event overlap | D-27 | — | Proposed | M6 |
-| 0034 | Monthly permits rule | D-28 | — | Proposed | M6 |
-| 0035 | Opex structure | D-29 | — | Proposed | M6 |
-| 0036 | Property-tax base | D-30 | — | Proposed | M6 |
-| 0037 | Returns convention (unlevered, exit, lease reversion) | D-31 | — | Proposed | M6 |
-| 0038 | Payback definition | D-32 | — | Proposed | M6 |
-| 0039 | Ground-lease rent | D-33 | — | Proposed | M6 |
-| 0040 | Soft cost base = hard cost | — | D-13 | Proposed | M6 |
+| 0033 | Billing basis / days / event overlap | D-27 | — | Proposed — **review at M6** | M6 |
+| 0034 | Monthly permits rule | D-28 | — | Proposed — **review at M6** | M6 |
+| 0035 | Opex structure | D-29 | — | Proposed — **review at M6** | M6 |
+| 0036 | Property-tax base | D-30 | — | Proposed — **review at M6** | M6 |
+| 0037 | Returns convention (unlevered, exit, lease reversion) | D-31 | — | Proposed — **review at M6** | M6 |
+| 0038 | Payback definition | D-32 | — | Proposed — **review at M6** | M6 |
+| 0039 | Ground-lease rent | D-33 | — | Proposed — **review at M6** | M6 |
+| 0040 | Soft cost base = hard cost | — | D-13 | **Accepted** 2026-09-24 | M6 |
 | 0041 | Financial ranking metric = yield-on-cost (buy) | D-34 | D-14 | **Accepted** 2026-09-24 | M6 |
-| 0042 | Excel parity engine (`formulas`, no cached values) | D-35 | — | Proposed | M6 |
-| 0043 | Calibration factors in `markets/<slug>.calibration.yaml` | D-36 | — | Proposed | M8 |
-| 0044 | CLI names: `check-config` validates config; `validate` = back-test | D-37/Q3 | — | Proposed | — |
-| 0045 | `.gdb` export optional (`package --gdb`) | D-38 | — | Proposed | M7 |
-| 0046 | Due-diligence flags are rule-based | D-39 | — | Proposed | M6 |
-| 0047 | Memo numbers carry a trace key | D-40 | — | Proposed | M7 |
+| 0042 | Excel parity engine (`formulas`, no cached values) | D-35 | — | **Accepted** 2026-09-24 | M6 |
+| 0043 | Calibration factors in `markets/<slug>.calibration.yaml` | D-36 | — | **Accepted** 2026-09-24 | M8 |
+| 0044 | CLI names: `check-config` validates config; `validate` = back-test | D-37/Q3 | — | **Accepted** 2026-09-24 | — |
+| 0045 | `.gdb` export optional (`package --gdb`) | D-38 | — | **Accepted** 2026-09-24 | M7 |
+| 0046 | Due-diligence flags are rule-based | D-39 | — | **Accepted** 2026-09-24 | M6 |
+| 0047 | Memo numbers carry a trace key | D-40 | — | **Accepted** 2026-09-24 | M7 |
 | 0048 | Zoning screen table for Columbus | — | D-15 | **Accepted** 2026-09-24 | M2 |
 | 0049 | Stall count rounds down | — | (manual §9.1) | **Accepted** 2026-09-24 | M5 |
-| 0050 | Config provenance (`provenance:` map) and step gating | Q6 | — | Proposed | — |
-| 0051 | `configs/sources.yaml` source catalogue; S03 split into S03a/S03b | Q4 | — | Proposed | — |
-| 0052 | Runtime environment on managed Windows workstations | — | — | Proposed | — |
-| 0053 | Ingest geometry rules (clip, repair, dedupe) | — | — | Proposed | — |
+| 0050 | Config provenance (`provenance:` map) and step gating | Q6 | — | **Accepted** 2026-09-24 | — |
+| 0051 | `configs/sources.yaml` source catalogue; S03 split into S03a/S03b | Q4 | — | **Accepted** 2026-09-24 | — |
+| 0052 | Runtime environment on managed Windows workstations | — | — | **Accepted** 2026-09-24 | — |
+| 0053 | Ingest geometry rules (clip, repair, dedupe) | — | — | **Accepted** 2026-09-24 | — |
 | 0054 | Manual observations CSV for rates/occupancy | Q1 | S07 row | **Accepted** 2026-09-24 | M2 |
 | 0055 | Optional public-redaction mode for packages (`package --public`) | — | — | **Accepted** 2026-09-24 | M7 |
 | 0056 | Download cache outside the repo; DEM fetched once for the study-area extent | — | — | **Accepted** 2026-09-24 | M2 |
 | 0057 | Secrets only from the environment; never persisted or logged | — | — | **Accepted** 2026-09-24 | — |
+| 0058 | Columbus §3389.131: special permit applies to temporary lots only | — | D-15 | **Accepted** 2026-09-24 ([VERIFY] with Building & Zoning Services) | M5 |
+| 0059 | Zoning screen: confidence routing, L- overlays, overlays, GIS code matching | — | D-15 | **Accepted** 2026-09-24 | M5 |
 
 ---
 
@@ -151,7 +154,11 @@ As listed in the index (plan D-08 … D-40 and the admin Decision_Log). Each is 
 plan and the manual pilot's workbook agree wherever both cover a topic. They will be restated here
 in full, with anything
 learned during the build, at the milestone that needs them.
-**ADR-0015 is Open:** set `demand.residential_offstreet_share` or exclude residential demand.
+**ADR-0015 — Residential demand: Accepted 2026-09-24.** Residential demand is **excluded** for the
+Franklin pilot. The residential rate row stays in `configs/parking_rates.yaml`; generation is switched
+off by configuration (`demand.excluded_anchor_categories: [ResidentialBlock]` in the market file), not
+by code. The investment memo's assumptions section must state this exclusion. Revisit after the
+Phase K validation back-test.
 
 ## ADR-0048 — Columbus zoning screen (ADMIN D-15)
 Build the `zoning_screen` table covering Title 33, Title 34 (Zone In) and Downtown zones A/B;
@@ -214,3 +221,82 @@ slope matters little in central Columbus, so effort here stays minimal.
 API keys (e.g. `CENSUS_API_KEY`) are read only from environment variables named in the config.
 They are never written to configs, `params.yaml`, logs, registry rows, error messages or context
 files; URLs are redacted before they are logged or raised.
+
+## ADR-0058 — Columbus §3389.131 (special permit for non-accessory parking lots)
+**Context.** §3389.131 ("Temporary parking lot") states: "A special permit shall be required for the
+establishment of any nonaccessory parking lot. The board of zoning adjustment shall grant a special
+permit for a temporary parking lot only when …". C-3 (§3355.03/.05(D)), C-4 (§3356.03/.05(F)) and M
+(§3363.01) list parking lots as permitted uses.
+**Readings.** (A) The sentence governs *temporary* lots only — supported by the section title and by
+Title 34 Table E.20.100.A, which marks non-accessory lots *Allowed* in CAC/RAC and footnotes only
+temporary lots as needing a special permit. (B) It requires a Board of Zoning Adjustment special
+permit for *every* non-accessory lot.
+**Decision.** Reading (A). C-3, C-4 and M are ByRight (confidence Medium).
+**Effect of the alternative.** Under (B), C-3, C-4 and M become Conditional: they still pass the
+screen but score 60 instead of 100 on C09 (zoning certainty), and the due-diligence list gains
+"BZA special permit". Title 34 CAC/RAC are unaffected.
+**Status.** [VERIFY] — Bernard is confirming with Columbus Building & Zoning Services; the rows keep
+[VERIFY] until he reports back.
+
+## ADR-0059 — Zoning screen rules
+The market zoning table (`markets/franklin_oh/zoning_screen.csv`) gives each district a
+`commercial_parking_use` (dm_ZoningScreen), a `confidence` (High/Medium/Low) with a one-line reason,
+and citations. `parkiq.zoning` resolves a parcel:
+* ByRight/Conditional → Pass; Unknown → Review; Prohibited → Fail, **but Low-confidence Prohibited →
+  Review** (non-exhaustive use lists such as C-1 or East Franklinton, and every "not listed" reading).
+* **Limited (L-) overlays** take the base district's result and are **always Review** with reason
+  "limitation text applies". CPD/PUD/PC are Unknown → Review.
+* **Overlays** (§3372 UCO/CCO/RCO; §3325 University District) cap the result — the parcel gets the
+  more restrictive of base and overlay. UCO/CCO/RCO keep base uses (§3372.05) and add their design
+  rule to the reason; University District NC/RC subareas route to Review (lots must sit behind a
+  principal building, §3325.231/.331).
+* **GIS code matching**: the city layer stores Title 33 codes without hyphens and fuses the L prefix
+  (`C4`, `LC4`, `LAR12`); Title 34 codes keep hyphens (`UCR-R`). Matching is hyphen-insensitive,
+  exact matches win (so `LRR` is the Limited Rural Residential district, not L + RR), then market
+  aliases (`RURAL` → `R`), then density suffixes (`PUD8` → PUD), then the L prefix.
+* Jurisdictions not in the table (Dublin, Worthington, Upper Arlington, …) → Unknown → Review,
+  never Fail. The screen reason always shows district, result, confidence and citation.
+* **Revision (F3 review, 2026-09-25).** Residential, apartment and manufactured-home districts are
+  Prohibited with **High** confidence ("commercial pay lot not a permitted principal use in
+  residential districts", SCOPE §5.5) and Fail. Low-confidence Prohibited (→ Review) is kept only
+  for genuinely ambiguous districts: C-1, C-2, EFD, the TND districts, M-2, EQ. DD with an unknown
+  parking zone is **Unknown → Review** (Zone A prohibits new lots). A DD parcel within
+  `sources.S23c.options.boundary_review_ft` (150 ft) of the digitized Zone A/B line is always Review
+  ("near digitized Zone A/B boundary"), whichever side it falls on (ADR-0061).
+* Owner type is a due-diligence flag only, never a screen filter.
+
+## ADR-0060 — M2 schema completion (schema.yaml v1.0.0)
+**Decision.** `schema.yaml` now carries every SCOPE §4.2–4.3 class and table, plus:
+* **Additions:** `ZoningDistricts`, `ZoningOverlays`, `ParkingZones` (Reference); Parcels fields
+  `jurisdiction`, `auto_oriented_flag`, `excluded_use_flag`, `zoning_overlays`, `parking_zone`,
+  `parking_zone_near_boundary`, `zoning_status`, `zoning_reason`; domains `dm_Tenure` (Buy/Lease)
+  and `dm_ParkingZone` (A/B); raw snapshots `Raw_Zoning`, `Raw_ZoningOverlays`, `Raw_ParkingZones`.
+* **Hex × daypart outputs are attribute tables** (`Hex_Demand_Daypart`, `Hex_Supply_Daypart`,
+  `Hex_Gap_Daypart`) keyed by `hex_id` and joined to `HexGrid` for display — SCOPE allows
+  "Polygon/table"; this avoids storing every hexagon five times.
+* **`SupplyFacilities` is a point class** (one point per facility, footprint in `area_sqft`); a
+  GeoPackage/FGDB class holds one geometry type.
+* **`SiteFinancials`** keeps SCOPE's 1:1 relationship with one row per tenure.
+* **Domains** are stored as GeoPackage schema-extension constraints (`gpkg_data_columns` +
+  `gpkg_data_column_constraints`), re-attached after every write, and enforced in Python on write.
+  **Relationship classes and subtypes** are recorded in `_ParkIQ_Relationships` / `_ParkIQ_Subtypes`
+  and become real relationship classes in the file-geodatabase export (M7); GeoPackage has no
+  relationship class ArcGIS reads.
+* BuildSchema creates all layers empty in every run's GeoPackage; only layers a step actually
+  wrote are registered in `_ParkIQ_Layers`, QA-checked and added to the ArcGIS workspace.
+* `docs/ERD.drawio`, `docs/ERD.png` and `docs/DataDictionary.md` are generated (`parkiq
+  schema-docs`); a test fails if they are out of date.
+
+## ADR-0061 — Downtown parking zones A/B derived from Map 2 (S23c)
+**Context.** §3359.27 applies Zone A (no new non-accessory surface lots) and Zone B (permitted with
+a Certificate of Appropriateness) "as indicated on the official city zoning map and as illustrated
+on Map 2". No GIS layer is published (open data and map services checked 2026-09-24).
+**Decision (Bernard, F3, 2026-09-25).** Digitize from Map 2 as derived source S23c, [VERIFY]:
+Map 2 (Ord. 1532-2013, Municode image dated 2026-07-01) is georeferenced to TIGER 2025 centerlines
+(six intersection control points, affine refined by chamfer matching of all centerlines to the
+map's street lines: median residual 0.56 px ≈ 4 ft at 7.13 ft/px). Pixels are classified Zone A /
+Zone B by their map shade inside the overlay outline; each parcel takes the zone covering most of
+its area; zone polygons are the dissolved parcels — boundaries follow parcel lines, never a
+freehand trace. Parcels within 150 ft of the A/B line route to Review. If the City confirms an
+official layer, it replaces S23c.
+

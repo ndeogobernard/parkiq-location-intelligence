@@ -7,6 +7,11 @@ export PROJ_DATA="$(cygpath -w "$E/Library/share/proj")"
 export PROJ_LIB="$PROJ_DATA"
 export CONDA_PREFIX="$(cygpath -w "$E")"
 export PYTHONIOENCODING=utf-8
+# GitHub CLI (winget or MSI install), if present
+for _d in "$(cygpath -u "${LOCALAPPDATA:-}")"/Microsoft/WinGet/Packages/GitHub.cli_*/bin "/c/Program Files/GitHub CLI"; do
+  if [ -x "$_d/gh.exe" ]; then export PATH="$PATH:$_d"; break; fi
+done
+unset _d
 # User-level environment variables set after this app/shell started are not inherited; read the
 # Census key from the user environment into this session only (never printed or written).
 if [ -z "${CENSUS_API_KEY:-}" ]; then

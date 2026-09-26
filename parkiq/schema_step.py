@@ -1,9 +1,10 @@
-"""Step ``schema`` (tool 1 BuildSchema, M1 subset).
+"""Step ``schema`` (tool 1 BuildSchema).
 
-M1: initialise the run GeoPackage with the config-derived tables so every run carries the exact
-rates, criteria, weights and finance parameters it used (SCOPE §4.3): ParkingRates,
-CriteriaDefinitions, WeightScenarios, FinanceParams. M2 extends this into the full BuildSchema
-(all empty layers, domains as GeoPackage constraints, related tables).
+Creates every feature class and table in ``schema.yaml`` on the run GeoPackage (empty; existing
+layers are kept), attaches the domains as GeoPackage constraints and records relationship classes
+and subtypes (:mod:`parkiq.schema_build`). Then writes the config-derived tables so every run
+carries the exact rates, criteria, weights and finance parameters it used (SCOPE §4.3):
+ParkingRates, CriteriaDefinitions, WeightScenarios, FinanceParams.
 """
 
 from __future__ import annotations
@@ -15,12 +16,14 @@ import pandas as pd
 
 from parkiq.config import DAYPARTS
 from parkiq.runner import RunContext, register
+from parkiq.schema_build import build_schema as _build
 
 
 @register("schema", deps=(), reads=("rates", "criteria", "weights", "finance"))
 def build_schema(ctx: RunContext) -> dict[str, Any]:
     """Write config tables for this run."""
     cfg = ctx.cfg
+    built = _build(ctx.store.gpkg, ctx.store.schema, cfg.crs)
     calib = cfg.rates.calibration_factors
     rates = pd.DataFrame(
         [
@@ -72,6 +75,8 @@ def build_schema(ctx: RunContext) -> dict[str, Any]:
     ctx.store.write_table("FinanceParams", fin)
     return {
         "schema_version": ctx.store.schema.version,
+        "layers_created": built["created"],
+        "relationships": built["relationships"],
         "rates_rows": len(rates),
         "criteria": len(crit),
         "weights_rows": len(weights),
