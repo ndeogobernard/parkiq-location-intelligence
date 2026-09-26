@@ -77,6 +77,8 @@ supply:
   paid_signal_overrides_path: franklin_oh/paid_signal_overrides.csv   # ADR-0075: reviewed fee/operator signals to drop (osm_id, action=drop)
   practical_capacity: 0.85      # ADR-0079: practical-capacity convention (market-evidence note only)
   benchmark_occupancy_path: franklin_oh/benchmark_occupancy.csv       # ADR-0079: SPP 2019 peak occupancy by area
+c04_daypart_weights: {wd_day: 0.3571, wd_eve: 0.3572, we_day: 0.1428, we_eve: 0.1429, event: 0.0}   # ADR-0081: share of operating days (5/14, 5/14, 1/7, 1/7); events are C03
+
 finance: {}                     # all SCOPE defaults from configs/finance_defaults.yaml; DECIDE keys null
 ranking: {financial_weight: 0.70, suitability_weight: 0.30, shortlist_size: 10}   # SCOPE range 5–10
 data_licenses:
@@ -239,6 +241,7 @@ provenance:
   site.min_frontage_ft:            {status: SCOPE,  source: "SCOPE §2.1"}
   site.min_shape_index:            {status: SCOPE,  source: "SCOPE §2.1; rectangularity (ADR-0025)"}
   site.improvement_ratio_max:      {status: SCOPE,  source: "SCOPE §5.5"}
+  criteria.c04_daypart_weights:    {status: SET,    source: "ADR-0081: share of operating days; applied (analyst may revisit)"}
   site.frontage_buffer_ft:         {status: SET,    source: "ADR-0080: derived from Franklin parcels/OSM streets; applied (analyst may revisit)"}
   demand.transit_adjustment.high_frequency_radius_m: {status: VERIFY, source: "SCOPE §2.1"}
   demand.transit_adjustment.high_frequency_headway_max_min: {status: SET, source: "Bernard, M4 decisions 2026-09-26 (COTA frequent network)"}

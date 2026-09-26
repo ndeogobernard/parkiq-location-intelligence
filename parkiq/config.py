@@ -288,6 +288,7 @@ class MarketConfig(_Strict):
     supply: SupplySection
     finance: dict[str, Any] = Field(default_factory=dict)
     ranking: RankingSection | None = None
+    c04_daypart_weights: dict[Daypart, float] | None = None  # overrides criteria.yaml (ADR-0081)
     data_licenses: DataLicenses
     sources: dict[str, SourceEntry] = Field(default_factory=dict)
     provenance: dict[str, Provenance] = Field(default_factory=dict)
@@ -665,6 +666,11 @@ def load_config(
     market = m.model_copy(update=upd)
 
     ranking = market.ranking or weights.ranking  # ADR-0017: market overrides shared
+    if market.c04_daypart_weights is not None:
+        tot = sum(market.c04_daypart_weights.values())
+        if abs(tot - 1.0) > 1e-3:
+            raise ConfigError(f"{market_path}: c04_daypart_weights sum to {tot:.4f}, not 1.00")
+        criteria = criteria.model_copy(update={"c04_daypart_weights": market.c04_daypart_weights})
     provenance: dict[str, Provenance] = {}
     for f in ("finance_defaults.yaml", "weights.yaml", "criteria.yaml"):
         for k, v in _load_yaml(cdir / f).get("provenance", {}).items():

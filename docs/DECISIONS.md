@@ -558,6 +558,8 @@ well below a lot depth, so parcels behind a frontage lot do not pick up frontage
 is the alternative if arterial parcels are missed (check in the M5 screen QA).
 
 ## ADR-0081 — C04 daypart weights: share of operating days — Applied (analyst may revisit)
+Set in the market file (`c04_daypart_weights`, validated to sum to 1.00); the shared
+`configs/criteria.yaml` keeps it null (DECIDE) so no market inherits a default.
 `criteria.c04_daypart_weights` = wd_day 5/14, wd_eve 5/14, we_day 1/7, we_eve 1/7, event 0: each
 daypart's rate index is weighted by how many days a year it applies (weekday 5/7, weekend 2/7,
 split evenly between day and evening); event revenue is scored separately by C03. C04 still waits

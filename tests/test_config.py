@@ -103,3 +103,12 @@ def test_fixture_dir_labelled_synthetic() -> None:
     text = FIXTURE_YAML.read_text(encoding="utf-8")
     assert "SYNTHETIC — NOT REAL DATA" in text
     assert (FIXTURE_DIR / "README.md").exists()
+
+
+def test_market_sets_c04_weights(variant) -> None:  # type: ignore[no-untyped-def]
+    w = {"wd_day": 0.4, "wd_eve": 0.3, "we_day": 0.15, "we_eve": 0.15, "event": 0.0}
+    cfg = load_config(variant({"c04_daypart_weights": w}))
+    assert cfg.criteria.c04_daypart_weights == w
+    assert missing_for_step(cfg, "criteria") == []
+    with pytest.raises(ConfigError, match="c04_daypart_weights sum"):
+        load_config(variant({"c04_daypart_weights": {**w, "wd_day": 0.5}}))
