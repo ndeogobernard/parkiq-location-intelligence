@@ -155,3 +155,49 @@ def test_supply_step_on_fixture(m1_run) -> None:  # type: ignore[no-untyped-def]
     assert len(fac) > 0 and set(hs["daypart"]) == {"wd_day", "wd_eve", "we_day", "we_eve", "event"}
     one = hs[hs["daypart"] == "wd_day"]
     assert (one["effective_supply_stalls"] <= one["supply_stalls"] + 1e-9).all()
+
+
+def test_exclusions_and_factor() -> None:
+    from parkiq.supply import apply_exclusions
+
+    f = _osm([
+        {"parking": "surface", "name": "Fair Auto Auction", "geometry": box(0, 0, 320, 100)},
+        {"parking": "surface", "name": "City Impound Lot", "geometry": box(500, 0, 600, 100)},
+        {"parking": "surface", "name": "Dealer lot?", "geometry": box(1000, 0, 1100, 100)},
+        {"parking": "surface", "geometry": box(2000, 0, 2320, 100)},
+    ])  # fmt: skip
+    parcels = gpd.GeoDataFrame({"land_use_code": ["454"]}, geometry=[box(1900, -50, 2400, 150)],
+                               crs=FT)  # fmt: skip
+    rules = pd.DataFrame(
+        {"pattern": [r"\bauction\b", r"\bimpound\b", "^(454|466|467)$"],
+         "field": ["name", "name", "parcel_land_use_code"],
+         "reason": ["auction", "impound", "dealer parcel"]}
+    )  # fmt: skip
+    kept, ex = apply_exclusions(f, rules, parcels)
+    assert sorted(ex["exclusion_reason"]) == ["auction", "dealer parcel", "impound"]
+    assert list(kept["name"]) == ["Dealer lot?"]
+    c = capacity(f.iloc[[0]], None, 320, 0.9, FT, surface_factor=1.5)
+    assert c["capacity_est_raw"].iloc[0] == 90 and c["capacity_est"].iloc[0] == 135
+    assert c["capacity_source"].iloc[0] == "area x factor"
+
+
+def test_survey_exclude_and_manual() -> None:
+    from parkiq.survey import select_sample
+
+    fac = gpd.GeoDataFrame(
+        {"facility_id": ["A", "B", "C", "D"], "name": ["x", "y", "z", "OSU Garage"],
+         "operator": ["Columbus State Community College", None, None, None],
+         "type": ["Surface", "Surface", "Surface", "Garage"], "fee_flag": [True, True, False, True],
+         "capacity_stated": [900, 50, 60, 1000], "capacity_est": [None] * 4,
+         "capacity_source": ["stated"] * 4, "submarket": ["U", "U", "U", None],
+         "source_ids": ["w1", "w2", "w3", "w4"]},
+        geometry=[Point(0, 0), Point(1000, 0), Point(2000, 0), Point(9000, 0)], crs=FT,
+    )  # fmt: skip
+    strata = [{"label": "U", "areas": ["U"], "n": 2, "garages": 0,
+               "manual": [{"facility_id": "D", "operator": "CampusParc",
+                           "source": "operator website", "why": "campus garage"}]}]  # fmt: skip
+    s = select_sample(fac, strata, 150, 1, [{"field": "operator", "pattern": "Columbus State"}])
+    smp = s[s.role == "sample"]
+    assert list(smp["facility_id"]) == ["D", "B"] and "A" not in set(s["facility_id"])
+    assert smp.iloc[0]["source_expected"] == "operator website"
+    assert s[s.role == "backup"]["why_selected"].iloc[0].startswith("UNVERIFIED")

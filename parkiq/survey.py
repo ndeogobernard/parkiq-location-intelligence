@@ -48,6 +48,8 @@ def _why(r: pd.Series) -> str:
     bits = []
     if r["_paid"]:
         bits.append("tagged paid (fee=yes)")
+    else:
+        bits.append("UNVERIFIED as paid (no fee tag)")
     if r["_op"]:
         bits.append(f"operator {r['operator']}")
     bits.append(f"{int(r['_cap'])} stalls ({r['capacity_source'] or 'unknown'})")
@@ -55,16 +57,37 @@ def _why(r: pd.Series) -> str:
 
 
 def select_sample(
-    fac: gpd.GeoDataFrame, strata: list[dict[str, Any]], spacing_m: float, backups: int
+    fac: gpd.GeoDataFrame,
+    strata: list[dict[str, Any]],
+    spacing_m: float,
+    backups: int,
+    exclude: list[dict[str, str]] | None = None,
 ) -> pd.DataFrame:
-    """Round sample + backups per stratum (see module docstring)."""
+    """Round sample + backups per stratum (see module docstring).
+
+    ``exclude`` rules ({field, pattern, reason}) remove facilities from every pool. A stratum's
+    ``manual`` entries ({facility_id, operator, source, why}) are added to its sample first, even
+    outside its areas; they count toward ``n``.
+    """
     crs = fac.crs
     gap = units.m_to_crs(spacing_m, crs)
     rows: list[dict[str, Any]] = []
+    keep = pd.Series(True, index=fac.index)
+    for rule in exclude or []:
+        col = fac[rule["field"]]
+        keep &= ~(col.notna() & col.astype(str).str.contains(rule["pattern"], case=False))
+    fac = fac[keep]
     for s in strata:
         pool = _score(fac[fac["submarket"].isin(s["areas"]) & (fac["type"] != "OnStreet")])
         picked: list[Any] = []
         chosen: list[Any] = []
+        manual = {m["facility_id"]: m for m in s.get("manual", [])}
+        if manual:
+            extra = _score(fac[fac["facility_id"].isin(list(manual))])
+            pool = pd.concat([extra, pool[~pool.index.isin(extra.index)]])
+            for i, r in extra.iterrows():
+                chosen.append(i)
+                picked.append(r.geometry)
 
         def take(
             cands: pd.DataFrame, limit: int, chosen: list[Any] = chosen, picked: list[Any] = picked
@@ -82,13 +105,16 @@ def select_sample(
         take(pool, s["n"] + backups)  # backups: next best of any type
         for k, i in enumerate(chosen):
             r = pool.loc[i]
+            m = manual.get(r["facility_id"])
             ll = gpd.GeoSeries([r.geometry], crs=crs).to_crs(4326).iloc[0]
             rows.append({
                 "role": "sample" if k < s["n"] else "backup",
                 "rank": k + 1 if k < s["n"] else k + 1 - s["n"],
                 "stratum": s["label"], "area": r["submarket"], "facility_id": r["facility_id"],
-                "name": r["name"], "operator": r["operator"], "type": r["type"],
-                "lat": round(ll.y, 6), "lon": round(ll.x, 6), "why_selected": _why(r),
+                "name": r["name"], "operator": m["operator"] if m else r["operator"],
+                "type": r["type"], "lat": round(ll.y, 6), "lon": round(ll.x, 6),
+                "why_selected": f"MANUAL: {m['why']}" if m else _why(r),
+                "source_expected": m["source"] if m else "sign / app rate screen",
                 "osm_ids": r["source_ids"],
             })  # fmt: skip
     return pd.DataFrame(rows)

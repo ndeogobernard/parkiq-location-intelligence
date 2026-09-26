@@ -203,7 +203,11 @@ def survey_package_cmd(
     spec = survey.load_strata(strata)
     fac = ctx.store.read_layer("SupplyFacilities")
     sample = survey.select_sample(
-        fac, spec["strata"], float(spec["min_spacing_m"]), int(spec["backups_per_area"])
+        fac,
+        spec["strata"],
+        float(spec["min_spacing_m"]),
+        int(spec["backups_per_area"]),
+        spec.get("exclude"),
     )
     folder = out or strata.parent
     rnd = int(spec["round"])

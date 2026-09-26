@@ -53,9 +53,11 @@ supply:
   dedupe_distance_m: 40
   dedupe_name_similarity: 0.80  # ADR-0020 (Bernard, M3 2026-09-26): named pairs within 40 m merge at >= 0.80
   dedupe_unnamed_touch_m: 5     # ADR-0020 (Bernard): an unnamed record merges only with a same-type neighbour within 5 m
-  unknown_access_as_private: true   # PROPOSED at M3 stop: OSM lots without access/fee tags counted at the private share
+  unknown_access_as_private: true   # analyst choice (Bernard, M3 review 2026-09-26)
   curb_local_highways: [residential, living_street, unclassified]   # ADR-0021 (Bernard): "residential/local streets"
-  curb_sensitive_ratio: 1.0     # PROPOSED at M3 stop: flag hex when potential free-curb stalls >= counted effective supply
+  curb_sensitive_ratio: 1.0     # analyst choice (Bernard, M3 review 2026-09-26)
+  surface_capacity_factor: 1.414  # ADR-0067: median stated/area-estimate, 356 OSM surface lots (IQR 0.979-2.000), run 20260925_2217; existing lots only
+  exclusions_path: franklin_oh/supply_exclusions.csv   # ADR-0067 (V-40): non-parking lots, reviewable list
 finance: {}                     # all SCOPE defaults from configs/finance_defaults.yaml; DECIDE keys null
 ranking: {financial_weight: 0.70, suitability_weight: 0.30, shortlist_size: 10}   # SCOPE range 5–10
 data_licenses:
@@ -229,9 +231,10 @@ provenance:
   supply.dedupe_distance_m:        {status: SCOPE,  source: "SCOPE §5.3"}
   supply.dedupe_name_similarity:   {status: SET,    source: "analyst choice (Bernard, M3 decisions 2026-09-26; ADR-0020)"}
   supply.dedupe_unnamed_touch_m:   {status: SET,    source: "analyst choice (Bernard, M3 decisions 2026-09-26; ADR-0020)"}
-  supply.unknown_access_as_private: {status: VERIFY, source: "proposed at M3 stop (conservative: untagged lots are mostly customer lots)"}
+  supply.unknown_access_as_private: {status: SET,   source: "analyst choice (Bernard, M3 review 2026-09-26)"}
   supply.curb_local_highways:      {status: SET,    source: "Bernard, M3 decisions 2026-09-26 (ADR-0021)"}
-  supply.curb_sensitive_ratio:     {status: VERIFY, source: "proposed at M3 stop: potential free-curb stalls >= counted supply"}
+  supply.curb_sensitive_ratio:     {status: SET,    source: "analyst choice (Bernard, M3 review 2026-09-26)"}
+  supply.surface_capacity_factor:  {status: SET,    source: "ADR-0067: median stated/estimate over 356 OSM surface lots, IQR 0.979-2.000 (run 20260925_2217); recompute from round-1 survey counts"}
   ranking.financial_weight:        {status: SCOPE,  source: "SCOPE §5.8"}
   ranking.suitability_weight:      {status: SCOPE,  source: "SCOPE §5.8"}
   sources.S18.options.cell_size_m: {status: SET,    source: "Bernard 2026-09-24: 10 m, slope matters little in central Columbus"}

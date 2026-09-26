@@ -1,0 +1,11 @@
+pattern,field,reason
+\bauction\b,name,vehicle auction storage — not parking supply
+\bauction\b,operator,vehicle auction storage — not parking supply
+\bimpound\b,name,impound lot — not parking supply
+\btow(ing)?\b,name,tow/impound yard — not parking supply
+\b(inventory|dealer|dealership)\b,name,dealership inventory — not parking supply
+\b(bus|fleet|transit) (depot|garage|yard|lot)\b,name,bus/fleet depot — not public parking supply
+\btruck (stop|yard|parking|terminal)\b,name,truck yard/terminal — not car parking supply
+\bequipment (yard|storage)\b,name,equipment storage — not parking supply
+^(454|466|467)$,parcel_land_use_code,auto/truck dealership or used-car lot parcel (inventory display) — Ohio DTE code
+^(360|482|483)$,parcel_land_use_code,truck terminal / bus garage parcel — Ohio DTE code

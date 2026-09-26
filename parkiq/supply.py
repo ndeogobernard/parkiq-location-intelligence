@@ -220,8 +220,13 @@ def capacity(
     stall_sqft: float,
     efficiency: float,
     crs: Any,
+    surface_factor: float = 1.0,
 ) -> gpd.GeoDataFrame:
-    """Stated / estimated capacity and its source for each facility."""
+    """Stated / estimated capacity and its source for each facility.
+
+    Surface area estimates are multiplied by ``surface_factor`` (ADR-0067: calibrated to stated
+    capacities of existing lots); ``capacity_est_raw`` keeps the uncalibrated estimate.
+    """
     f = f.copy()
     f["capacity"] = pd.to_numeric(f["capacity"], errors="coerce")
     f["levels"] = pd.to_numeric(f["levels"], errors="coerce")
@@ -245,18 +250,47 @@ def capacity(
     est = np.full(len(f), np.nan)
     surf = is_poly & (f["ptype"] != "Garage")
     est[surf.to_numpy()] = (f.loc[surf, "area_sqft"] * efficiency / stall_sqft).to_numpy()
+    raw = est.copy()
+    est[surf.to_numpy()] *= surface_factor
     gl = garage & levels.notna()
     est[gl.to_numpy()] = (f.loc[gl, "area_sqft"] * levels[gl] / stall_sqft).to_numpy()
     f["levels"] = levels
     f["capacity_est"] = np.round(est, 0)
+    f["capacity_est_raw"] = np.round(raw, 0)
     f["capacity_stated"] = f["capacity"]
     src = pd.Series(None, index=f.index, dtype="object")
-    src[surf] = "area"
+    src[surf] = "area" if surface_factor == 1.0 else "area x factor"
     src[gl] = "footprint x levels"
     src[f["capacity_stated"].notna()] = "stated"
     f["capacity_source"] = src
     f["capacity_final"] = f["capacity_stated"].fillna(f["capacity_est"])
     return f
+
+
+def apply_exclusions(
+    f: gpd.GeoDataFrame, rules: pd.DataFrame, parcels: gpd.GeoDataFrame | None
+) -> tuple[gpd.GeoDataFrame, gpd.GeoDataFrame]:
+    """Drop non-parking lots matching a reviewable rule list (pattern, field, reason).
+
+    ``field`` is a facility column (``name``, ``operator``) or ``parcel_land_use_code`` (the
+    land-use code of the parcel under the facility's representative point). Returns
+    (kept, excluded with ``exclusion_reason``).
+    """
+    f = f.copy()
+    if parcels is not None and (rules["field"] == "parcel_land_use_code").any():
+        pts = gpd.GeoDataFrame(geometry=f.geometry.representative_point(), crs=f.crs)
+        j = gpd.sjoin(pts, parcels[["land_use_code", "geometry"]], predicate="within")
+        f["parcel_land_use_code"] = j[~j.index.duplicated()]["land_use_code"].reindex(f.index)
+    reason = pd.Series(None, index=f.index, dtype="object")
+    for r in rules.itertuples(index=False):
+        if r.field not in f.columns:
+            continue
+        col = f[r.field]
+        hit = col.notna() & col.astype(str).str.contains(r.pattern, case=False, regex=True)
+        reason[hit & reason.isna()] = r.reason
+    excluded = f[reason.notna()].assign(exclusion_reason=reason[reason.notna()])
+    kept = f[reason.isna()].drop(columns=["parcel_land_use_code"], errors="ignore")
+    return kept.reset_index(drop=True), excluded.reset_index(drop=True)
 
 
 def private_flags(f: gpd.GeoDataFrame, unknown_private: bool) -> pd.Series:
@@ -330,12 +364,30 @@ def run_supply(ctx: RunContext) -> dict[str, Any]:
                     float(sc.dedupe_name_similarity or 1))  # fmt: skip
     bld = ctx.store.read_layer("Buildings") if "Buildings" in written else None
     stall, eff = site.stall_area_sqft_gross, site.layout_efficiency
+    factor = float(sc.surface_capacity_factor or 1.0)  # existing lots only (ADR-0067)
     counts = {}
     for label, g in (("osm_records", f0), ("after_dissolve", f1), ("after_dedupe", f2)):
-        gc = capacity(g, bld, stall, eff, crs)
+        gc = capacity(g, bld, stall, eff, crs, factor)
         counts[label] = {"records": len(gc), "stalls": float(gc["capacity_final"].fillna(0).sum()),
                          "downtown": area_counts(gc, "capacity_final")}  # fmt: skip
-    fac = capacity(f2, bld, stall, eff, crs)
+    excl_report: dict[str, Any] = {}
+    if sc.exclusions_path is not None:
+        rules = pd.read_csv(sc.exclusions_path, dtype=str)
+        parcels = ctx.store.read_layer("Parcels", columns=["land_use_code"])
+        f2, excluded = apply_exclusions(f2, rules, parcels)
+        ex = capacity(excluded, bld, stall, eff, crs, factor)
+        top = ex.sort_values("capacity_final", ascending=False).head(10)
+        excl_report = {
+            "facilities": len(ex),
+            "stalls": float(ex["capacity_final"].fillna(0).sum()),
+            "by_reason": {
+                str(k): {"facilities": len(v), "stalls": float(v["capacity_final"].fillna(0).sum())}
+                for k, v in ex.groupby("exclusion_reason")
+            },
+            "largest": top[["name", "operator", "exclusion_reason", "capacity_final"]]
+            .to_dict("records"),
+        }  # fmt: skip
+    fac = capacity(f2, bld, stall, eff, crs, factor)
     fac["private_flag"] = private_flags(fac, bool(sc.unknown_access_as_private))
     fac["type"] = fac["ptype"].replace({"Unknown": "Surface"})
     fac["facility_id"] = [f"F{i:06d}" for i in range(1, len(fac) + 1)]
@@ -400,6 +452,14 @@ def run_supply(ctx: RunContext) -> dict[str, Any]:
     both = fac[fac["capacity_stated"].notna() & fac["capacity_est"].notna()
                & (fac["capacity_stated"] > 0)]  # fmt: skip
     err = (both["capacity_est"] - both["capacity_stated"]).abs() / both["capacity_stated"]
+    sb = fac[(fac["type"] == "Surface") & fac["capacity_stated"].gt(0)
+             & fac["capacity_est_raw"].gt(0)]  # fmt: skip
+    ratio_now = sb["capacity_stated"] / sb["capacity_est_raw"]
+    factor_check = {
+        "configured": factor, "n": len(sb),
+        "median_now": float(ratio_now.median()) if len(sb) else None,
+        "iqr_now": [float(x) for x in ratio_now.quantile([0.25, 0.75])] if len(sb) else None,
+    }  # fmt: skip
     med = float(err.median()) if len(err) else float("nan")
     total_in = float(cap.sum() + (ons["stalls_est"].fillna(0).sum() if ons is not None else 0))
     total_out = float((off_raw + on_alloc).sum())
@@ -428,6 +488,8 @@ def run_supply(ctx: RunContext) -> dict[str, Any]:
         **st, "dedupe": dd, "counts": counts,
         "by_type": by("type"), "by_submarket": by("submarket"),
         "capacity_source": fac["capacity_source"].fillna("none").value_counts().to_dict(),
+        "surface_capacity_factor": factor_check,
+        "exclusions": excl_report,
         "capacity_qa": {"n_both": len(both), "median_abs_pct_err": med,
                         "share_within_20pct": float((err <= 0.2).mean()) if len(err) else None},
         "onstreet": {"block_faces": 0 if ons is None else len(ons),

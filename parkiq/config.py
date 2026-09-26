@@ -207,6 +207,8 @@ class SupplySection(_Strict):
     unknown_access_as_private: bool | None = None
     curb_local_highways: list[str] = Field(default_factory=list)
     curb_sensitive_ratio: float | None = Field(default=None, gt=0)
+    surface_capacity_factor: float | None = Field(default=None, gt=0)
+    exclusions_path: Path | None = None
 
 
 class RankingSection(_Strict):
@@ -606,6 +608,10 @@ def load_config(
     if m.network.graph_path is not None:
         upd["network"] = m.network.model_copy(
             update={"graph_path": _resolve_path(m.network.graph_path, market_path.parent)}
+        )
+    if m.supply.exclusions_path is not None:
+        upd["supply"] = m.supply.model_copy(
+            update={"exclusions_path": _resolve_path(m.supply.exclusions_path, market_path.parent)}
         )
     mk = m.market
     if mk.submarkets_source is not None:

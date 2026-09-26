@@ -387,3 +387,24 @@ double-counts staff demand at hospitals; a rule is needed (e.g. subtract hospita
   size/stall screen, keep the component parcel ids, and report how many existing lots pass once
   assembled. Existing surface lots are not failed on shape index; their capacity is estimated from
   the lot polygon.
+
+## ADR-0067 — Existing-lot capacity calibration and non-parking exclusions (V-39, V-40)
+**Decision (Bernard, M3 review 2026-09-26).**
+* **Capacity.** Area-based estimates of EXISTING surface lots are multiplied by
+  `supply.surface_capacity_factor` = **1.414**, the median of stated ÷ area-estimate over the 356
+  OSM surface lots that carry a stated capacity (IQR 0.979–2.000; run 20260925_2217). SCOPE's
+  320 sq ft gross stall and 0.90 layout efficiency stay unchanged for a candidate site's own
+  (new-lot) stall count. Each supply run reports the factor recomputed from current data; when
+  round-1 survey counts arrive the factor is recomputed from surveyed lots and both are reported.
+* **Exclusions.** Lots that are not parking supply are removed by a reviewable list
+  (`markets/franklin_oh/supply_exclusions.csv`: pattern, field, reason) on facility name/operator
+  or the land-use code of the parcel under the facility (auto dealers 454/466/467, truck
+  terminals and bus garages 360/482/483). The supply report lists what was excluded.
+* `supply.unknown_access_as_private` = true and `supply.curb_sensitive_ratio` = 1.0 are SET
+  (analyst choice).
+
+**ADR-0066 amendment (2026-09-26).** Where one CMS record combines campuses, beds are split by the
+hospital's published per-campus figures and each campus is placed separately: CCN 360035 (937
+beds) → Mount Carmel East 614 and Mount Carmel Grove City 323 (shares of the published 400 / 210).
+Nationwide Children's is not overridden (CMS 378 vs 703 licensed is a definition difference, not a
+structure error); the gap is noted in V-36 and must appear in the memo assumptions.
