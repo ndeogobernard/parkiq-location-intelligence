@@ -78,6 +78,7 @@ def test_walk_minutes_in_edges(m1_run) -> None:  # type: ignore[no-untyped-def]
     assert e["walk_minutes"].iloc[0] == pytest.approx(125 / 1.3 / 60)
 
 
+@pytest.mark.slow  # full fixture pipeline run; CI runs it (pytest -m 'not network and not arcpy')
 def test_resume_skips_and_force_reruns(fixture_cfg, fresh_out) -> None:  # type: ignore[no-untyped-def]
     ctx = open_run(fixture_cfg, run_id="20260101_0000_fixture_Balanced", out=fresh_out)
     run_steps(ctx, ["schema", "setup"])
@@ -93,6 +94,7 @@ def test_resume_skips_and_force_reruns(fixture_cfg, fresh_out) -> None:  # type:
     assert reg["source_id"].value_counts().max() == 1  # one row per source per run
 
 
+@pytest.mark.slow  # full fixture pipeline run; CI runs it (pytest -m 'not network and not arcpy')
 def test_ingest_twice_is_idempotent(fixture_cfg, fresh_out) -> None:  # type: ignore[no-untyped-def]
     ctx = open_run(fixture_cfg, run_id="20260101_0000_fixture_Balanced", out=fresh_out)
     run_steps(ctx, ["schema", "setup", "ingest"])
@@ -123,6 +125,7 @@ def test_decide_value_blocks_step(variant, fresh_out, monkeypatch) -> None:  # t
         run_steps(ctx, ["setup"])
 
 
+@pytest.mark.slow  # full fixture pipeline run; CI runs it (pytest -m 'not network and not arcpy')
 def test_stale_marking_after_upstream_rerun(fixture_cfg, fresh_out) -> None:  # type: ignore[no-untyped-def]
     ctx = open_run(fixture_cfg, run_id="20260101_0000_fixture_Balanced", out=fresh_out)
     run_steps(ctx, ["schema", "setup", "ingest"])

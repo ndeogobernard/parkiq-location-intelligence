@@ -109,14 +109,35 @@ sources:
     vintage: "2026-09-07"       # feed_version 2026-SEP-07-BB_20260904, valid 2026-09-07..2027-01-03
     options: {service_date: "20261014"}   # a plain Wednesday: no event supplements or holiday swaps
   S10:
-    enabled: false              # analyst venue table (Nationwide Arena, Lower.com Field, Ohio Stadium, ...)
-    path: null
-  S12a: {enabled: false, path: null}        # hospitals with beds [VERIFY V-18]
-  S12b: {enabled: false, vintage: null}     # IPEDS year [VERIFY V-19]
+    enabled: false              # DRAFT venues.csv (2026-09-26), every value [VERIFY] — enable after Bernard's check
+    path: franklin_oh/venues.csv
+    options: {x: lon, y: lat, xy_crs: "EPSG:4326"}
+  S12a:
+    enabled: true               # HIFLD Open retired (404, 2026-09-26); FEMA RAPT copy of HIFLD Hospitals (data edited 2026-04-22)
+    provider: "FEMA RAPT (HIFLD Hospitals schema)"
+    license: "Public use (no restriction stated)"
+    url: "https://services.arcgis.com/XG15cJAlne2vxtgt/arcgis/rest/services/Hospitals_RAPT/FeatureServer/6"
+    vintage: "2026-04"
+    field_map: {hospital_id: ID, name: NAME, beds: BEDS}
+    options: {where: "STATUS = 'OPEN'"}   # BEDS -999 -> null; bed counts differ from CMS POS [VERIFY]
+  S12b:
+    enabled: true               # IPEDS HD2024/EFFY2024 latest (2025 -> 404, checked 2026-09-26)
+    vintage: "2024"
+    field_map: {unitid: UNITID, name: INSTNM}
+    options:
+      x: LONGITUD
+      y: LATITUDE
+      xy_crs: "EPSG:4326"
+      enrollment_field: EFYTOTLT
+      enrollment_filter: {EFFYLEV: "1"}   # all students, one row per UNITID
   S13:
-    enabled: false              # ODOT TIMS traffic count layer (admin Source_Register) [VERIFY V-20]
-    url: "https://tims.dot.state.oh.us/ags/rest/services/Roadway_Information/Traffic_Count_Stations/MapServer"
-    field_map: {}
+    enabled: true               # ODOT TIMS stations layer 0; Franklin AADT_YEAR 2025 (checked 2026-09-26)
+    provider: "ODOT Office of Technical Services (TIMS)"
+    license: "Public web service [VERIFY terms]"
+    url: "https://tims.dot.state.oh.us/ags/rest/services/Roadway_Information/Traffic_Count_Stations/MapServer/0"
+    vintage: "2025"
+    field_map: {count_id: STATION_ID_NBR, aadt: AADT, year: AADT_YEAR, road: NLFID}
+    options: {where: "AADT IS NOT NULL"}
   S14:
     enabled: true               # NFHL layer 28; 9,137 polygons in the county envelope (2026-09-25)
     vintage: "2026-09"
@@ -131,6 +152,14 @@ sources:
     vintage: "2026-09"
     field_map: {site_id: REGISTRY_ID, name: PRIMARY_NAME, program: PGM_SYS_ACRNM}
     options: {brownfield_programs: [ACRES]}
+  S20:
+    enabled: true               # Columbus curb inventory (PublicService/MapServer/38), edited through 2026-09-25 (ADR-0064)
+    provider: City of Columbus
+    license: "Open data [VERIFY licence: sibling City items are CC0; this layer has no Hub item]"
+    url: "https://maps2.columbus.gov/arcgis/rest/services/Schemas/PublicService/MapServer/38"
+    vintage: "2026-09"
+    field_map: {segment_id: AssetID, res_type: ResType, length_ft: Length, stalls_est: Spaces, rate_hour: Fee1}
+    options: {where: "ResType = 'Metered Parking' AND Status = 'Active'"}
   S23:
     enabled: true               # Columbus Base Zoning Districts (18,871 polygons, 78 codes; checked 2026-09-24)
     url: "https://maps2.columbus.gov/arcgis/rest/services/Schemas/BuildingZoning/MapServer/4"

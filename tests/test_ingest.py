@@ -148,6 +148,7 @@ def test_raw_snapshots_are_wgs84(m1_run) -> None:  # type: ignore[no-untyped-def
 # ------------------------------------------------------------------ not-configured path
 
 
+@pytest.mark.slow  # full fixture pipeline run; CI runs it (pytest -m 'not network and not arcpy')
 def test_disabled_source_takes_not_configured_path(variant, fresh_out) -> None:  # type: ignore[no-untyped-def]
     cfg = load_config(variant({"sources.S12a.enabled": False}))
     ctx = open_run(cfg, run_id="20260101_0000_fixture_Balanced", out=fresh_out)
@@ -162,6 +163,7 @@ def test_disabled_source_takes_not_configured_path(variant, fresh_out) -> None: 
     assert "S12a" in log and "not configured" in log and "effect:" in log
 
 
+@pytest.mark.slow  # full fixture pipeline run; CI runs it (pytest -m 'not network and not arcpy')
 def test_license_flag_gates_source(variant, fresh_out) -> None:  # type: ignore[no-untyped-def]
     cfg = load_config(variant({"sources.S02.license_flag": "regrid"}))  # regrid: false
     ctx = open_run(

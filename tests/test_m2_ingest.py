@@ -162,3 +162,19 @@ def test_overlay_load_has_no_case_colliding_columns(tmp_path: Path) -> None:
     lower = [c.lower() for c in g.columns]
     assert len(lower) == len(set(lower))
     assert sorted(g["overlay_code"]) == ["overlay:UCO", "overlay:University/NC"]
+
+
+def test_onstreet_meters_shape() -> None:
+    from shapely.geometry import LineString
+
+    from parkiq.config import SourceEntry
+    from parkiq.ingest.city_open_data import OnStreetMetersAdapter
+
+    a = gpd.GeoDataFrame(
+        {"segment_id": ["1", "2"], "res_type": ["Metered Parking", "Permit Parking"],
+         "stalls_est": ["6", None], "rate_hour": ["1.00", None]},
+        geometry=[LineString([(0, 0), (100, 0)]), LineString([(0, 10), (50, 10)])], crs=FT,
+    )  # fmt: skip
+    out = OnStreetMetersAdapter(SourceEntry()).shape(a, None)  # type: ignore[arg-type]
+    assert list(out["metered_flag"]) == [True, False] and list(out["permit_flag"]) == [False, True]
+    assert out["stalls_est"].iloc[0] == 6.0 and out["rate_hour"].iloc[0] == 1.0

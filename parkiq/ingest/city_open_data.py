@@ -147,6 +147,31 @@ class ParkingZonesAdapter(_TableAdapter):
         return a
 
 
+class OnStreetMetersAdapter(_TableAdapter):
+    """S20 — city curb inventory by block face → ``OnStreetSegments`` (ADR-0064).
+
+    Franklin: Columbus "Parking Facilities" (PublicService/MapServer/38) filtered to active
+    metered block faces; ``Spaces`` is the stated stall count and ``Fee1`` the posted daytime
+    hourly rate. Hours, time limits and evening periods stay in the raw snapshot.
+    """
+
+    source_id = "S20"
+    target, raw_layer, id_field = "OnStreetSegments", "Raw_OnStreet", "segment_id"
+    required = ("segment_id",)
+    optional = ("length_ft", "stalls_est", "metered_flag", "permit_flag", "rate_hour")
+    downstream_effect = "no on-street supply or posted meter rates (rate surface off-street only)"
+
+    def shape(self, a: gpd.GeoDataFrame, ctx: RunContext) -> gpd.GeoDataFrame:
+        a = a[a.geom_type.isin(["LineString", "MultiLineString"])].copy()
+        res = a["res_type"].astype(str) if "res_type" in a.columns else pd.Series("", index=a.index)
+        a["metered_flag"] = res.str.contains("Meter", case=False)
+        a["permit_flag"] = res.str.contains("Permit", case=False)
+        for c in ("length_ft", "stalls_est", "rate_hour"):
+            if c in a.columns:
+                a[c] = pd.to_numeric(a[c], errors="coerce")
+        return a
+
+
 # --------------------------------------------------------------------------- parcel join
 
 
@@ -267,6 +292,7 @@ def load_table(entry_options: dict[str, Any]) -> ZoningTable | None:
 
 
 __all__ = [
+    "OnStreetMetersAdapter",
     "ParkingZonesAdapter",
     "ZoningDistrictsAdapter",
     "ZoningOverlaysAdapter",

@@ -1,0 +1,26 @@
+name: tests
+on:
+  push:
+    branches: [main]
+  pull_request:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash -el {0}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: mamba-org/setup-micromamba@v2
+        with:
+          environment-file: environment.yml
+          cache-environment: true
+      - name: Install package
+        run: pip install -e . --no-deps
+      - name: Lint and types
+        run: |
+          ruff check .
+          ruff format --check .
+          mypy --strict parkiq
+      - name: Tests (offline, including slow; no network, no ArcPy)
+        run: pytest -m "not network and not arcpy"

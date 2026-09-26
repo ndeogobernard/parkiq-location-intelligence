@@ -146,6 +146,13 @@ sources:
     license: Public domain
     url: null                # V-22 — download to a local file for now
     verify: true
+  S20:
+    enabled: false           # enabled per market
+    provider: City (curb management)
+    dataset: On-street curb inventory by block face — metered spaces and posted rates
+    license: per city open-data terms
+    url: null
+    verify: true             # SCOPE S20 = meter transactions; inventory used instead (ADR-0064)
   S23:
     enabled: false           # enabled per market
     provider: City of Columbus

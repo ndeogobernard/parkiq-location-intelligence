@@ -225,6 +225,7 @@ def download(url: str, dest_dir: Path, filename: str | None = None) -> Path:
     try:
         with requests.get(url, stream=True, timeout=HTTP_TIMEOUT_S) as r:
             r.raise_for_status()
+            r.raw.decode_content = True  # undo Content-Encoding (e.g. gzip) — raw is not decoded
             with tmp.open("wb") as fh:
                 shutil.copyfileobj(r.raw, fh)
     except requests.RequestException as exc:

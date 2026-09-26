@@ -18,6 +18,7 @@ from parkiq.ingest.aadt import AadtAdapter
 from parkiq.ingest.acs import AcsAdapter
 from parkiq.ingest.base import IngestError, SourceAdapter, collect, register_source
 from parkiq.ingest.city_open_data import (
+    OnStreetMetersAdapter,
     ParkingZonesAdapter,
     ZoningDistrictsAdapter,
     ZoningOverlaysAdapter,
@@ -59,6 +60,7 @@ ADAPTERS: tuple[type[SourceAdapter], ...] = (
     ZoningDistrictsAdapter,
     ZoningOverlaysAdapter,
     ParkingZonesAdapter,
+    OnStreetMetersAdapter,
     RegridParcelsAdapter,
     ParkingListingsAdapter,
     LandListingsAdapter,

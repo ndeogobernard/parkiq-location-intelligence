@@ -34,6 +34,10 @@ INGEST_LAYERS: dict[str, str | None] = {
     "TrafficCounts": None,
     "FloodHazard": None,
     "EnvSites": None,
+    "OnStreetSegments": "segment_id",
+    "ZoningDistricts": None,
+    "ZoningOverlays": None,
+    "ParkingZones": None,
 }
 AREA_TOL_REL = 1e-6  # numerical tolerance for tiling checks (fraction of area) — not a parameter
 

@@ -39,6 +39,16 @@ GDB = REPO / "arcgis" / "ParkIQ_Workspace.gdb"
 ATBX = REPO / "arcgis" / "ParkIQ_Workspace.atbx"
 FOCUS_MARKET = "franklin_oh"  # map opened as the active view after a build
 HOLLOW = {"MarketBoundary": [40, 40, 40, 100], "StudyArea": [120, 120, 120, 100]}  # outline RGBA
+# Unique-value symbology: layer -> (field, {value: fill RGBA})
+STATUS_COLORS = {
+    "Pass": [26, 150, 65, 100],
+    "Review": [253, 174, 97, 100],
+    "Fail": [200, 200, 200, 60],
+}
+UNIQUE = {
+    "ScreenPreview": ("screen_status", STATUS_COLORS),
+    "CandidateParcels": ("screen_status", STATUS_COLORS),
+}
 OUTPUTS = REPO / "outputs"
 BLANK = (
     Path(arcpy.GetInstallInfo()["InstallDir"])
@@ -160,6 +170,47 @@ def _hollow(lyr: arcpy.mp.Layer, outline_rgba: list[int]) -> None:
         lyr.symbology = sym
 
 
+def _cim(name: str):  # type: ignore[no-untyped-def]
+    return arcpy.cim.CreateCIMObjectFromClassName(name, "V3")
+
+
+def _fill_symbol(rgba: list[int]):  # type: ignore[no-untyped-def]
+    def color(v: list[int]):  # type: ignore[no-untyped-def]
+        c = _cim("CIMRGBColor")
+        c.values = v
+        return c
+
+    fill = _cim("CIMSolidFill")
+    fill.color, fill.enable = color(rgba), True
+    stroke = _cim("CIMSolidStroke")
+    stroke.color, stroke.width, stroke.enable = color([90, 90, 90, 60]), 0.2, True
+    sym = _cim("CIMPolygonSymbol")
+    sym.symbolLayers = [stroke, fill]
+    ref = _cim("CIMSymbolReference")
+    ref.symbol = sym
+    return ref
+
+
+def _unique(lyr: arcpy.mp.Layer, field: str, colors: dict[str, list[int]]) -> None:
+    """Unique-value fill by ``field`` via the CIM (arcpy's renderer.fields setter rejects
+    GeoPackage layers)."""
+    cim = lyr.getDefinition("V3")
+    classes = []
+    for val, rgba in colors.items():
+        uv = _cim("CIMUniqueValue")
+        uv.fieldValues = [val]
+        k = _cim("CIMUniqueValueClass")
+        k.label, k.values, k.symbol, k.visible = val, [uv], _fill_symbol(rgba), True
+        classes.append(k)
+    grp = _cim("CIMUniqueValueGroup")
+    grp.classes, grp.heading = classes, field
+    r = _cim("CIMUniqueValueRenderer")
+    r.fields, r.groups, r.useDefaultSymbol = [field], [grp], False
+    r.defaultSymbol = _fill_symbol([255, 255, 255, 0])
+    cim.renderer = r
+    lyr.setDefinition(cim)
+
+
 def focus() -> int:
     """Child process: open the newest FOCUS_MARKET map as the only open view, then save."""
     p = arcpy.mp.ArcGISProject(str(APRX))
@@ -226,6 +277,8 @@ def add_run(p: arcpy.mp.ArcGISProject, run: Path) -> str:
             lyr.name = r["layer"]
             if r["layer"] in HOLLOW:
                 _hollow(lyr, HOLLOW[r["layer"]])
+            if r["layer"] in UNIQUE:
+                _unique(lyr, *UNIQUE[r["layer"]])
             m.addLayerToGroup(grp, lyr, "BOTTOM")
             m.removeLayer(lyr)
             if not sr_set and r["layer"] == "MarketBoundary":

@@ -31,9 +31,6 @@ Status: **Open** unless noted. "Owner" = who can close it (A = analyst, P = part
 | ID | Item | Where | Owner |
 |---|---|---|---|
 | V-17 | Ticketmaster Discovery API terms (analytics/storage) and key | S10 (M2) | A/P |
-| V-18 | Hospitals with beds: HIFLD Open availability (believed changed in 2025, unconfirmed) or CMS provider files; bed field | S12a | A |
-| V-19 | IPEDS HD/EFFY file names by year; enrollment field (`EFYTOTLT`) and all-students filter (`EFFYLEV = 1`); main-campus location vs. satellites | S12b | A |
-| V-20 | ODOT TIMS traffic-count layer URL (workbook) — layer index, AADT and year field names | S13 | A |
 | V-24 | Regrid API/bulk format, fields, zoning add-on, storage/derivation terms | S01 Regrid (M2) | P |
 | V-25 | Placer.ai / Advan delivery format and terms | S19 (M2) | P |
 | V-26 | CoStar / LoopNet / Crexi terms (many prohibit scraping/redistribution) | S16 (M2) | P |
@@ -44,13 +41,20 @@ Status: **Open** unless noted. "Owner" = who can close it (A = analyst, P = part
 | V-31 | Walking speed 1.3 m/s; transit factor 0.85 within 400 m; high-frequency headway threshold | market | A |
 | V-32 | `formulas` package IRR/NPV support for the parity test | M6 | dev |
 | V-13b | Overture Places: whether a parking category exists; current taxonomy field (`categories.primary`) — S03a still disabled | S03a | A |
-| V-34 | Columbus open-data layers (zoning, meters, permits) — currency (the meters item dates from 2017, per workbook) | S20–S23 (M2) | A |
 | V-35 | Downtown parking zones A/B (S23c) are DERIVED from City Code Map 2 (ADR-0061): Bernard is asking the City whether an official GIS layer exists; if so it replaces S23c. Until then DD parcels within 150 ft of the A/B line route to Review | S23c | A |
+| V-36 | Hospital beds: FEMA RAPT (HIFLD schema, Franklin rows dated 2024-04-19) vs CMS POS Q2 2026 disagree (Mount Carmel East 483 vs 937; James 356 vs 172; Nationwide Children's 551 vs 378). Choose the bed source for demand (M4) | S12a | A |
+| V-37 | Licence of Columbus PublicService/MapServer/38 (no Hub item; sibling City items CC0) | S20 | A |
+| V-38 | ODOT TIMS terms of use (copyright 'ODOT Office of Technical Services'; no terms page found) | S13 | A |
 
 ## Closed
 
 | ID | Item | Closed | Evidence |
 |---|---|---|---|
+| V-18 | Hospitals with beds | 2026-09-26 | HIFLD Open retired (404). FEMA RAPT copy of HIFLD Hospitals (`services.arcgis.com/XG15cJAlne2vxtgt/.../Hospitals_RAPT/FeatureServer/6`, data edited 2026-04-22); 32 open hospitals in the study area, 4 without beds. Bed counts differ from CMS POS — see V-36 |
+| V-19 | IPEDS file names, enrollment field/filter | 2026-09-26 | HD2024/EFFY2024 latest (2025 → 404); EFYTOTLT with EFFYLEV = 1; 28 institutions (OSU main 65,036) |
+| V-20 | ODOT TIMS traffic counts | 2026-09-26 | `Traffic_Count_Stations/MapServer/0`; STATION_ID_NBR, AADT, AADT_YEAR (2025); 1,472 stations with AADT. Terms → V-38 |
+| V-34 | Columbus open-data layers currency | 2026-09-26 | Meters item (2017) stale; curb inventory MapServer/38 current (edits to 2026-09-25) → S20 (ADR-0064); zoning S23/S23b current. Licence of layer 38 → V-37 |
+| — | Downloader saved gzip-encoded responses still compressed (IPEDS zips failed with 'Bad magic number') | 2026-09-26 | Fixed: `decode_content = True`; cache scanned, no other file affected |
 | V-13 | Overture release id and S3 path (S02 buildings) | 2026-09-25 | Release `2026-09-23.1` (S3 listing 2026-09-25); S02 buildings loaded live: 560,474 footprints. Places (S03a) still disabled — parking category/taxonomy part stays open as V-13b |
 | V-14 | LODES8 latest Ohio year; WAC/xwalk columns | 2026-09-25 | LODES8 listing 2002–2023 (files dated 2025-12-03); `oh_wac_S000_JT00_2023.csv.gz` + `oh_xwalk.csv.gz` headers match the adapter; loaded 7,401 blocks |
 | V-15 | ACS vintage and variable IDs; API key | 2026-09-25 | ACS 5-year 2024 (2025 → 404); all 11 variable IDs present in 2024 variables.json; key required (from env); loaded 1,033 block groups |

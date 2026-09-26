@@ -300,3 +300,38 @@ its area; zone polygons are the dissolved parcels — boundaries follow parcel l
 freehand trace. Parcels within 150 ft of the A/B line route to Review. If the City confirms an
 official layer, it replaces S23c.
 
+
+## ADR-0062 — FEMA NFHL query: drop minimal-hazard zones, ~1 m generalization
+**Context.** NFHL layer 28 returns full-detail polygons (~75 KB each; 200 features ≈ 15 MB), so a
+county-wide query does not transfer reliably in pages of 1,000.
+**Decision (Bernard, F4, 2026-09-25).** The S14 query (`sources.S14.options`) excludes
+`ZONE_SUBTY = 'AREA OF MINIMAL FLOOD HAZARD'` (539 of 9,137 polygons in the county envelope), pages
+100 features, and asks the server to generalize geometry with `maxAllowableOffset` 1e-5° (~1 m)
+and 6-decimal coordinates.
+**Effect.** Floodway (`ZONE_SUBTY = 'FLOODWAY'`) and SFHA (`SFHA_TF = 'T'`) polygons are all kept, so
+the floodway screen and flood flag are unaffected in kind; their edges can move by up to ~1 m, which
+can change the result only for a parcel touching a floodway edge by less than that. Minimal-hazard
+Zone X carries no screen meaning. Franklin load: 8,327 polygons.
+
+## ADR-0063 — Existing surface lots are not failed by new-lot rules
+**Context.** Zone A's prohibition (§3359.27(C)), Prohibited zoning and design overlays govern
+*establishing* a lot. A parcel already operating as a surface lot may be a legal nonconforming use
+(§3359.27 exempts lots established before 15 Jan 1999; Title 33 nonconforming-use rules).
+**Decision (Bernard, F4, 2026-09-25).** A parcel is an *existing surface lot* when its land-use code
+is 456 and the surface check confirms it (improvement ratio < 0.25, OSM surface parking ≥ 50 %,
+buildings ≤ 20 %), or OSM `parking=surface` polygons cover ≥ 50 % of it. For such parcels, zoning
+Fail (including Zone A) and design-overlay results become **Review** with reason "existing surface
+lot — possible legal nonconforming use; verify grandfathered status (§3359.27 pre-1999 exception /
+nonconforming-use rules)", and the parcel's land use counts as eligible. Size, stall range, shape,
+excluded use, floodway and slope still apply.
+
+## ADR-0064 — S20 = city curb inventory (not meter transactions)
+**Context.** SCOPE §3 lists S20 as meter/kiosk *transactions* (on-street occupancy and rates).
+Columbus publishes no transactions; it publishes a maintained curb inventory by block face
+(PublicService/MapServer/38, edited through 2026-09-25) with stated spaces, posted hourly rates,
+hours, time limits and evening periods. The 2017 "Parking Meters" point item is stale (93 % removed).
+**Decision.** S20 ingests the curb inventory, filtered to active metered block faces, into
+`OnStreetSegments` (`stalls_est` = stated `Spaces`, `rate_hour` = daytime `Fee1`, `metered_flag`);
+hours, limits and evening rates stay in `Raw_OnStreet`. On-street occupancy is not available from
+S20; if transactions become available they get their own source id. Franklin load: 1,864 block
+faces, 10,715 spaces (361 without a posted rate).

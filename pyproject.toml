@@ -58,11 +58,12 @@ ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "-m 'not network and not arcpy' --strict-markers"
+addopts = "-m 'not network and not arcpy and not slow' --strict-markers"
 markers = [
   "unit: fast unit tests (default)",
   "integration: fixture-market pipeline runs",
   "network: live endpoint smoke tests (opt-in: pytest -m network)",
+  "slow: full fixture pipeline re-runs; excluded locally, run in CI (pytest -m 'not network and not arcpy')",
   "arcpy: requires ArcGIS Pro / ArcPy",
 ]
 filterwarnings = ["ignore::DeprecationWarning:osmnx.*"]
