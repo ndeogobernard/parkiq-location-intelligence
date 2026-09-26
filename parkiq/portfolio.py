@@ -149,9 +149,9 @@ def render(
     browser = next((b for b in BROWSERS if Path(b).exists()), None) or shutil.which("msedge")
     if browser is None:
         raise FileNotFoundError("no headless Edge/Chrome found to print the PDF")
-    with (
-        tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as prof
-    ):  # isolated profile: no hand-off to a running browser
+    with tempfile.TemporaryDirectory(
+        ignore_cleanup_errors=True
+    ) as prof:  # isolated profile: no hand-off to a running browser
         subprocess.run(
             [
                 browser,
