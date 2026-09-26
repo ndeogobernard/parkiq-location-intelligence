@@ -1,0 +1,1 @@
+facility_id,osm_ids,parcel_id,name,operator,type,lat,lon,area,visit_date,visit_time,observer,source,rate_hour,rate_daily,rate_early_bird,early_bird_rule,rate_evening_flat,evening_starts,rate_weekend_daily,rate_event,rate_monthly,max_stay,hours_posted,payment_app,app_zone,capacity_counted,photo_ref,notes

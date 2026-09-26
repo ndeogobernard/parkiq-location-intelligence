@@ -278,6 +278,8 @@ def to_analysis(
     if native.equals(ctx.cfg.crs):
         transformation = "none"
     out = out[out.geometry.notna() & ~out.geometry.is_empty].copy()
+    if out.geometry.has_z.any():  # schema geometries are 2-D (e.g. Auditor parcels are Polygon Z)
+        out[out.geometry.name] = out.geometry.force_2d()
     invalid = ~out.geometry.is_valid
     if invalid.any():
         out.loc[invalid, out.geometry.name] = out.loc[invalid].geometry.make_valid()

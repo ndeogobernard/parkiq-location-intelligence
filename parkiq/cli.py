@@ -186,6 +186,44 @@ def schema_docs_cmd(
         typer.echo(f"{kind}: {path}")
 
 
+@app.command("survey-package")
+def survey_package_cmd(
+    market: MarketOpt,
+    run_id: Annotated[str, typer.Option("--run-id", help="run with SupplyFacilities")],
+    strata: Annotated[Path, typer.Option(help="survey strata YAML", exists=True)],
+    out: Annotated[Path | None, typer.Option(help="output folder (default: strata folder)")] = None,
+    config_dir: Annotated[Path | None, typer.Option(help="configs/ directory")] = None,
+) -> None:
+    """Field rate survey package: sample + backups CSV, blank template, field sheet, map (PDF)."""
+    from parkiq import survey
+    from parkiq.runner import open_run
+
+    cfg = _load(market, config_dir)
+    ctx = open_run(cfg, run_id=run_id)
+    spec = survey.load_strata(strata)
+    fac = ctx.store.read_layer("SupplyFacilities")
+    sample = survey.select_sample(
+        fac, spec["strata"], float(spec["min_spacing_m"]), int(spec["backups_per_area"])
+    )
+    folder = out or strata.parent
+    rnd = int(spec["round"])
+    sample.to_csv(folder / f"round{rnd}_sample.csv", index=False)
+    survey.write_template(folder / "survey_template.csv")
+    survey.field_sheet_pdf(folder / "field_sheet.pdf", cfg.market.market.name, rnd)
+    subs = ctx.store.read_layer("Submarkets")
+    edges = ctx.store.read_layer("WalkEdges", columns=["highway"])
+    subs["geometry"] = subs.geometry.make_valid()
+    area = subs.union_all().buffer(2000)
+    roads = edges[edges.intersects(area)]
+    survey.sample_map_pdf(
+        folder / f"round{rnd}_sample_map.pdf", sample, subs, roads,
+        f"{cfg.market.market.name} — field rate survey round {rnd} (run {run_id})",
+    )  # fmt: skip
+    n = sample.groupby(["stratum", "role"]).size().unstack(fill_value=0)
+    typer.echo(n.to_string())
+    typer.echo(f"written to {folder}")
+
+
 @app.command()
 def validate(
     run_id: Annotated[str, typer.Option("--run-id")],

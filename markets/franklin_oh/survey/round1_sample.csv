@@ -1,0 +1,56 @@
+role,rank,stratum,area,facility_id,name,operator,type,lat,lon,why_selected,osm_ids
+sample,1,Downtown Zone A/B,Downtown (Zone A/B),F002205,RiverSouth Garage,Lazarus Parking,Garage,39.956938,-83.000952,tagged paid (fee=yes); operator Lazarus Parking; 637 stalls (footprint x levels),way/360547113
+sample,2,Downtown Zone A/B,Downtown (Zone A/B),F000021,Peninsula Garage,LAZ Parking,Garage,39.960524,-83.008444,tagged paid (fee=yes); operator LAZ Parking; 600 stalls (stated),node/6362958735
+sample,3,Downtown Zone A/B,Downtown (Zone A/B),F002181,Columbus Commons Garage,,Garage,39.957102,-82.998114,tagged paid (fee=yes); 3784 stalls (footprint x levels),way/32803036
+sample,4,Downtown Zone A/B,Downtown (Zone A/B),F005331,Vern Riffe Center Parking Garage,,Garage,39.960247,-83.001581,tagged paid (fee=yes); 2334 stalls (footprint x levels),way/617454267
+sample,5,Downtown Zone A/B,Downtown (Zone A/B),F002410,11-S,Columbus State Community College,Surface,39.968224,-82.989248,tagged paid (fee=yes); operator Columbus State Community College; 430 stalls (area),way/391604451;way/808868020
+sample,6,Downtown Zone A/B,Downtown (Zone A/B),F000126,28-S,Columbus State Community College,Surface,39.970134,-82.994934,tagged paid (fee=yes); operator Columbus State Community College; 284 stalls (area),relation/6628632
+sample,7,Downtown Zone A/B,Downtown (Zone A/B),F002104,,Nationwide Children's Homecare,Surface,39.956455,-82.99185,tagged paid (fee=yes); operator Nationwide Children's Homecare; 241 stalls (stated),way/292819978
+sample,8,Downtown Zone A/B,Downtown (Zone A/B),F002416,4-S,Columbus State Community College,Surface,39.97019,-82.985179,tagged paid (fee=yes); operator Columbus State Community College; 202 stalls (area),way/391605390
+sample,9,Downtown Zone A/B,Downtown (Zone A/B),F002421,2-E,Columbus State Community College,Surface,39.970799,-82.989606,tagged paid (fee=yes); operator Columbus State Community College; 188 stalls (area),way/391606085
+sample,10,Downtown Zone A/B,Downtown (Zone A/B),F002347,Courthouse Parking,Parking Company of America,Surface,39.955314,-83.001608,tagged paid (fee=yes); operator Parking Company of America; 147 stalls (area),way/38022226;way/610875781
+sample,11,Downtown Zone A/B,Downtown (Zone A/B),F002413,9-E,Columbus State Community College,Surface,39.968585,-82.986658,tagged paid (fee=yes); operator Columbus State Community College; 76 stalls (area),way/391605236
+sample,12,Downtown Zone A/B,Downtown (Zone A/B),F002459,,,Surface,39.970836,-82.997926,tagged paid (fee=yes); 773 stalls (area),way/40477669
+backup,1,Downtown Zone A/B,Downtown (Zone A/B),F002047,,,Garage,39.961334,-82.998971,tagged paid (fee=yes); 2260 stalls (footprint x levels),way/230998777
+backup,2,Downtown Zone A/B,Downtown (Zone A/B),F005981,Franklin County Parking Garage,,Garage,39.954162,-82.997878,tagged paid (fee=yes); 1207 stalls (footprint x levels),way/80675857
+backup,3,Downtown Zone A/B,Downtown (Zone A/B),F005157,Franklin County Parking Garage,,Garage,39.953987,-83.001223,tagged paid (fee=yes); 782 stalls (footprint x levels),way/611304312
+backup,4,Downtown Zone A/B,Downtown (Zone A/B),F002042,,,Garage,39.965663,-83.0036,tagged paid (fee=yes); 633 stalls (footprint x levels),way/221134828
+backup,5,Downtown Zone A/B,Downtown (Zone A/B),F002345,Two Miranova Place Parking Garage,,Garage,39.954279,-83.005889,tagged paid (fee=yes); 560 stalls (footprint x levels),way/38022201
+sample,1,Arena District + Short North,Arena District,F002000,Buggyworks Lot,SP+,Surface,39.96983,-83.01188,tagged paid (fee=yes); operator SP+; 436 stalls (area),way/188837568;way/224406001;way/545541269
+sample,2,Arena District + Short North,Arena District,F003612,,,Surface,39.972091,-83.006725,tagged paid (fee=yes); 244 stalls (area),way/500537992
+sample,3,Arena District + Short North,Arena District,F005863,Vine East Lot,,Surface,39.970603,-83.006427,tagged paid (fee=yes); 227 stalls (area),way/777468248;way/777468252
+sample,4,Arena District + Short North,Arena District,F006390,,,Surface,39.967042,-83.013311,tagged paid (fee=yes); 207 stalls (area),way/961441290
+sample,5,Arena District + Short North,Arena District,F006394,,,Surface,39.96712,-83.010091,tagged paid (fee=yes); 75 stalls (area),way/961441296;way/961441299
+backup,1,Arena District + Short North,Arena District,F002160,Columbus Convention Center - Vine Street Garage,Greater Columbus Convention Center,Garage,39.970905,-83.003565,tagged paid (fee=yes); operator Greater Columbus Convention Center; 1778 stalls (stated),way/318435093
+backup,2,Arena District + Short North,Arena District,F006186,Astor Park Garage,LAZ Parking,Garage,39.968223,-83.018444,tagged paid (fee=yes); operator LAZ Parking; 670 stalls (stated),way/885617839
+backup,3,Arena District + Short North,Arena District,F002159,McConnell Garage,SP+,Garage,39.969305,-83.008093,tagged paid (fee=yes); operator SP+; 0 stalls (nan),way/318434648
+backup,4,Arena District + Short North,Arena District,F002040,,,Garage,39.966303,-83.004527,tagged paid (fee=yes); 420 stalls (footprint x levels),way/221134826
+backup,5,Arena District + Short North,Short North,F004855,Joseph Garage,,Garage,39.975166,-83.004076,tagged paid (fee=yes); 378 stalls (footprint x levels),way/599895898
+sample,1,University District,University District,F006242,,,Surface,39.997854,-83.007166,tagged paid (fee=yes); 20 stalls (area),way/916523971
+sample,2,University District,University District,F001210,,,Surface,40.006602,-83.012011,94 stalls (area),way/1363959654;way/1363959658;way/1363959659;way/1363959660;way/1363959661;way/1363959662;way/1363959663;way/1363959664;way/1463240758
+sample,3,University District,University District,F001084,,,Surface,39.991859,-83.005217,77 stalls (area),way/1363680529;way/1546418687;way/539336627;way/539336628
+sample,4,University District,University District,F000919,,,Surface,40.002522,-83.008033,46 stalls (area),way/1339700845;way/1339700855
+sample,5,University District,University District,F000630,,,Surface,40.006432,-83.008729,43 stalls (area),way/1226370523
+backup,1,University District,University District,F002180,Gateway Garage,The Ohio State University,Garage,39.994071,-83.005209,tagged paid (fee=yes); operator The Ohio State University; 1176 stalls (stated),way/326172610
+backup,2,University District,University District,F005780,,,Surface,40.006583,-83.01399,37 stalls (area),way/761775348
+backup,3,University District,University District,F001188,,,Surface,40.004336,-83.007616,31 stalls (area),way/1363955217
+backup,4,University District,University District,F003677,,,Surface,40.006953,-83.01655,28 stalls (area),way/537575926;way/961135564
+backup,5,University District,University District,F001537,,,Surface,40.008734,-83.010821,24 stalls (area),way/1461997597;way/1461997598;way/1461997603
+sample,1,Brewery District / German Village,Brewery District / German Village,F002129,Lot 37E,Kroger,Surface,39.949449,-83.001175,tagged paid (fee=yes); operator Kroger; 746 stalls (area),way/293478811;way/293478812;way/480727126
+sample,2,Brewery District / German Village,Brewery District / German Village,F003898,,,Surface,39.952033,-83.002158,tagged paid (fee=yes); 286 stalls (area),way/554543134;way/554543135;way/554543136;way/554543137
+sample,3,Brewery District / German Village,Brewery District / German Village,F003906,,,Surface,39.948116,-83.001729,tagged paid (fee=yes); 269 stalls (area),way/554543149
+sample,4,Brewery District / German Village,Brewery District / German Village,F004009,,,Surface,39.942083,-82.99786,tagged paid (fee=yes); 14 stalls (area),way/558263950
+backup,1,Brewery District / German Village,Brewery District / German Village,F004179,Brewery District Parking,,Garage,39.95179,-82.999691,tagged paid (fee=yes); 674 stalls (footprint x levels),way/588427790
+backup,2,Brewery District / German Village,Brewery District / German Village,F002130,,Sherwin-Williams,Surface,39.949331,-82.997628,operator Sherwin-Williams; 117 stalls (area),way/293478813;way/556041543;way/589003580;way/589003588
+backup,3,Brewery District / German Village,Brewery District / German Village,F000175,,Fifth Third Bank,Surface,39.945771,-82.998158,operator Fifth Third Bank; 83 stalls (area),way/1013711265;way/1013711268;way/556041533
+backup,4,Brewery District / German Village,Brewery District / German Village,F004046,,Education First Credit Union,Surface,39.951817,-82.987831,operator Education First Credit Union; 42 stalls (area),way/560979668
+backup,5,Brewery District / German Village,Brewery District / German Village,F004015,,McDonald's,Surface,39.941567,-82.996045,operator McDonald's; 38 stalls (area),way/558321105;way/558321113
+sample,1,Franklinton,Franklinton,F002331,,,Surface,39.958999,-83.020854,207 stalls (area),way/375405973
+sample,2,Franklinton,Franklinton,F001020,,,Surface,39.957022,-83.011665,126 stalls (area),way/1362988264;way/1362988265;way/1362988266
+sample,3,Franklinton,Franklinton,F005821,,,Surface,39.963365,-83.023782,94 stalls (area),way/772060075
+sample,4,Franklinton,Franklinton,F002194,,,Surface,39.956844,-83.019407,85 stalls (area),way/338767253
+backup,1,Franklinton,Franklinton,F001678,,LAZ Parking,Garage,39.955483,-83.01174,tagged paid (fee=yes); operator LAZ Parking; 0 stalls (nan),way/1481272974;way/744780730
+backup,2,Franklinton,Franklinton,F005543,Gravity Apartments parking garage,,Garage,39.961611,-83.013666,tagged paid (fee=yes); 0 stalls (nan),way/689698427
+backup,3,Franklinton,Franklinton,F006088,,,Surface,39.957565,-83.014142,44 stalls (area),way/830845404
+backup,4,Franklinton,Franklinton,F005335,,,Surface,39.959696,-83.024439,22 stalls (area),way/621514404
+backup,5,Franklinton,Franklinton,F000032,,,Surface,39.957073,-83.040209,0 stalls (nan),node/7933197057

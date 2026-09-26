@@ -1,0 +1,11 @@
+# Field rate survey — round 1 (Bernard, M3 decisions 2026-09-26). Posted rates for all dayparts.
+# Areas are Submarkets names (markets/franklin_oh/submarkets.geojson). Public right-of-way only.
+round: 1
+min_spacing_m: 150          # spread picks within an area (analyst choice for navigation, not a model parameter)
+backups_per_area: 5
+strata:
+  - {label: "Downtown Zone A/B", areas: ["Downtown (Zone A/B)"], n: 12, garages: 4}
+  - {label: "Arena District + Short North", areas: ["Arena District", "Short North"], n: 5, garages: 0}
+  - {label: "University District", areas: ["University District"], n: 5, garages: 0}
+  - {label: "Brewery District / German Village", areas: ["Brewery District / German Village"], n: 4, garages: 0}
+  - {label: "Franklinton", areas: ["Franklinton"], n: 4, garages: 0}

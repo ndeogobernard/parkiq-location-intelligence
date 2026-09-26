@@ -170,7 +170,14 @@ class Store:
             return cur.rowcount
 
     def _append_table(self, table: str, df: pd.DataFrame) -> None:
-        pyogrio.write_dataframe(df, self.gpkg, layer=table, driver="GPKG", append=self.has(table))
+        append = self.has(table)
+        if append:
+            with closing(self._connect()) as con:
+                cols = {r[1] for r in con.execute(f'PRAGMA table_info("{table}")')} - {"fid"}
+                n = con.execute(f'SELECT COUNT(*) FROM "{table}"').fetchone()[0]
+            # an empty table built by an older schema version is replaced, not appended to
+            append = not (n == 0 and cols != set(df.columns))
+        pyogrio.write_dataframe(df, self.gpkg, layer=table, driver="GPKG", append=append)
 
     def write_table(self, name: str, df: pd.DataFrame, key: Mapping[str, Any] | None = None) -> int:
         """Replace this run's rows (optionally narrowed by ``key``) in an attribute table.

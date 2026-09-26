@@ -8,6 +8,10 @@ market:
   slug: franklin_oh
   boundary: {type: county, value: "39049"}
   focus_submarkets: []          # DECIDE after the county-wide demand scan (ADR-0008)
+  submarkets_source:           # survey strata for reporting only (never a filter); built from City layers + S23c
+    path: franklin_oh/submarkets.geojson
+    name_field: name
+    type_field: type
   analysis_crs: EPSG:3735       # NAD83 / Ohio South (ftUS) — ADR-0007
   units: ft
 study:
@@ -47,7 +51,11 @@ supply:
   private_effective_share: 0.50
   onstreet_stall_length_ft: 22  # Columbus meter layer (S20) may make this unnecessary downtown
   dedupe_distance_m: 40
-  dedupe_name_similarity: null  # DECIDE (ADR-0020)
+  dedupe_name_similarity: 0.80  # ADR-0020 (Bernard, M3 2026-09-26): named pairs within 40 m merge at >= 0.80
+  dedupe_unnamed_touch_m: 5     # ADR-0020 (Bernard): an unnamed record merges only with a same-type neighbour within 5 m
+  unknown_access_as_private: true   # PROPOSED at M3 stop: OSM lots without access/fee tags counted at the private share
+  curb_local_highways: [residential, living_street, unclassified]   # ADR-0021 (Bernard): "residential/local streets"
+  curb_sensitive_ratio: 1.0     # PROPOSED at M3 stop: flag hex when potential free-curb stalls >= counted effective supply
 finance: {}                     # all SCOPE defaults from configs/finance_defaults.yaml; DECIDE keys null
 ranking: {financial_weight: 0.70, suitability_weight: 0.30, shortlist_size: 10}   # SCOPE range 5–10
 data_licenses:
@@ -113,13 +121,14 @@ sources:
     path: franklin_oh/venues.csv
     options: {x: lon, y: lat, xy_crs: "EPSG:4326"}
   S12a:
-    enabled: true               # HIFLD Open retired (404, 2026-09-26); FEMA RAPT copy of HIFLD Hospitals (data edited 2026-04-22)
-    provider: "FEMA RAPT (HIFLD Hospitals schema)"
-    license: "Public use (no restriction stated)"
-    url: "https://services.arcgis.com/XG15cJAlne2vxtgt/arcgis/rest/services/Hospitals_RAPT/FeatureServer/6"
-    vintage: "2026-04"
-    field_map: {hospital_id: ID, name: NAME, beds: BEDS}
-    options: {where: "STATUS = 'OPEN'"}   # BEDS -999 -> null; bed counts differ from CMS POS [VERIFY]
+    enabled: true               # ONE bed source: CMS POS Q2 2026, BED_CNT (Bernard, M3 2026-09-26; ADR-0066)
+    provider: "CMS Provider of Services (Hospital & other), geocoded"
+    license: "Public domain (CMS)"
+    url: null
+    path: franklin_oh/hospitals_cms.csv
+    vintage: "2026-Q2"
+    field_map: {hospital_id: ccn, name: name, beds: beds}
+    options: {x: lon, y: lat, xy_crs: "EPSG:4269"}   # Census geocoder returns NAD83
   S12b:
     enabled: true               # IPEDS HD2024/EFFY2024 latest (2025 -> 404, checked 2026-09-26)
     vintage: "2024"
@@ -218,7 +227,11 @@ provenance:
   supply.private_effective_share:  {status: SCOPE,  source: "SCOPE §2.1"}
   supply.onstreet_stall_length_ft: {status: SCOPE,  source: "SCOPE §2.1"}
   supply.dedupe_distance_m:        {status: SCOPE,  source: "SCOPE §5.3"}
-  supply.dedupe_name_similarity:   {status: DECIDE, source: "ADR-0020"}
+  supply.dedupe_name_similarity:   {status: SET,    source: "analyst choice (Bernard, M3 decisions 2026-09-26; ADR-0020)"}
+  supply.dedupe_unnamed_touch_m:   {status: SET,    source: "analyst choice (Bernard, M3 decisions 2026-09-26; ADR-0020)"}
+  supply.unknown_access_as_private: {status: VERIFY, source: "proposed at M3 stop (conservative: untagged lots are mostly customer lots)"}
+  supply.curb_local_highways:      {status: SET,    source: "Bernard, M3 decisions 2026-09-26 (ADR-0021)"}
+  supply.curb_sensitive_ratio:     {status: VERIFY, source: "proposed at M3 stop: potential free-curb stalls >= counted supply"}
   ranking.financial_weight:        {status: SCOPE,  source: "SCOPE §5.8"}
   ranking.suitability_weight:      {status: SCOPE,  source: "SCOPE §5.8"}
   sources.S18.options.cell_size_m: {status: SET,    source: "Bernard 2026-09-24: 10 m, slope matters little in central Columbus"}

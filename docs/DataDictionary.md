@@ -390,6 +390,10 @@ Geometry: Point · CRS: analysis CRS
 | `rate_month` | REAL | yes |  |  | Monthly rate |
 | `rate_event` | REAL | yes |  |  | Event rate |
 | `operator` | TEXT | yes |  |  | Operator |
+| `access` | TEXT | yes |  |  | OSM access tag (addition, ADR-0065) |
+| `parts` | INTEGER | yes |  |  | Source features merged into this facility (addition, ADR-0065) |
+| `source_ids` | TEXT | yes |  |  | Source feature ids, ';'-joined (addition, ADR-0065) |
+| `submarket` | TEXT | yes |  |  | Submarket containing the facility (addition, ADR-0065) |
 
 ### `OnStreetSegments`
 
@@ -697,6 +701,11 @@ Geometry: table · CRS: —
 | `daypart` | TEXT | no |  | `dm_Daypart` | Daypart |
 | `supply_stalls` | REAL | yes |  |  | Supply, stalls |
 | `effective_supply_stalls` | REAL | yes |  |  | Supply with private share applied |
+| `offstreet_stalls` | REAL | yes |  |  | Off-street share of supply_stalls (addition, ADR-0065) |
+| `onstreet_stalls` | REAL | yes |  |  | Metered on-street share of supply_stalls (addition, ADR-0065) |
+| `unmetered_curb_ft` | REAL | yes |  |  | Local-street curb length (both sides) not metered (addition, ADR-0021) |
+| `potential_curb_stalls` | REAL | yes |  |  | unmetered_curb_ft / on-street stall length — NOT counted as supply |
+| `curb_sensitive_flag` | BOOLEAN | yes |  |  | potential_curb_stalls >= curb_sensitive_ratio × effective supply (ADR-0021) |
 
 ### `Hex_Gap_Daypart`
 

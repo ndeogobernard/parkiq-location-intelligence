@@ -47,6 +47,10 @@ supply:
   onstreet_stall_length_ft: 22
   dedupe_distance_m: 40
   dedupe_name_similarity: 0.8
+  dedupe_unnamed_touch_m: 5
+  unknown_access_as_private: true
+  curb_local_highways: [residential, living_street, unclassified]
+  curb_sensitive_ratio: 1.0
 finance:
   tech_fee_pct_revenue: 0.05
   mgmt_fee_pct_revenue: 0.06
@@ -162,6 +166,10 @@ provenance:
   supply.onstreet_stall_length_ft: {status: SET, source: "SYNTHETIC fixture"}
   supply.dedupe_distance_m:        {status: SET, source: "SYNTHETIC fixture"}
   supply.dedupe_name_similarity:   {status: SET, source: "SYNTHETIC fixture"}
+  supply.dedupe_unnamed_touch_m:   {status: SET, source: "SYNTHETIC fixture"}
+  supply.unknown_access_as_private: {status: SET, source: "SYNTHETIC fixture"}
+  supply.curb_local_highways:      {status: SET, source: "SYNTHETIC fixture"}
+  supply.curb_sensitive_ratio:     {status: SET, source: "SYNTHETIC fixture"}
   finance.tech_fee_pct_revenue:    {status: SET, source: "SYNTHETIC fixture"}
   finance.mgmt_fee_pct_revenue:    {status: SET, source: "SYNTHETIC fixture"}
   finance.capture_share:           {status: SET, source: "SYNTHETIC fixture"}

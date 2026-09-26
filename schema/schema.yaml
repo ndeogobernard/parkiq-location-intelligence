@@ -326,6 +326,10 @@ layers:
       rate_month:      {type: REAL, desc: "Monthly rate"}
       rate_event:      {type: REAL, desc: "Event rate"}
       operator:        {type: TEXT, desc: "Operator"}
+      access:          {type: TEXT, desc: "OSM access tag (addition, ADR-0065)"}
+      parts:           {type: INTEGER, desc: "Source features merged into this facility (addition, ADR-0065)"}
+      source_ids:      {type: TEXT, desc: "Source feature ids, ';'-joined (addition, ADR-0065)"}
+      submarket:       {type: TEXT, desc: "Submarket containing the facility (addition, ADR-0065)"}
   OnStreetSegments:
     feature_dataset: Supply
     geometry: LineString
@@ -571,6 +575,11 @@ tables:
       daypart:                 {type: TEXT, nullable: false, domain: dm_Daypart, desc: "Daypart"}
       supply_stalls:           {type: REAL, desc: "Supply, stalls"}
       effective_supply_stalls: {type: REAL, desc: "Supply with private share applied"}
+      offstreet_stalls:        {type: REAL, desc: "Off-street share of supply_stalls (addition, ADR-0065)"}
+      onstreet_stalls:         {type: REAL, desc: "Metered on-street share of supply_stalls (addition, ADR-0065)"}
+      unmetered_curb_ft:       {type: REAL, desc: "Local-street curb length (both sides) not metered (addition, ADR-0021)"}
+      potential_curb_stalls:   {type: REAL, desc: "unmetered_curb_ft / on-street stall length — NOT counted as supply"}
+      curb_sensitive_flag:     {type: BOOLEAN, desc: "potential_curb_stalls >= curb_sensitive_ratio × effective supply (ADR-0021)"}
   Hex_Gap_Daypart:
     desc: "Demand − effective supply per hex and daypart (Phase D)."
     fields:

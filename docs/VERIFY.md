@@ -42,9 +42,13 @@ Status: **Open** unless noted. "Owner" = who can close it (A = analyst, P = part
 | V-32 | `formulas` package IRR/NPV support for the parity test | M6 | dev |
 | V-13b | Overture Places: whether a parking category exists; current taxonomy field (`categories.primary`) — S03a still disabled | S03a | A |
 | V-35 | Downtown parking zones A/B (S23c) are DERIVED from City Code Map 2 (ADR-0061): Bernard is asking the City whether an official GIS layer exists; if so it replaces S23c. Until then DD parcels within 150 ft of the A/B line route to Review | S23c | A |
-| V-36 | Hospital beds: FEMA RAPT (HIFLD schema, Franklin rows dated 2024-04-19) vs CMS POS Q2 2026 disagree (Mount Carmel East 483 vs 937; James 356 vs 172; Nationwide Children's 551 vs 378). Choose the bed source for demand (M4) | S12a | A |
+| V-36 | Hospital beds — ONE source: CMS POS Q2 2026 BED_CNT (ADR-0066). Spot-check of the five largest vs the hospitals' own figures (2026-09-26): Riverside 1,000 vs 1,059 (single campus; OK); OSU Univ. Hospitals 971 vs no per-hospital figure (medical center 1,463 staffed across 6 hospitals; new tower opened 2026-02-22; plausible); **Mount Carmel East 937 vs ~400 at the East campus** (CCN also reports Grove City, 210; ~327 unexplained) — CMS overstates the 6001 E Broad St point; Grant 645 vs 'more than 650' (OK); **Nationwide Children's 378 vs 703 licensed Columbus beds** (CMS likely excludes licensed/NICU/behavioral beds) — CMS understates. Decide before M4 whether to keep CMS as-is or override these two with campus figures | S12a | A |
 | V-37 | Licence of Columbus PublicService/MapServer/38 (no Hub item; sibling City items CC0) | S20 | A |
 | V-38 | ODOT TIMS terms of use (copyright 'ODOT Office of Technical Services'; no terms page found) | S13 | A |
+| V-39 | Surface capacity estimate vs OSM stated capacity (M3 QA-C01): estimate/stated median 0.71 (n = 357; median |error| 40 %; garages 1.06). With SCOPE stall_area_sqft_gross 320 and layout_efficiency 0.90, surface supply is likely understated ~29 %. Options: calibrate the surface factor to stated lots, or keep SCOPE values | supply | A |
+| V-40 | Non-parking lots in OSM parking (auto auctions, impound, dealer inventory; e.g. Columbus Fair Auto Auction ~7,600 est. stalls, City impound lot ~4,700) are counted as private supply. Proposal: exclude by name/operator keywords or a manual list | supply | A |
+| V-41 | Proposed M3 values: `supply.unknown_access_as_private` = true (5,937 of 6,363 surface facilities private at 0.50) and `supply.curb_sensitive_ratio` = 1.0 (1,429 hexes flagged, mostly low-supply residential; meaningful once intersected with M4 hot zones) | supply | A |
+| V-42 | Arena District survey stratum is an analyst construct (downtown overlay north of W Spring St, west of N High St); Short North / University District are the SIDs (High St corridors; OSU campus garages outside) | survey | A |
 
 ## Closed
 

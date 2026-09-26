@@ -34,10 +34,10 @@ consequence and confirmed before any code builds on it.
 | 0017 | Market `ranking:` overrides shared weights | D-12 | — | **Accepted** 2026-09-24 | — |
 | 0018 | Microsoft footprints via Overture (no separate adapter) | D-13 | — | **Accepted** 2026-09-24 | — |
 | 0019 | Units in field names; conversions only in `parkiq/units.py` | D-14 | — | **Accepted** 2026-09-24 | — |
-| 0020 | Supply dedupe rule | D-15 | — | Proposed — **review at M3** | M3 |
-| 0021 | On-street curb length | D-16 | — | Proposed — **review at M3** | M3 |
+| 0020 | Supply dedupe rule | D-15 | — | **Accepted** 2026-09-26 (with changes) | M3 |
+| 0021 | On-street curb length | D-16 | — | **Accepted** 2026-09-26 | M3 |
 | 0022 | Anchor category crosswalk `configs/anchor_crosswalk.yaml` | D-17 | — | **Accepted** 2026-09-24 | M4 |
-| 0023 | Listing-rate → daypart mapping | D-18 | — | Proposed — **review at M3** | M3 |
+| 0023 | Listing-rate → daypart mapping | D-18 | — | **Accepted** 2026-09-26 | M3 |
 | 0024 | Hot-zone contiguity = H3 k=1 components | D-19 | — | Proposed — **review at M4** | M4 |
 | 0025 | Shape index = rectangularity | D-20 | D-09 | **Accepted** 2026-09-24 | M5 |
 | 0026 | Frontage / corner definitions | D-21 | — | Proposed — **review at M5** | M5 |
@@ -335,3 +335,55 @@ hours, time limits and evening periods. The 2017 "Parking Meters" point item is 
 hours, limits and evening rates stay in `Raw_OnStreet`. On-street occupancy is not available from
 S20; if transactions become available they get their own source id. Franklin load: 1,864 block
 faces, 10,715 spaces (361 without a posted rate).
+
+## ADR-0020 — Supply dedupe: Accepted 2026-09-26 (Bernard, with changes)
+Adjacent OSM polygons of one facility (touching, same type, same or missing name/operator) are
+dissolved first. Named pairs merge within 40 m when normalized-name token-set similarity ≥ 0.80
+(`supply.dedupe_name_similarity`, SET). An **unnamed** record merges only with a same-type
+neighbour whose geometry touches or overlaps within 5 m (`supply.dedupe_unnamed_touch_m`), never at
+40 m. Capacity priority: stated > listing > OSM > Overture.
+
+## ADR-0021 — On-street supply: Accepted 2026-09-26
+On-street supply = S20 stated spaces on active metered block faces; unmetered curb is excluded.
+Each hex records `unmetered_curb_ft` on local streets (`supply.curb_local_highways`: residential,
+living_street, unclassified; both sides; metered faces removed) and `potential_curb_stalls`
+(÷ on-street stall length). `curb_sensitive_flag` = potential ≥ `supply.curb_sensitive_ratio` ×
+counted effective supply (ratio proposed 1.0, [VERIFY]). The flag is carried into M4 hot zones and
+stated in the memo assumptions; curb-sensitive areas are listed for the field survey.
+
+## ADR-0023 — Rates: Accepted 2026-09-26
+The off-street rate surface is built from survey/manual observations only; S20 meter rates are a
+floor and cross-check, never inputs. The daypart mapping (plan D-18) applies to observations. The
+rate surface stays blocked until round-1 survey data is in.
+
+## ADR-0065 — Supply inventory rules (M3)
+OSM `parking` → type: surface/untagged/carports/sheds/garage_boxes → Surface; multi-storey,
+underground, rooftop → Garage; street_side/lane/layby/kerb types dropped (ADR-0021).
+Capacity: stated, else surface area × `site.layout_efficiency` ÷ `site.stall_area_sqft_gross`, else
+garage footprint × levels ÷ gross stall area (levels from OSM, else the max of Overture buildings
+covering ≥ 50 % of the footprint); otherwise unknown and not counted (reported). Private/reserved:
+`access` in private/customers/residents/permit/employees/… → private; `fee=yes` or public access →
+public; untagged → `supply.unknown_access_as_private` (proposed true, [VERIFY]); private stalls
+count at `private_effective_share`. Supply is the same for every daypart until operating hours are
+known. `SupplyFacilities` gains `access`, `parts`, `source_ids`, `submarket`; `Hex_Supply_Daypart`
+gains off-/on-street splits and the curb fields.
+
+## ADR-0066 — Hospital beds: one source (CMS POS)
+**Decision (Bernard, 2026-09-26).** All hospital beds come from the CMS Provider of Services file
+(Hospital & other, Q2 2026), field **BED_CNT** (total beds), active short-term, specialty,
+psychiatric, rehabilitation and children's hospitals in Franklin County (6-digit CCNs; legacy
+letter-suffixed federal records and zero-bed transplant-centre records excluded). CMS has no
+coordinates: addresses are geocoded with the Census geocoder (one fallback via OSM Nominatim) →
+`markets/franklin_oh/hospitals_cms.csv`. **Caveat:** BED_CNT is per CCN and a CCN can span several
+campuses, all placed at the main address. The five largest are spot-checked against the hospitals'
+own figures (discrepancies in VERIFY V-36).
+**For M4 (propose at M4 start):** hospital demand from beds vs LODES health-care jobs (CNS16)
+double-counts staff demand at hospitals; a rule is needed (e.g. subtract hospital-site CNS16 jobs).
+
+## Notes carried forward (Bernard, M3 decisions 2026-09-26)
+* **M4 venues:** a blank `events_per_year` (or seats) means UNKNOWN, not zero — the demand step
+  skips that venue's event demand with a WARNING and never treats blank as 0.
+* **M5 parcel assembly:** merge contiguous parcels with the same owner (normalized name) before the
+  size/stall screen, keep the component parcel ids, and report how many existing lots pass once
+  assembled. Existing surface lots are not failed on shape index; their capacity is estimated from
+  the lot polygon.

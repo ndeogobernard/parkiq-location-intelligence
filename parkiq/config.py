@@ -200,9 +200,13 @@ class SupplySection(_Strict):
     private_effective_share: float = Field(ge=0, le=1)
     onstreet_stall_length_ft: float = Field(gt=0)
     dedupe_distance_m: float = Field(gt=0)
-    dedupe_name_similarity: float | None = None
+    dedupe_name_similarity: float | None = Field(default=None, ge=0, le=1)
+    dedupe_unnamed_touch_m: float | None = Field(default=None, ge=0)
     onstreet_intersection_clearance_ft: float | None = None
     onstreet_driveway_allowance_ft: float | None = None
+    unknown_access_as_private: bool | None = None
+    curb_local_highways: list[str] = Field(default_factory=list)
+    curb_sensitive_ratio: float | None = Field(default=None, gt=0)
 
 
 class RankingSection(_Strict):
@@ -652,7 +656,12 @@ STEP_REQUIREMENTS: dict[str, list[str]] = {
         "market.demand.transit_adjustment.peak_window",
         "market.demand.mode_adjustment",
     ],
-    "supply": ["market.supply.dedupe_name_similarity"],
+    "supply": [
+        "market.supply.dedupe_name_similarity",
+        "market.supply.dedupe_unnamed_touch_m",
+        "market.supply.unknown_access_as_private",
+        "market.supply.curb_sensitive_ratio",
+    ],
     "gap": [],
     "screen": ["market.site.improvement_ratio_max", "market.site.frontage_buffer_ft"],
     "walksheds": [],
