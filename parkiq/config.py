@@ -182,6 +182,8 @@ class DemandSection(_Strict):
     campus_rule: dict[str, list[str]] = Field(default_factory=dict)
     single_anchor_share: float | None = Field(default=None, gt=0, le=1)
     floor_area_cap_sqft: dict[str, float] = Field(default_factory=dict)
+    # ADR-0078: in-office attendance vs the rate's (pre-pandemic) baseline, {category: {daypart: f}}
+    attendance_factor: dict[str, dict[str, float]] = Field(default_factory=dict)
     workplace_min_commuters: float | None = Field(default=None, ge=0)
     workplace_source_id: str | None = None
     jurisdiction_places_path: Path | None = None
@@ -225,6 +227,9 @@ class SupplySection(_Strict):
     parcel_estimate_max_acres: float | None = Field(default=None, gt=0)
     paid_operators: list[str] = Field(default_factory=list)
     survey_observations_path: Path | None = None
+    paid_signal_overrides_path: Path | None = None  # ADR-0075: reviewed paid signals to drop
+    practical_capacity: float | None = Field(default=None, gt=0, le=1)  # ADR-0079
+    benchmark_occupancy_path: Path | None = None  # ADR-0079: observed peak occupancy by area
 
 
 class RankingSection(_Strict):
@@ -635,7 +640,12 @@ def load_config(
         upd["demand"] = dm.model_copy(update=dupd)
     supd = {
         k: _resolve_path(getattr(m.supply, k), market_path.parent)
-        for k in ("exclusions_path", "survey_observations_path")
+        for k in (
+            "exclusions_path",
+            "survey_observations_path",
+            "paid_signal_overrides_path",
+            "benchmark_occupancy_path",
+        )
         if getattr(m.supply, k) is not None
     }
     if supd:

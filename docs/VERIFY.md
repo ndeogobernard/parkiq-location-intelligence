@@ -46,8 +46,9 @@ Status: **Open** unless noted. "Owner" = who can close it (A = analyst, P = part
 | V-37 | Licence of Columbus PublicService/MapServer/38 (no Hub item; sibling City items CC0) | S20 | A |
 | V-38 | ODOT TIMS terms of use (copyright 'ODOT Office of Technical Services'; no terms page found) | S13 | A |
 | V-42 | Arena District survey stratum is an analyst construct (downtown overlay north of W Spring St, west of N High St); Short North / University District are the SIDs (High St corridors; OSU campus garages outside) | survey | A |
-| V-45 | Paid-market indicators outside the core: HZ-P0002 (Easton) rests on four OSM `fee=yes` surface lots and HZ-P0001 (east side, near Mount Carmel East) on one `fee=yes` garage; confirm these are paid to the public (local knowledge / round-1 survey) | gap | A (Bernard: local knowledge) |
-| V-46 | Benchmark gaps vs SPP 2019 (report only; calibration M8): Downtown Zone A/B model occupancy 1.15 vs Capitol Square 81.6 %, Short North 0.90 vs 60.9 %, Brewery 0.45 vs 65 %; Arena 0.83 vs 92.5 % within ±25 % | demand | M8 |
+| V-45 | Paid-market indicators outside the core: HZ-P0002 (Easton) rests on four OSM `fee=yes` surface lots and HZ-P0001 (east side, near Mount Carmel East) on one `fee=yes` garage. Bernard: not sure (2026-09-26) → kept, and added to round-1 survey (stratum 'Paid-signal check (V-45)'); if free, add to paid_signal_overrides.csv and re-run gap | gap | survey |
+| V-46 | Benchmark gaps vs SPP 2019 (report only; calibration M8). After the attendance factor (ADR-0078): Downtown Zone A/B model 0.93 vs Capitol Square 81.6 % (+14 %), Short North 0.77 vs 60.9 % (+26 %), Arena 0.64 vs 92.5 % (−30 %), Brewery 0.35 vs 65 % (−45 %). 2019 is pre-pandemic | demand | M8 |
+| V-48 | Office attendance factor 0.71 (ADR-0078) is a nationwide Placer.ai figure vs 2019; a Columbus-specific ratio vs 2019 (DCI / Placer.ai) would replace it | demand | A |
 
 ## Closed
 

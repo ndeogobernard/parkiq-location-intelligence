@@ -358,8 +358,13 @@ def parcel_estimate(
         "share_median": {k: float(v) for k, v in by_class.items()},
     }
     u = p[~covered].copy()
-    u["est_area"] = open_area[~covered] * u["land_use_class"].map(by_class)
+    u["open_area"] = open_area[~covered]
+    # capped at open area (parcel − building footprint): the class share is ≤ 1 by construction
+    u["est_area"] = (u["open_area"] * u["land_use_class"].map(by_class)).clip(upper=u["open_area"])
     u = u[u["est_area"].fillna(0) > 0]
+    stats["max_share_of_open_area"] = (
+        float((u["est_area"] / u["open_area"]).max()) if len(u) else 0.0
+    )
     est_sqft = u["est_area"].map(lambda a: units.crs_area_to_sqft(a, crs))
     out = gpd.GeoDataFrame(
         {

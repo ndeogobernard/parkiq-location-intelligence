@@ -28,7 +28,7 @@ site:
   min_frontage_ft: 60
   min_shape_index: 0.60         # metric = rectangularity (ADR-0025)
   improvement_ratio_max: 0.25
-  frontage_buffer_ft: null      # DECIDE
+  frontage_buffer_ft: 50        # ADR-0080: ≈ p90 centerline→parcel-edge distance on drive streets (n 3,675)
 demand:
   walk_shed_minutes: [3, 5, 8]
   decay_weights: {3: 1.0, 5: 0.6, 8: 0.25}
@@ -50,6 +50,7 @@ demand:
   hotel_sqft_per_room: 713      # ADR-0069: median gross sq ft per room, 10 OSM hotels with rooms (building GFA shared among POIs)
   campus_rule: {Medical: [CNS16], University: [CNS15]}   # ADR-0070: jobs removed on the anchor's campus parcels
   single_anchor_share: 0.5      # SET (Bernard): hot zone flagged when one anchor supplies > 50% of its gap
+  attendance_factor: {Office: {wd_day: 0.71}}   # ADR-0078 [VERIFY]: Placer.ai Nationwide Office Index, Jan–Jul 2026 mean visits vs same month 2019 (−29.0 %); no Columbus-specific figure vs 2019 published
   floor_area_cap_sqft: {RestaurantBar: 12220, Retail: 40758}   # ADR-0072: 90th pct of standalone-building footprints (1,449 / 1,795 places)
   residential_offstreet_share: null        # not used: residential excluded for the pilot (ADR-0015)
   excluded_anchor_categories: [ResidentialBlock]   # ADR-0015: no residential demand generation; rates stay in config
@@ -73,6 +74,9 @@ supply:
   parcel_estimate_max_acres: 5  # ADR-0074: calibration and application limited to parcels <= 5 acres
   paid_operators: [CampusParc, "LAZ", 'SP\+', Lazarus, "Park Columbus", "Towne Park", "ABM", "Parking Company of America", "Premier Parking", "Impark", "Reef"]   # ADR-0075: paid-market indicators (regex, reviewable)
   survey_observations_path: franklin_oh/survey/round1_observations.csv   # ADR-0075: rows with a posted price mark paid market (file added after fieldwork)
+  paid_signal_overrides_path: franklin_oh/paid_signal_overrides.csv   # ADR-0075: reviewed fee/operator signals to drop (osm_id, action=drop)
+  practical_capacity: 0.85      # ADR-0079: practical-capacity convention (market-evidence note only)
+  benchmark_occupancy_path: franklin_oh/benchmark_occupancy.csv       # ADR-0079: SPP 2019 peak occupancy by area
 finance: {}                     # all SCOPE defaults from configs/finance_defaults.yaml; DECIDE keys null
 ranking: {financial_weight: 0.70, suitability_weight: 0.30, shortlist_size: 10}   # SCOPE range 5–10
 data_licenses:
@@ -235,18 +239,20 @@ provenance:
   site.min_frontage_ft:            {status: SCOPE,  source: "SCOPE §2.1"}
   site.min_shape_index:            {status: SCOPE,  source: "SCOPE §2.1; rectangularity (ADR-0025)"}
   site.improvement_ratio_max:      {status: SCOPE,  source: "SCOPE §5.5"}
-  site.frontage_buffer_ft:         {status: DECIDE, source: ""}
+  site.frontage_buffer_ft:         {status: SET,    source: "ADR-0080: derived from Franklin parcels/OSM streets; applied (analyst may revisit)"}
   demand.transit_adjustment.high_frequency_radius_m: {status: VERIFY, source: "SCOPE §2.1"}
   demand.transit_adjustment.high_frequency_headway_max_min: {status: SET, source: "Bernard, M4 decisions 2026-09-26 (COTA frequent network)"}
   demand.meters_per_floor:         {status: SET,    source: "ADR-0069: derived, median of 5,351 Overture buildings with height and levels"}
   demand.hotel_sqft_per_room:      {status: SET,    source: "ADR-0069: derived, median of 10 OSM hotels with rooms; IQR in memo"}
   demand.single_anchor_share:      {status: SET,    source: "Bernard, M4 decisions 2026-09-26"}
   demand.workplace_min_commuters:  {status: SET,    source: "ADR-0073: analyst choice (sampling stability), applied"}
+  demand.attendance_factor.Office.wd_day: {status: VERIFY, source: "Placer.ai Nationwide Office Index via Commercial Property Executive (commercialsearch.com/news/placer-ai-office-index-2/, latest 2026-08-28): Jan–Jul 2026 −38.3/−31.9/−26.5/−29.1/−32.4/−21.0/−23.6 % vs 2019, mean −29.0 % → 0.71. Cross-check Columbus: DCI State of Downtown 2025 (Placer.ai, Dec 2024–Nov 2025) 90,900 employees, 11.5 M visits, 2.98 visits/week among 73,840 weekly employees ≈ 0.48 of employees per weekday (absolute, no 2019 base)"}
   demand.floor_area_cap_sqft.RestaurantBar: {status: SET, source: "ADR-0072: 90th pct standalone-building footprint, 1,449 restaurants/bars"}
   demand.floor_area_cap_sqft.Retail:        {status: SET, source: "ADR-0072: 90th pct standalone-building footprint, 1,795 shops"}
   demand.transit_adjustment.demand_factor:           {status: VERIFY, source: "SCOPE §2.1"}
   demand.excluded_anchor_categories: {status: SET, source: "ADR-0015 — Bernard 2026-09-24; revisit after Phase K validation"}
   network.walking_speed_m_s:       {status: VERIFY, source: "SCOPE §5.1 [PARAMETER]; needs citation"}
+  supply.practical_capacity:       {status: SET,    source: "ADR-0079: 85 % practical-capacity convention (Bernard, 2026-09-26)"}
   supply.private_effective_share:  {status: SCOPE,  source: "SCOPE §2.1"}
   supply.onstreet_stall_length_ft: {status: SCOPE,  source: "SCOPE §2.1"}
   supply.dedupe_distance_m:        {status: SCOPE,  source: "SCOPE §5.3"}

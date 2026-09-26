@@ -68,8 +68,8 @@ def select_sample(
     """Round sample + backups per stratum (see module docstring).
 
     ``exclude`` rules ({field, pattern, reason}) remove facilities from every pool. A stratum's
-    ``manual`` entries ({facility_id, operator, source, why}) are added to its sample first, even
-    outside its areas; they count toward ``n``.
+    ``manual`` entries ({facility_id | osm_id | name, operator, source, why}) are added to its
+    sample first, even outside its areas; they count toward ``n``.
     """
     crs = fac.crs
     gap = units.m_to_crs(spacing_m, crs)
@@ -78,6 +78,8 @@ def select_sample(
     for rule in exclude or []:
         col = fac[rule["field"]]
         keep &= ~(col.notna() & col.astype(str).str.contains(rule["pattern"], case=False))
+    if "capacity_source" in fac.columns:  # parcel estimates (ADR-0074) are not mapped lots
+        keep &= fac["capacity_source"].fillna("").ne("parcel estimate")
     fac = fac[keep]
     for s in strata:
         pool = _score(fac[fac["submarket"].isin(s["areas"]) & (fac["type"] != "OnStreet")])
@@ -85,11 +87,12 @@ def select_sample(
         chosen: list[Any] = []
         manual: dict[str, dict[str, Any]] = {}
         for m in s.get("manual", []):  # by facility_id or exact name (ids change between runs)
-            hit = (
-                fac[fac["facility_id"] == m["facility_id"]]
-                if "facility_id" in m
-                else fac[fac["name"] == m["name"]]
-            )
+            if "facility_id" in m:
+                hit = fac[fac["facility_id"] == m["facility_id"]]
+            elif "osm_id" in m:  # stable across runs, e.g. "way/123456"
+                hit = fac[fac["source_ids"].fillna("").str.contains(m["osm_id"], regex=False)]
+            else:
+                hit = fac[fac["name"] == m["name"]]
             if len(hit):
                 manual[str(hit["facility_id"].iloc[0])] = m
         if manual:

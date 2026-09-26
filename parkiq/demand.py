@@ -367,7 +367,10 @@ def run_demand(ctx: RunContext) -> dict[str, Any]:
                 float((calib.get(c) or {}).get(dp, 1.0)) if isinstance(calib.get(c), dict) else 1.0
             )
         )
-        mat[:, k] = a["size_value"] * rate * cf * a["mode_factor"] * a["transit_factor"]
+        att = a["category"].map(
+            lambda c, dp=dp: float(dm.attendance_factor.get(c, {}).get(dp, 1.0))
+        )
+        mat[:, k] = a["size_value"] * rate * cf * att * a["mode_factor"] * a["transit_factor"]
         a[f"demand_{dp}"] = mat[:, k]
     a["anchor_id"] = [f"A{i:06d}" for i in range(1, len(a) + 1)]
     for c in ("drive_share", "venue_id"):
@@ -466,6 +469,7 @@ def run_demand(ctx: RunContext) -> dict[str, Any]:
             .round(4)
             .to_dict(),
             "transit_factor_applied": int((a["transit_factor"] < 1).sum()),
+            "attendance_factor": dm.attendance_factor,
         }
     )
     (ctx.run_dir / "demand_report.json").write_text(

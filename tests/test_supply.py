@@ -19,6 +19,7 @@ from parkiq.supply import (
     dissolve_adjacent,
     norm_name,
     osm_facilities,
+    parcel_estimate,
     private_flags,
     similarity,
 )
@@ -201,3 +202,22 @@ def test_survey_exclude_and_manual() -> None:
     assert list(smp["facility_id"]) == ["D", "B"] and "A" not in set(s["facility_id"])
     assert smp.iloc[0]["source_expected"] == "operator website"
     assert s[s.role == "backup"]["why_selected"].iloc[0].startswith("UNVERIFIED")
+
+
+def test_parcel_estimate_capped_at_open_area() -> None:
+    """ADR-0074: estimated parking never exceeds parcel area minus building footprint."""
+    # two calibration parcels with OSM lots covering all their open area, one uncovered parcel
+    parcels = gpd.GeoDataFrame(
+        {"parcel_id": ["a", "b", "c"], "land_use_class": ["Commercial"] * 3,
+         "land_use_code": ["400"] * 3, "excluded_use_flag": [False] * 3},
+        geometry=[box(0, 0, 100, 100), box(200, 0, 300, 100), box(400, 0, 500, 100)], crs=FT,
+    )  # fmt: skip
+    bldg = gpd.GeoDataFrame(
+        geometry=[box(0, 0, 50, 100), box(200, 0, 250, 100), box(400, 0, 460, 100)], crs=FT
+    )
+    osm = gpd.GeoDataFrame(geometry=[box(50, 0, 100, 100), box(250, 0, 300, 100)], crs=FT)
+    est, stats = parcel_estimate(parcels, bldg, osm, ["Commercial"], 5.0, FT)
+    assert stats["share_median"]["Commercial"] == pytest.approx(1.0)
+    assert len(est) == 1
+    assert est["est_area_sqft"].iloc[0] == pytest.approx(40 * 100, rel=1e-4)  # open area of c
+    assert stats["max_share_of_open_area"] <= 1.0

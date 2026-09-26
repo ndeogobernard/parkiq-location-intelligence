@@ -22,7 +22,7 @@ criteria:
   C10: {name: "Pipeline risk",                 unit: count,    direction: Cost,    shed_minutes: 5, description: "Planned garages/developments within 5 min"}
 
 # C04 daypart weights — method choice, DECIDE (manual §11.1). null → the criteria step refuses to run.
-c04_daypart_weights: null
+c04_daypart_weights: {wd_day: 0.3571, wd_eve: 0.3572, we_day: 0.1428, we_eve: 0.1429, event: 0.0}   # ADR-0081: share of operating days (5/14, 5/14, 1/7, 1/7); events are C03
 # C06 search (ADR-0028): top-N anchors within a search radius; missing anchors take the cap value.
 c06: {top_n: 3, search_minutes: 15, missing_minutes: 15}
 # C09 scores — SCOPE §5.7 verbatim. Prohibited parcels never reach scoring (screened out).
@@ -31,4 +31,5 @@ c09_scores: {ByRight: 100, Conditional: 60, Unknown: 40}
 provenance:
   normalization:       {status: SCOPE, source: "SCOPE §5.7"}
   c09_scores:          {status: SCOPE, source: "SCOPE §5.7"}
+  c04_daypart_weights: {status: SET,   source: "ADR-0081: share of operating days, applied (analyst may revisit)"}
   c06:                 {status: SCOPE, source: "ADR-0028 (15-min search, cap 15) — proposed"}

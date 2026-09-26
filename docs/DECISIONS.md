@@ -510,3 +510,55 @@ stops the build. The sources table comes from the run's DataSourceRegistry. Figu
 `docs/portfolio/make_figures.py` under the map standard. Three reports: data model (now), spatial
 analysis (after M5–M6), pipeline (≈ M7). Portfolio cards may link only published reports; nothing
 goes to the site until Bernard approves.
+
+## ADR-0078 — Office attendance factor (hybrid work) — Applied (analyst may revisit)
+Office per-employee rates (ITE PG 6th ed., LU 701) describe pre-pandemic attendance, so weekday-day
+Office demand is multiplied by `demand.attendance_factor` = {Office: {wd_day: 0.71}}; other
+dayparts and categories are unchanged. Value [VERIFY]: Placer.ai Nationwide Office Index
+(Commercial Property Executive, latest 2026-08-28), January–July 2026 office visits vs the same
+month of 2019: −38.3, −31.9, −26.5, −29.1, −32.4, −21.0, −23.6 % → mean −29.0 % → 0.71. No
+Columbus-specific figure against 2019 is published; Downtown Columbus Inc. State of Downtown 2025
+(Placer.ai, Dec 2024–Nov 2025: 90,900 employees, 11.5 M visits, 2.98 visits/week among 73,840
+weekly employees ≈ 0.48 of employees on an average weekday, absolute) is consistent with a
+factor of 0.6–0.7 and is kept as a cross-check. Kastle's 10-city barometer (56.3 %, Dec 2025) is
+lower; a mid-week peak day runs ~15–20 % above the weekly mean (memo). Effect (Franklin run):
+county wd_day demand 453,344 → 382,785; Downtown Zone A/B 60,677 → 49,037 (−19 %).
+
+## ADR-0079 — 85 % practical capacity as market evidence — Applied (Bernard 2026-09-26)
+`supply.practical_capacity` = 0.85. The gap report's `market_evidence` block lists observed peak
+occupancy by area (`markets/franklin_oh/benchmark_occupancy.csv`, City SPP 2019 / fall-2018
+operator data) against 85 %: Arena District 92.5 % (above), Capitol Square 81.6 %, Short
+North/Warehouse 60.9 %, Brewery/RiverSouth 65 %, Scioto Peninsula 22 %, East Downtown 64.7 %
+(below). It is market evidence for the memo only — not used to scale demand or supply — and is
+pre-pandemic, so it likely overstates today's weekday office-driven occupancy.
+
+## ADR-0074 amendment (2026-09-26)
+* The estimated area is explicitly capped at open area (parcel − building footprint); the report
+  records `max_share_of_open_area` (0.929 = SurfaceParking median). Test added.
+* Sensitivity (estimate off, same run otherwise): screening zones 8 → 9 (the extra zone is 4
+  stalls); all 8 zones keep their extent except HZ-P0008 (1 → 2 hexes, gap 1,866 → 3,449); other
+  gaps change by 0–9 %. Before the mask: 568 → 400 zones, qualifying hexes 2,578 → 4,352. The
+  estimate is 7.8 % of counted supply in paid-market hexes vs 44 % in the rest of the county, so
+  it mainly affects the context-only suburbs, not the screening set.
+* Estimated lots are never survey picks (they are parcels, not mapped lots).
+
+## ADR-0075 amendment (2026-09-26)
+Reviewed paid signals can be dropped via `markets/franklin_oh/paid_signal_overrides.csv`
+(osm_id, action = drop, reason, reviewed_by, date); counts reported as `signals_overridden`.
+Empty until V-45 is answered; the V-45 lots are in the round-1 survey as a "Paid-signal check"
+stratum (manual picks by OSM id).
+
+## ADR-0080 — Frontage buffer 50 ft — Applied (analyst may revisit)
+`site.frontage_buffer_ft` = 50. A parcel edge counts as street frontage within 50 ft of a
+drive-street centerline (service roads and alleys excluded, manual §9). Derived from Franklin data:
+distance from 3,675 sampled centerline points (in the right-of-way) to the nearest parcel edge —
+median 24.9 ft, p90 42 ft, p95 56 ft; by class p90: residential 36, tertiary 40, secondary 60,
+primary 68.5 ft. 50 ft covers ≥ p95 of residential/tertiary and ≈ p75–p90 of arterials while staying
+well below a lot depth, so parcels behind a frontage lot do not pick up frontage. A per-class buffer
+is the alternative if arterial parcels are missed (check in the M5 screen QA).
+
+## ADR-0081 — C04 daypart weights: share of operating days — Applied (analyst may revisit)
+`criteria.c04_daypart_weights` = wd_day 5/14, wd_eve 5/14, we_day 1/7, we_eve 1/7, event 0: each
+daypart's rate index is weighted by how many days a year it applies (weekday 5/7, weekend 2/7,
+split evenly between day and evening); event revenue is scored separately by C03. C04 still waits
+for the rate surface (round-1 survey, ADR-0023).

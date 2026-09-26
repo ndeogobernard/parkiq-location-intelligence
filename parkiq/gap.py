@@ -61,6 +61,38 @@ def components(hex_ids: list[str]) -> list[list[str]]:
     return out
 
 
+def market_evidence(sc: Any) -> dict[str, Any]:
+    """Observed peak occupancy by area against the practical-capacity convention (ADR-0079).
+
+    Market evidence only, kept apart from the model: it is not used to scale demand or supply.
+    """
+    pc = sc.practical_capacity
+    path = sc.benchmark_occupancy_path
+    if pc is None or path is None or not path.exists():
+        return {}
+    b = pd.read_csv(path)
+    areas = []
+    for r in b.itertuples():
+        occ = float(r.peak_occupancy)
+        areas.append(
+            {
+                "area": r.area,
+                "peak_occupancy": occ,
+                "vs_practical_capacity": round(occ - pc, 3),
+                "status": "at or above practical capacity"
+                if occ >= pc
+                else "below practical capacity",
+                "year": int(r.year),
+                "source": r.source,
+            }
+        )
+    return {
+        "practical_capacity": pc,
+        "note": str(b["note"].dropna().iloc[0]) if "note" in b and b["note"].notna().any() else "",
+        "areas": areas,
+    }
+
+
 def paid_market_hexes(ctx: RunContext, hexes: gpd.GeoDataFrame) -> tuple[set[str], dict[str, int]]:
     """Hexes with paid parking within the largest walk band (see module docstring)."""
     cfg = ctx.cfg
@@ -75,11 +107,22 @@ def paid_market_hexes(ctx: RunContext, hexes: gpd.GeoDataFrame) -> tuple[set[str
     if "SupplyFacilities" in written:
         f = ctx.store.read_layer("SupplyFacilities")
         fee = f["fee_flag"].fillna(0).astype(bool)
+        drop = pd.Series(False, index=f.index)
+        ovr = sc.paid_signal_overrides_path
+        if ovr is not None and ovr.exists():  # reviewed signals that are not paid public parking
+            o = pd.read_csv(ovr, dtype=str).fillna("")
+            ids = set(o.loc[o["action"].str.lower().eq("drop"), "osm_id"])
+            drop = (
+                f["source_ids"].fillna("").map(lambda v: any(x in ids for x in str(v).split(";")))
+            )
+            fee &= ~drop
+            counts["signals_overridden"] = int(drop.sum())
         op = pd.Series(False, index=f.index)
         if sc.paid_operators:
             # whole words only: "LAZ" must not match "Plaza"
             rx = "|".join(rf"\b(?:{p})(?!\w)" for p in sc.paid_operators)
             op = f["operator"].fillna("").str.contains(rx, flags=re.IGNORECASE, regex=True)
+        op &= ~drop
         pts.append(f.loc[fee | op].geometry)
         counts["fee_tagged_facilities"] = int(fee.sum())
         counts["paid_operator_facilities"] = int((op & ~fee).sum())
@@ -241,5 +284,6 @@ def run_gap(ctx: RunContext) -> dict[str, Any]:
         "hexes_qualifying_paid": len(q_paid),
         "positive_gap_hexes": {dp: int((wide[dp] > 0).sum()) for dp in DAYPARTS},
     }
+    rep["market_evidence"] = market_evidence(ctx.cfg.market.supply)
     (ctx.run_dir / "gap_report.json").write_text(json.dumps(rep, indent=1), encoding="utf-8")
     return rep
