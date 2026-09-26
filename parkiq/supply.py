@@ -58,8 +58,18 @@ TYPE_MAP = {
     "half_on_kerb": "OnStreet",
 }
 PUBLIC_ACCESS = {"yes", "public", "permissive"}
-PRIVATE_ACCESS = {"private", "customers", "residents", "permit", "employees", "delivery",
-                  "no", "destination", "students", "members"}  # fmt: skip
+PRIVATE_ACCESS = {
+    "private",
+    "customers",
+    "residents",
+    "permit",
+    "employees",
+    "delivery",
+    "no",
+    "destination",
+    "students",
+    "members",
+}
 TOUCH_TOL_M = 0.15  # "touching" for polygon dissolve — numerical tolerance, not a parameter
 
 
@@ -198,19 +208,26 @@ def _merge(f: gpd.GeoDataFrame, comp: np.ndarray) -> gpd.GeoDataFrame:
             else (float(cap.max()) if cap.notna().any() and len(polys) <= 1 else np.nan)
         )
         access = g["access"].dropna().astype(str).str.lower()
-        rows.append({
-            "name": _first(g["name"]), "nname": _first(g["nname"]),
-            "operator": _first(g["operator"]), "nop": _first(g["nop"]),
-            "ptype": max(set(types), key=types.count) if types else "Unknown",
-            "parking": _first(g["parking"]), "capacity": stated,
-            "fee": "yes" if (g["fee"] == "yes").any() else _first(g["fee"]),
-            "access": (next((a for a in access if a in PUBLIC_ACCESS), None)
-                       or (access.iloc[0] if len(access) else None)),
-            "levels": pd.to_numeric(g["levels"], errors="coerce").max(),
-            "parts": int(g["parts"].sum()) if "parts" in g else len(g),
-            "source_ids": ";".join(sorted(";".join(g["source_ids"]).split(";"))),
-            "geometry": geom,
-        })  # fmt: skip
+        rows.append(
+            {
+                "name": _first(g["name"]),
+                "nname": _first(g["nname"]),
+                "operator": _first(g["operator"]),
+                "nop": _first(g["nop"]),
+                "ptype": max(set(types), key=types.count) if types else "Unknown",
+                "parking": _first(g["parking"]),
+                "capacity": stated,
+                "fee": "yes" if (g["fee"] == "yes").any() else _first(g["fee"]),
+                "access": (
+                    next((a for a in access if a in PUBLIC_ACCESS), None)
+                    or (access.iloc[0] if len(access) else None)
+                ),
+                "levels": pd.to_numeric(g["levels"], errors="coerce").max(),
+                "parts": int(g["parts"].sum()) if "parts" in g else len(g),
+                "source_ids": ";".join(sorted(";".join(g["source_ids"]).split(";"))),
+                "geometry": geom,
+            }
+        )
     return gpd.GeoDataFrame(rows, geometry="geometry", crs=f.crs).reset_index(drop=True)
 
 
@@ -293,14 +310,90 @@ def apply_exclusions(
     return kept.reset_index(drop=True), excluded.reset_index(drop=True)
 
 
+def _cover(a: gpd.GeoDataFrame, b: gpd.GeoDataFrame) -> pd.Series:
+    """Area of each polygon in ``a`` covered by polygons of ``b`` (index-aligned to ``a``)."""
+    a = a.reset_index(drop=True)
+    b = b.reset_index(drop=True)
+    j = gpd.sjoin(a[["geometry"]], b[["geometry"]], predicate="intersects")
+    if j.empty:
+        return pd.Series(0.0, index=a.index)
+    ia = shapely.area(
+        shapely.intersection(
+            a.geometry.values[j.index.to_numpy()], b.geometry.values[j["index_right"].to_numpy()]
+        )
+    )
+    return pd.Series(ia, index=j.index).groupby(level=0).sum().reindex(a.index).fillna(0.0)
+
+
+def parcel_estimate(
+    parcels: gpd.GeoDataFrame,
+    buildings: gpd.GeoDataFrame,
+    osm_polys: gpd.GeoDataFrame,
+    classes: list[str],
+    max_acres: float,
+    crs: Any,
+) -> tuple[gpd.GeoDataFrame, dict[str, Any]]:
+    """Estimate surface parking on parcels OSM does not map (ADR-0074).
+
+    For each land-use class, the share of a parcel's open area (lot − building footprint) that OSM
+    maps as parking is measured on parcels ≤ ``max_acres`` that DO carry an OSM lot (median per
+    parcel); the share is applied to same-class parcels ≤ ``max_acres`` with no OSM parking at all.
+    Returns estimated lot records (``area_sqft`` = estimated parking area) and calibration stats.
+    """
+    p = parcels[parcels["land_use_class"].isin(classes)].copy().reset_index(drop=True)
+    p = p[~p["excluded_use_flag"].fillna(False).astype(bool)].reset_index(drop=True)
+    area = p.geometry.area
+    p["acres"] = area.map(lambda a: units.crs_area_to_sqft(a, crs)) / 43560.0
+    p = p[p["acres"] <= max_acres].reset_index(drop=True)
+    area = p.geometry.area
+    open_area = (area - _cover(p, buildings)).clip(lower=0)
+    osm_area = _cover(p, osm_polys)
+    covered = osm_area > 0
+    share = (osm_area / open_area.replace(0, np.nan))[covered].clip(upper=1)
+    by_class = share.groupby(p.loc[covered, "land_use_class"]).median()
+    stats = {
+        "calibration_parcels": {
+            c: int((p.loc[covered, "land_use_class"] == c).sum()) for c in classes
+        },
+        "share_median": {k: float(v) for k, v in by_class.items()},
+    }
+    u = p[~covered].copy()
+    u["est_area"] = open_area[~covered] * u["land_use_class"].map(by_class)
+    u = u[u["est_area"].fillna(0) > 0]
+    est_sqft = u["est_area"].map(lambda a: units.crs_area_to_sqft(a, crs))
+    out = gpd.GeoDataFrame(
+        {
+            "name": None,
+            "nname": None,
+            "operator": None,
+            "nop": None,
+            "ptype": "Surface",
+            "parking": "surface (parcel estimate)",
+            "capacity": np.nan,
+            "fee": None,
+            "access": None,
+            "levels": np.nan,
+            "parts": 1,
+            "source_ids": "parcel:" + u["parcel_id"].astype(str),
+            "land_use_code": u["land_use_code"],
+            "est_area_sqft": est_sqft.to_numpy(),
+        },
+        geometry=u.geometry.representative_point().to_numpy(),
+        crs=u.crs,
+    )
+    stats["parcels_estimated"] = len(out)
+    return out.reset_index(drop=True), stats
+
+
 def private_flags(f: gpd.GeoDataFrame, unknown_private: bool) -> pd.Series:
     """True = private/reserved (counted at the effective share)."""
     acc = f["access"].fillna("").astype(str).str.lower()
     fee = f["fee"].fillna("").astype(str).str.lower()
     public = acc.isin(PUBLIC_ACCESS) | (fee == "yes")
     private = acc.isin(PRIVATE_ACCESS)
-    return pd.Series(np.where(public, False, np.where(private, True, unknown_private)),
-                     index=f.index)  # fmt: skip
+    return pd.Series(
+        np.where(public, False, np.where(private, True, unknown_private)), index=f.index
+    )
 
 
 def curb_by_hex(
@@ -316,10 +409,11 @@ def curb_by_hex(
     key = [tuple(sorted((str(a), str(b)))) for a, b in zip(local["u"], local["v"], strict=True)]
     local = local.assign(_k=key).drop_duplicates("_k")
     if len(metered):
-        near = gpd.sjoin(local[["geometry"]],
-                         gpd.GeoDataFrame(geometry=metered.geometry.buffer(
-                             units.m_to_crs(12.0, crs)), crs=crs),
-                         predicate="intersects").index.unique()  # fmt: skip
+        near = gpd.sjoin(
+            local[["geometry"]],
+            gpd.GeoDataFrame(geometry=metered.geometry.buffer(units.m_to_crs(12.0, crs)), crs=crs),
+            predicate="intersects",
+        ).index.unique()
         local = local.drop(index=near)
     mid = gpd.GeoDataFrame(
         {"ft": local["length_m"].to_numpy() / 0.3048 * 2.0},
@@ -333,10 +427,15 @@ def curb_by_hex(
 @register(
     "supply",
     deps=("qaqc",),
-    reads=("market.supply", "market.site", "market.demand.walk_shed_minutes",
-           "market.demand.decay_weights", "market.network"),
+    reads=(
+        "market.supply",
+        "market.site",
+        "market.demand.walk_shed_minutes",
+        "market.demand.decay_weights",
+        "market.network",
+    ),
     milestone="M3",
-)  # fmt: skip
+)
 def run_supply(ctx: RunContext) -> dict[str, Any]:
     """Phase C supply inventory, capacity, allocation and curb sensitivity."""
     cfg = ctx.cfg
@@ -346,8 +445,9 @@ def run_supply(ctx: RunContext) -> dict[str, Any]:
     osm = ctx.store.read_layer("ParkingOSM")
     f0, st = osm_facilities(osm)
     subs = ctx.store.read_layer("Submarkets") if "Submarkets" in written else None
-    downtown = (ctx.store.read_layer("ParkingZones").union_all()
-                if "ParkingZones" in written else None)  # fmt: skip
+    downtown = (
+        ctx.store.read_layer("ParkingZones").union_all() if "ParkingZones" in written else None
+    )
 
     def area_counts(g: gpd.GeoDataFrame, cap: str | None = None) -> dict[str, float]:
         if downtown is None:
@@ -360,16 +460,24 @@ def run_supply(ctx: RunContext) -> dict[str, Any]:
 
     f0["parts"] = 1
     f1 = dissolve_adjacent(f0, crs)
-    f2, dd = dedupe(f1, crs, sc.dedupe_distance_m, float(sc.dedupe_unnamed_touch_m or 0),
-                    float(sc.dedupe_name_similarity or 1))  # fmt: skip
+    f2, dd = dedupe(
+        f1,
+        crs,
+        sc.dedupe_distance_m,
+        float(sc.dedupe_unnamed_touch_m or 0),
+        float(sc.dedupe_name_similarity or 1),
+    )
     bld = ctx.store.read_layer("Buildings") if "Buildings" in written else None
     stall, eff = site.stall_area_sqft_gross, site.layout_efficiency
     factor = float(sc.surface_capacity_factor or 1.0)  # existing lots only (ADR-0067)
     counts = {}
     for label, g in (("osm_records", f0), ("after_dissolve", f1), ("after_dedupe", f2)):
         gc = capacity(g, bld, stall, eff, crs, factor)
-        counts[label] = {"records": len(gc), "stalls": float(gc["capacity_final"].fillna(0).sum()),
-                         "downtown": area_counts(gc, "capacity_final")}  # fmt: skip
+        counts[label] = {
+            "records": len(gc),
+            "stalls": float(gc["capacity_final"].fillna(0).sum()),
+            "downtown": area_counts(gc, "capacity_final"),
+        }
     excl_report: dict[str, Any] = {}
     if sc.exclusions_path is not None:
         rules = pd.read_csv(sc.exclusions_path, dtype=str)
@@ -384,11 +492,47 @@ def run_supply(ctx: RunContext) -> dict[str, Any]:
                 str(k): {"facilities": len(v), "stalls": float(v["capacity_final"].fillna(0).sum())}
                 for k, v in ex.groupby("exclusion_reason")
             },
-            "largest": top[["name", "operator", "exclusion_reason", "capacity_final"]]
-            .to_dict("records"),
-        }  # fmt: skip
+            "largest": top[["name", "operator", "exclusion_reason", "capacity_final"]].to_dict(
+                "records"
+            ),
+        }
     fac = capacity(f2, bld, stall, eff, crs, factor)
     fac["private_flag"] = private_flags(fac, bool(sc.unknown_access_as_private))
+    est_report: dict[str, Any] = {}
+    if sc.parcel_estimate_classes and sc.parcel_estimate_max_acres:
+        parc = ctx.store.read_layer(
+            "Parcels", columns=["parcel_id", "land_use_class", "land_use_code", "excluded_use_flag"]
+        )
+        polys = osm[osm.geom_type.isin(["Polygon", "MultiPolygon"])].copy()
+        polys["geometry"] = polys.geometry.make_valid()
+        bpoly = bld if bld is not None else gpd.GeoDataFrame(geometry=[], crs=crs)
+        est, est_report = parcel_estimate(
+            parc,
+            bpoly,
+            polys,
+            list(sc.parcel_estimate_classes),
+            float(sc.parcel_estimate_max_acres),
+            crs,
+        )
+        if sc.exclusions_path is not None and len(est):
+            rules = pd.read_csv(sc.exclusions_path, dtype=str)
+            est = est.assign(parcel_land_use_code=est["land_use_code"])
+            est, ex2 = apply_exclusions(est, rules[rules["field"] == "parcel_land_use_code"], None)
+            est_report["excluded_by_list"] = len(ex2)
+        est["capacity_stated"] = np.nan
+        est["capacity_est"] = np.round(est["est_area_sqft"] * eff / stall * factor, 0)
+        est["capacity_est_raw"] = np.round(est["est_area_sqft"] * eff / stall, 0)
+        est["capacity_final"] = est["capacity_est"]
+        est["capacity_source"] = "parcel estimate"
+        est["area_sqft"] = est["est_area_sqft"]
+        est["private_flag"] = True
+        est_report["stalls"] = float(est["capacity_final"].sum())
+        fac = gpd.GeoDataFrame(
+            pd.concat(
+                [fac, est.drop(columns=["est_area_sqft", "land_use_code"])], ignore_index=True
+            ),
+            crs=crs,
+        )
     fac["type"] = fac["ptype"].replace({"Unknown": "Surface"})
     fac["facility_id"] = [f"F{i:06d}" for i in range(1, len(fac) + 1)]
     fac["fee_flag"] = fac["fee"].map({"yes": True, "no": False})
@@ -400,9 +544,25 @@ def run_supply(ctx: RunContext) -> dict[str, Any]:
         pts["submarket"] = j[~j.index.duplicated()]["name"].reindex(pts.index)
     else:
         pts["submarket"] = None
-    out = pts[["facility_id", "name", "type", "capacity_stated", "capacity_est",
-               "capacity_source", "area_sqft", "fee_flag", "private_flag", "operator", "access",
-               "parts", "source_ids", "submarket", "geometry"]].copy()  # fmt: skip
+    out = pts[
+        [
+            "facility_id",
+            "name",
+            "type",
+            "capacity_stated",
+            "capacity_est",
+            "capacity_source",
+            "area_sqft",
+            "fee_flag",
+            "private_flag",
+            "operator",
+            "access",
+            "parts",
+            "source_ids",
+            "submarket",
+            "geometry",
+        ]
+    ].copy()
     for c in ("rate_hour", "rate_day", "rate_month", "rate_event"):
         out[c] = None  # survey observations (ADR-0023) — rate surface waits for round 1
     out = gpd.GeoDataFrame(out, geometry="geometry", crs=crs)
@@ -410,9 +570,12 @@ def run_supply(ctx: RunContext) -> dict[str, Any]:
 
     # ---- allocation to hexes
     hexes = ctx.store.read_layer("HexGrid")
-    graph = WalkGraph.from_layers(ctx.store.read_layer("WalkNodes"),
-                                  ctx.store.read_layer("WalkEdges"), crs,
-                                  cfg.market.network.walking_speed_m_s)  # fmt: skip
+    graph = WalkGraph.from_layers(
+        ctx.store.read_layer("WalkNodes"),
+        ctx.store.read_layer("WalkEdges"),
+        crs,
+        cfg.market.network.walking_speed_m_s,
+    )
     cap = fac["capacity_final"].fillna(0).to_numpy()
     effective = np.where(fac["private_flag"], cap * sc.private_effective_share, cap)
     bands = [float(b) for b in dm.walk_shed_minutes]
@@ -422,8 +585,9 @@ def run_supply(ctx: RunContext) -> dict[str, Any]:
     ons = ctx.store.read_layer("OnStreetSegments") if "OnStreetSegments" in written else None
     if ons is not None and len(ons):
         mid = gpd.GeoDataFrame(geometry=ons.geometry.interpolate(0.5, normalized=True), crs=crs)
-        on_alloc, s2 = allocate(mid, ons["stalls_est"].fillna(0).to_numpy(), hexes, graph,
-                                bands, weights)  # fmt: skip
+        on_alloc, s2 = allocate(
+            mid, ons["stalls_est"].fillna(0).to_numpy(), hexes, graph, bands, weights
+        )
         metered = ons
     else:
         on_alloc, s2 = pd.Series(0.0, index=off_raw.index), {}
@@ -439,65 +603,114 @@ def run_supply(ctx: RunContext) -> dict[str, Any]:
     eff_total = off_eff + on_alloc
     ratio = float(sc.curb_sensitive_ratio or np.inf)
     flag = (pot > 0) & (pot >= ratio * eff_total)
-    base = pd.DataFrame({
-        "hex_id": off_raw.index, "supply_stalls": (off_raw + on_alloc).to_numpy(),
-        "effective_supply_stalls": eff_total.to_numpy(), "offstreet_stalls": off_raw.to_numpy(),
-        "onstreet_stalls": on_alloc.to_numpy(), "unmetered_curb_ft": curb_ft.to_numpy(),
-        "potential_curb_stalls": pot.to_numpy(), "curb_sensitive_flag": flag.to_numpy(),
-    })  # fmt: skip
+    base = pd.DataFrame(
+        {
+            "hex_id": off_raw.index,
+            "supply_stalls": (off_raw + on_alloc).to_numpy(),
+            "effective_supply_stalls": eff_total.to_numpy(),
+            "offstreet_stalls": off_raw.to_numpy(),
+            "onstreet_stalls": on_alloc.to_numpy(),
+            "unmetered_curb_ft": curb_ft.to_numpy(),
+            "potential_curb_stalls": pot.to_numpy(),
+            "curb_sensitive_flag": flag.to_numpy(),
+        }
+    )
     table = pd.concat([base.assign(daypart=dp) for dp in DAYPARTS], ignore_index=True)
     ctx.store.write_table("Hex_Supply_Daypart", table)
 
     # ---- QA
-    both = fac[fac["capacity_stated"].notna() & fac["capacity_est"].notna()
-               & (fac["capacity_stated"] > 0)]  # fmt: skip
+    both = fac[
+        fac["capacity_stated"].notna() & fac["capacity_est"].notna() & (fac["capacity_stated"] > 0)
+    ]
     err = (both["capacity_est"] - both["capacity_stated"]).abs() / both["capacity_stated"]
-    sb = fac[(fac["type"] == "Surface") & fac["capacity_stated"].gt(0)
-             & fac["capacity_est_raw"].gt(0)]  # fmt: skip
+    sb = fac[
+        (fac["type"] == "Surface") & fac["capacity_stated"].gt(0) & fac["capacity_est_raw"].gt(0)
+    ]
     ratio_now = sb["capacity_stated"] / sb["capacity_est_raw"]
     factor_check = {
-        "configured": factor, "n": len(sb),
+        "configured": factor,
+        "n": len(sb),
         "median_now": float(ratio_now.median()) if len(sb) else None,
         "iqr_now": [float(x) for x in ratio_now.quantile([0.25, 0.75])] if len(sb) else None,
-    }  # fmt: skip
+    }
     med = float(err.median()) if len(err) else float("nan")
     total_in = float(cap.sum() + (ons["stalls_est"].fillna(0).sum() if ons is not None else 0))
     total_out = float((off_raw + on_alloc).sum())
     checks = [
-        Check("QA-C01", "SupplyFacilities", "capacity: median |estimated − stated| / stated",
-              f"{med:.1%} over {len(both)} facilities with both", med, "<= 20%",
-              bool(len(err)) and med <= 0.20, severity="warning"),
-        Check("QA-C02", "Hex_Supply_Daypart", "allocation conserves stalls (outside grid dropped)",
-              f"{total_out:,.0f} of {total_in:,.0f}", total_out / total_in if total_in else 1,
-              ">= 99%", total_in == 0 or total_out / total_in >= 0.99, severity="warning"),
-        Check("QA-C03", "SupplyFacilities", "facilities without capacity (not counted)",
-              str(int(fac["capacity_final"].isna().sum())), int(fac["capacity_final"].isna().sum()),
-              "reported", True, severity="info"),
-    ]  # fmt: skip
+        Check(
+            "QA-C01",
+            "SupplyFacilities",
+            "capacity: median |estimated − stated| / stated",
+            f"{med:.1%} over {len(both)} facilities with both",
+            med,
+            "<= 20%",
+            bool(len(err)) and med <= 0.20,
+            severity="warning",
+        ),
+        Check(
+            "QA-C02",
+            "Hex_Supply_Daypart",
+            "allocation conserves stalls (outside grid dropped)",
+            f"{total_out:,.0f} of {total_in:,.0f}",
+            total_out / total_in if total_in else 1,
+            ">= 99%",
+            total_in == 0 or total_out / total_in >= 0.99,
+            severity="warning",
+        ),
+        Check(
+            "QA-C03",
+            "SupplyFacilities",
+            "facilities without capacity (not counted)",
+            str(int(fac["capacity_final"].isna().sum())),
+            int(fac["capacity_final"].isna().sum()),
+            "reported",
+            True,
+            severity="info",
+        ),
+    ]
     write_checks(ctx, "supply", checks)
 
     def by(col: str) -> dict[str, Any]:
-        g = fac.assign(k=pts[col].fillna("(outside survey areas)") if col == "submarket"
-                       else fac[col])  # fmt: skip
-        return {k: {"facilities": len(v), "stalls": float(v["capacity_final"].fillna(0).sum()),
-                    "private": int(v["private_flag"].sum()),
-                    "no_capacity": int(v["capacity_final"].isna().sum())}
-                for k, v in g.groupby("k")}  # fmt: skip
+        g = fac.assign(
+            k=pts[col].fillna("(outside survey areas)") if col == "submarket" else fac[col]
+        )
+        return {
+            k: {
+                "facilities": len(v),
+                "stalls": float(v["capacity_final"].fillna(0).sum()),
+                "private": int(v["private_flag"].sum()),
+                "no_capacity": int(v["capacity_final"].isna().sum()),
+            }
+            for k, v in g.groupby("k")
+        }
 
     report = {
-        **st, "dedupe": dd, "counts": counts,
-        "by_type": by("type"), "by_submarket": by("submarket"),
+        **st,
+        "dedupe": dd,
+        "counts": counts,
+        "by_type": by("type"),
+        "by_submarket": by("submarket"),
         "capacity_source": fac["capacity_source"].fillna("none").value_counts().to_dict(),
         "surface_capacity_factor": factor_check,
+        "parcel_estimate": est_report,
         "exclusions": excl_report,
-        "capacity_qa": {"n_both": len(both), "median_abs_pct_err": med,
-                        "share_within_20pct": float((err <= 0.2).mean()) if len(err) else None},
-        "onstreet": {"block_faces": 0 if ons is None else len(ons),
-                     "stalls": 0.0 if ons is None else float(ons["stalls_est"].fillna(0).sum())},
+        "capacity_qa": {
+            "n_both": len(both),
+            "median_abs_pct_err": med,
+            "share_within_20pct": float((err <= 0.2).mean()) if len(err) else None,
+        },
+        "onstreet": {
+            "block_faces": 0 if ons is None else len(ons),
+            "stalls": 0.0 if ons is None else float(ons["stalls_est"].fillna(0).sum()),
+        },
         "allocation": {"offstreet": s1, "onstreet": s2, "in": total_in, "out": total_out},
         "curb_sensitive_hexes": int(flag.sum()),
-    }  # fmt: skip
-    (ctx.run_dir / "supply_report.json").write_text(json.dumps(report, indent=1, default=str),
-                                                     encoding="utf-8")  # fmt: skip
-    return {"facilities": len(fac), "stalls": float(cap.sum()),
-            "curb_sensitive_hexes": int(flag.sum())}  # fmt: skip
+    }
+    (ctx.run_dir / "supply_report.json").write_text(
+        json.dumps(report, indent=1, default=str), encoding="utf-8"
+    )
+    return {
+        "facilities": len(fac),
+        "stalls": float(cap.sum()),
+        "curb_sensitive_hexes": int(flag.sum()),
+    }

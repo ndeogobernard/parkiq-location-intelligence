@@ -153,6 +153,14 @@ sources:
     license: per city open-data terms
     url: null
     verify: true             # SCOPE S20 = meter transactions; inventory used instead (ADR-0064)
+  S25:
+    enabled: false           # read by the demand step from the market's workplace_drive_share_path (not an ingest adapter)
+    provider: AASHTO CTPP / US Census Bureau
+    dataset: CTPP 2017-2021 table B202105 Means of Transportation to Work (workplace geography), tract of work
+    license: Public (CTPP data portal; registered API key)
+    url: "https://ctppdata.transportation.org/api/data/2021"
+    vintage: "2017-2021"
+    verify: false
   S23:
     enabled: false           # enabled per market
     provider: City of Columbus

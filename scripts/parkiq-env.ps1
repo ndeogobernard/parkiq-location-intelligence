@@ -35,9 +35,12 @@ $env:PROJ_DATA = Join-Path $EnvPath "Library\share\proj"
 $env:PROJ_LIB = $env:PROJ_DATA
 $env:CONDA_PREFIX = $EnvPath
 Write-Host "ParkIQ env active: $EnvPath (python $(& python -c 'import sys;print(sys.version.split()[0])'))"
-# Pick up the Census key from the user environment if this window predates it (never printed).
-if (-not $env:CENSUS_API_KEY) {
-    $k = [Environment]::GetEnvironmentVariable("CENSUS_API_KEY", "User")
-    if ($k) { $env:CENSUS_API_KEY = $k }
-    Remove-Variable k -ErrorAction SilentlyContinue
+# Pick up API keys (Census, CTPP) from the user environment if this window predates them
+# (never printed).
+foreach ($n in @("CENSUS_API_KEY", "CTPP_API_KEY")) {
+    if (-not [Environment]::GetEnvironmentVariable($n, "Process")) {
+        $k = [Environment]::GetEnvironmentVariable($n, "User")
+        if ($k) { [Environment]::SetEnvironmentVariable($n, $k, "Process") }
+        Remove-Variable k -ErrorAction SilentlyContinue
+    }
 }

@@ -46,13 +46,16 @@ Status: **Open** unless noted. "Owner" = who can close it (A = analyst, P = part
 | V-37 | Licence of Columbus PublicService/MapServer/38 (no Hub item; sibling City items CC0) | S20 | A |
 | V-38 | ODOT TIMS terms of use (copyright 'ODOT Office of Technical Services'; no terms page found) | S13 | A |
 | V-42 | Arena District survey stratum is an analyst construct (downtown overlay north of W Spring St, west of N High St); Short North / University District are the SIDs (High St corridors; OSU campus garages outside) | survey | A |
-| V-43 | Workplace drive share below place level: CTPP 2017–2021 tract-of-work (A202105 means of transportation) — ctppdata.transportation.org API needs a registered key (free); until then the office mode factor uses ACS B08601 place/county (≈ 0.99 inside Columbus) | demand | A (needs Bernard: account) |
-| V-44 | Downtown demand benchmark: no published count of peak occupied spaces found. SPP 2.0 (Kimley-Horn, 2024/25) quotes DCI 2023 off-street occupancy 28–71 % by subarea; supply 79,000 (SID) or 100,000 (City 2019, wider area). The City's 2019 SPP downtown existing-conditions PDF (>10 MB) likely has peak counts — download needs approval | demand | A |
+| V-45 | Paid-market indicators outside the core: HZ-P0002 (Easton) rests on four OSM `fee=yes` surface lots and HZ-P0001 (east side, near Mount Carmel East) on one `fee=yes` garage; confirm these are paid to the public (local knowledge / round-1 survey) | gap | A (Bernard: local knowledge) |
+| V-46 | Benchmark gaps vs SPP 2019 (report only; calibration M8): Downtown Zone A/B model occupancy 1.15 vs Capitol Square 81.6 %, Short North 0.90 vs 60.9 %, Brewery 0.45 vs 65 %; Arena 0.83 vs 92.5 % within ±25 % | demand | M8 |
 
 ## Closed
 
 | ID | Item | Closed | Evidence |
 |---|---|---|---|
+| V-43 | Workplace drive share below place level | 2026-09-26 | ADR-0073: CTPP 2017–2021 B202105 tract of work (S25), min 100 commuters |
+| V-44 | Downtown demand benchmark | 2026-09-26 | City SPP 2019 (Kimley-Horn; operator data fall 2018, LPR on-street Nov 2018): off-street surveyed/peak — Arena 7,839 / 92.5 %, Capitol Square 10,582 / 81.6 %, Short North–Warehouse 7,092 / 60.9 %, Brewery–RiverSouth 2,027 / 65 %, Scioto Peninsula 917 / 22 %, East Downtown 283 / 64.7 %; on-street ≈ 40 % at system peak. Comparison → V-46 |
+| V-47 | Auditor Edge-of-Pavement as parking polygons | 2026-09-26 | ADR-0074: lines only; polygonized precision 5.7 %, recall 55 % → rejected; parcel-based estimate instead |
 | V-39 | Surface capacity estimate vs stated | 2026-09-26 | ADR-0067: factor 1.414 (n 356, IQR 0.979–2.000) on existing-lot area estimates; new-lot layout keeps 320/0.90; recompute from round-1 survey |
 | V-40 | Non-parking lots in OSM parking | 2026-09-26 | ADR-0067: reviewable exclusion list markets/franklin_oh/supply_exclusions.csv |
 | V-41 | Untagged lots private; curb-sensitive ratio | 2026-09-26 | SET, analyst choice (Bernard) |

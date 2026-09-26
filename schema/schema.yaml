@@ -370,6 +370,8 @@ layers:
       curb_sensitive_flag: {type: BOOLEAN, desc: "Any curb-sensitive hex (ADR-0021)"}
       jurisdictions:     {type: TEXT, desc: "Places the zone touches, ';'-joined (addition)"}
       below_min_lot_flag: {type: BOOLEAN, desc: "Positive weekday-day gap < minimum viable lot (site.target_stalls_range min) (addition, ADR-0072)"}
+      zone_class:        {type: TEXT, desc: "paid-market (screening) | free-parking area — context only (addition, ADR-0075)"}
+      paid_market_hexes: {type: INTEGER, desc: "Hexes with paid parking within an 8-min walk (addition, ADR-0075)"}
   CandidateParcels:
     feature_dataset: Analysis
     geometry: MultiPolygon
@@ -606,6 +608,7 @@ tables:
       gap_stalls: {type: REAL, desc: "demand − effective supply"}
       gap_ratio:  {type: REAL, desc: "demand / supply"}
       rate_index: {type: REAL, desc: "Normalized achievable rate"}
+      paid_market_flag: {type: BOOLEAN, desc: "Paid parking within an 8-min walk (addition, ADR-0075)"}
 
 # SCOPE §4.5. Subtypes are declared on the layer (subtype_field). Relationships are recorded in
 # the GeoPackage table _ParkIQ_Relationships by BuildSchema and become relationship classes in

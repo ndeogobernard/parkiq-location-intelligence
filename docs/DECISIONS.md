@@ -460,3 +460,53 @@ zones is Bernard's decision after the map.
   the whole footprint share (19.6 M sq ft for 2,547 restaurants; 291 k weekend-evening stalls).
 * A hot zone whose positive weekday-day gap is below the minimum viable lot
   (`site.target_stalls_range[0]` = 50 stalls) is flagged `below_min_lot_flag` (kept, reported).
+
+## ADR-0073 — Workplace drive share from CTPP tract of work — Applied (Bernard M4 fixes)
+The office-commute mode factor (ADR-0068, relative to the county) uses CTPP 2017–2021 table
+B202105 (means of transportation to work, workplace geography), tract of work, registry S25:
+drive share = car/truck/van (e2–e7) ÷ (workers − worked from home, e18). Tracts with fewer than
+`demand.workplace_min_commuters` = 100 commuters fall back to factor 1 (15 of 328 tracts). County
+0.944; tract 5th percentile 0.807. Replaces the ACS B08601 place-level share (tract values are not
+published). Downtown office demand −4 %, downtown weekday demand −2.4 % (62,160 → 60,677).
+Non-commute categories stay unadjusted. Key: `CTPP_API_KEY` (User environment, never logged).
+
+## ADR-0074 — Parcel-based surface-supply estimate where OSM has none — Applied (analyst may revisit)
+The Auditor Edge-of-Pavement file (S24, 2026-09-25) is lines only (ROADWAYS/DRIVES/PATHWAYS; 9
+features tagged parking area). Polygonized, minus right-of-way and buildings, its candidate
+polygons matched OSM parking with 5.7 % precision and 55 % recall — rejected as a supply source.
+Instead, on parcels ≤ `supply.parcel_estimate_max_acres` = 5 of classes Commercial, MixedUse and
+SurfaceParking with no OSM parking, parking area = open area (parcel − buildings) × the class
+median share of open area that OSM maps as parking on covered parcels of the same class
+(Commercial 0.533, n 2,304; MixedUse 0.654, n 206; SurfaceParking 0.929, n 451). Capacity via the
+existing-lot factor (ADR-0067); `capacity_source` = "parcel estimate"; treated as private (0.5).
+OSM keeps priority; the exclusion list applies. Franklin run: 12,766 parcels, 615,963 stalls
+(downtown 441 / 4,891). Estimated lots are not drawn on public maps.
+
+## ADR-0075 — Paid-market mask for screening hot zones — Applied (Bernard M4 fixes)
+A hex feeds a screening hot zone only if a paid-parking indicator is within an 8-minute walk
+(walk-shed allocation, largest band): S20 metered block faces, OSM `fee=yes` facilities,
+facilities whose operator matches `supply.paid_operators` (whole-word, case-insensitive), and
+survey observations with outcome "rates posted". Hot zones are built separately inside and outside
+the mask: `HZ-P####` "paid-market (screening)" and `HZ-C####` "free-parking area — context only";
+the full gap is still mapped. Franklin run: 234 paid-market hexes; 569 zones before the mask →
+8 screening (6 ≥ 50 stalls) + 565 context-only. CampusParc/OSU garages are rarely tagged with an
+operator in OSM; the round-1 survey observations add them when recorded.
+
+## ADR-0076 — Map standard — Applied (Bernard M4 fixes)
+Every map is made with `parkiq.maps.new_map` and finished with `finish`, which adds and checks:
+title; subtitle (measure, time of week, area); legend with units; a 1–2 sentence "how to read";
+scale bar; north arrow; sources as "name (vintage)" plus "© OpenStreetMap contributors" when OSM is
+used; "ParkIQ · map date"; PRELIMINARY unless final; a locator inset when the view is < 80 % of the
+market extent; and, for public maps, a text scan rejecting parcel-id patterns and "owner". A map
+missing anything raises `MapStandardError` and is not written; a JSON sidecar records the elements.
+Tests: `tests/test_maps.py`.
+
+## ADR-0077 — Portfolio reports from Markdown with run-derived numbers — Applied (Bernard M4 fixes)
+Reports live in `docs/portfolio/<slug>.md` and are built by `parkiq report-pdf` into
+`<slug>-documentation.md.pdf` (headless Edge/Chrome, CSS page header, page numbers, repo/site
+links, DRAFT mark until `--final`). Numbers are `{{placeholders}}` filled by
+`parkiq.portfolio.key_numbers` from the run GeoPackage and `schema.yaml`; an unfilled placeholder
+stops the build. The sources table comes from the run's DataSourceRegistry. Figures are made by
+`docs/portfolio/make_figures.py` under the map standard. Three reports: data model (now), spatial
+analysis (after M5–M6), pipeline (≈ M7). Portfolio cards may link only published reports; nothing
+goes to the site until Bernard approves.

@@ -182,6 +182,9 @@ class DemandSection(_Strict):
     campus_rule: dict[str, list[str]] = Field(default_factory=dict)
     single_anchor_share: float | None = Field(default=None, gt=0, le=1)
     floor_area_cap_sqft: dict[str, float] = Field(default_factory=dict)
+    workplace_min_commuters: float | None = Field(default=None, ge=0)
+    workplace_source_id: str | None = None
+    jurisdiction_places_path: Path | None = None
 
     @model_validator(mode="after")
     def _consistent(self) -> DemandSection:
@@ -218,6 +221,10 @@ class SupplySection(_Strict):
     curb_sensitive_ratio: float | None = Field(default=None, gt=0)
     surface_capacity_factor: float | None = Field(default=None, gt=0)
     exclusions_path: Path | None = None
+    parcel_estimate_classes: list[str] = Field(default_factory=list)
+    parcel_estimate_max_acres: float | None = Field(default=None, gt=0)
+    paid_operators: list[str] = Field(default_factory=list)
+    survey_observations_path: Path | None = None
 
 
 class RankingSection(_Strict):
@@ -621,15 +628,18 @@ def load_config(
     dm = m.demand
     dupd = {
         k: _resolve_path(getattr(dm, k), market_path.parent)
-        for k in ("workplace_drive_share_path", "workplace_places_path")
+        for k in ("workplace_drive_share_path", "workplace_places_path", "jurisdiction_places_path")
         if getattr(dm, k) is not None
     }
     if dupd:
         upd["demand"] = dm.model_copy(update=dupd)
-    if m.supply.exclusions_path is not None:
-        upd["supply"] = m.supply.model_copy(
-            update={"exclusions_path": _resolve_path(m.supply.exclusions_path, market_path.parent)}
-        )
+    supd = {
+        k: _resolve_path(getattr(m.supply, k), market_path.parent)
+        for k in ("exclusions_path", "survey_observations_path")
+        if getattr(m.supply, k) is not None
+    }
+    if supd:
+        upd["supply"] = m.supply.model_copy(update=supd)
     mk = m.market
     if mk.submarkets_source is not None:
         ss = mk.submarkets_source.model_copy(

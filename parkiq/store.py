@@ -173,10 +173,10 @@ class Store:
         append = self.has(table)
         if append:
             with closing(self._connect()) as con:
-                cols = {r[1] for r in con.execute(f'PRAGMA table_info("{table}")')} - {"fid"}
                 n = con.execute(f'SELECT COUNT(*) FROM "{table}"').fetchone()[0]
-            # an empty table built by an older schema version is replaced, not appended to
-            append = not (n == 0 and cols != set(df.columns))
+            # an empty table is replaced, not appended to: it may come from an older schema
+            # version, or carry a column type GDAL inferred from an all-null first write
+            append = n > 0
         pyogrio.write_dataframe(df, self.gpkg, layer=table, driver="GPKG", append=append)
 
     def write_table(self, name: str, df: pd.DataFrame, key: Mapping[str, Any] | None = None) -> int:
@@ -217,6 +217,10 @@ class Store:
                 )
             elif f.type == "DATETIME":
                 d[f.name] = d[f.name].map(lambda v: None if v is None else str(v))
+            elif f.type == "REAL":
+                d[f.name] = pd.to_numeric(d[f.name], errors="coerce").astype("float64")
+            elif f.type == "INTEGER":
+                d[f.name] = pd.to_numeric(d[f.name], errors="coerce").astype("Int64")
         self._delete_where(name, {"run_id": self.run_id, **(key or {})})
         if len(d):
             self._append_table(name, d)

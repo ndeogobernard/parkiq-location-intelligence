@@ -41,8 +41,11 @@ demand:
     peak_window: ["07:00", "09:00"]        # SET (Bernard, M4 2026-09-26): weekday AM peak
   mode_adjustment: relative     # SET (Bernard): commute categories only, workplace-based drive share (ADR-0068)
   commute_categories: [Office]  # ADR-0068: job-based demand; all other categories get the transit factor instead
-  workplace_drive_share_path: franklin_oh/workplace_drive_share.csv   # ACS B08601 place/county, WFH excluded
-  workplace_places_path: "C:/GIS/ParkIQ_cache/franklin_oh/demand/tl_2024_39_place.zip"
+  workplace_drive_share_path: franklin_oh/workplace_drive_share_tract.csv   # CTPP 2017-2021 B202105 tract of work, WFH excluded (ADR-0073)
+  workplace_places_path: "C:/GIS/ParkIQ_cache/franklin_oh/demand/tl_2021_39_tract.zip"   # CTPP 2021 uses 2020-vintage tracts
+  workplace_min_commuters: 100  # ADR-0073: tracts with fewer commuters fall back to the county share (factor 1)
+  workplace_source_id: S25
+  jurisdiction_places_path: "C:/GIS/ParkIQ_cache/franklin_oh/demand/tl_2024_39_place.zip"   # names of places hot zones touch
   meters_per_floor: 3.5         # ADR-0069: median height/levels, 5,351 Overture buildings (IQR 2.77-4.29)
   hotel_sqft_per_room: 713      # ADR-0069: median gross sq ft per room, 10 OSM hotels with rooms (building GFA shared among POIs)
   campus_rule: {Medical: [CNS16], University: [CNS15]}   # ADR-0070: jobs removed on the anchor's campus parcels
@@ -66,6 +69,10 @@ supply:
   curb_sensitive_ratio: 1.0     # analyst choice (Bernard, M3 review 2026-09-26)
   surface_capacity_factor: 1.414  # ADR-0067: median stated/area-estimate, 356 OSM surface lots (IQR 0.979-2.000), run 20260925_2217; existing lots only
   exclusions_path: franklin_oh/supply_exclusions.csv   # ADR-0067 (V-40): non-parking lots, reviewable list
+  parcel_estimate_classes: [Commercial, MixedUse, SurfaceParking]   # ADR-0074: fill OSM gaps on these parcels
+  parcel_estimate_max_acres: 5  # ADR-0074: calibration and application limited to parcels <= 5 acres
+  paid_operators: [CampusParc, "LAZ", 'SP\+', Lazarus, "Park Columbus", "Towne Park", "ABM", "Parking Company of America", "Premier Parking", "Impark", "Reef"]   # ADR-0075: paid-market indicators (regex, reviewable)
+  survey_observations_path: franklin_oh/survey/round1_observations.csv   # ADR-0075: rows with a posted price mark paid market (file added after fieldwork)
 finance: {}                     # all SCOPE defaults from configs/finance_defaults.yaml; DECIDE keys null
 ranking: {financial_weight: 0.70, suitability_weight: 0.30, shortlist_size: 10}   # SCOPE range 5–10
 data_licenses:
@@ -234,6 +241,7 @@ provenance:
   demand.meters_per_floor:         {status: SET,    source: "ADR-0069: derived, median of 5,351 Overture buildings with height and levels"}
   demand.hotel_sqft_per_room:      {status: SET,    source: "ADR-0069: derived, median of 10 OSM hotels with rooms; IQR in memo"}
   demand.single_anchor_share:      {status: SET,    source: "Bernard, M4 decisions 2026-09-26"}
+  demand.workplace_min_commuters:  {status: SET,    source: "ADR-0073: analyst choice (sampling stability), applied"}
   demand.floor_area_cap_sqft.RestaurantBar: {status: SET, source: "ADR-0072: 90th pct standalone-building footprint, 1,449 restaurants/bars"}
   demand.floor_area_cap_sqft.Retail:        {status: SET, source: "ADR-0072: 90th pct standalone-building footprint, 1,795 shops"}
   demand.transit_adjustment.demand_factor:           {status: VERIFY, source: "SCOPE §2.1"}
@@ -247,6 +255,7 @@ provenance:
   supply.unknown_access_as_private: {status: SET,   source: "analyst choice (Bernard, M3 review 2026-09-26)"}
   supply.curb_local_highways:      {status: SET,    source: "Bernard, M3 decisions 2026-09-26 (ADR-0021)"}
   supply.curb_sensitive_ratio:     {status: SET,    source: "analyst choice (Bernard, M3 review 2026-09-26)"}
+  supply.parcel_estimate_max_acres: {status: SET,   source: "ADR-0074: analyst choice (applied), conservative option"}
   supply.surface_capacity_factor:  {status: SET,    source: "ADR-0067: median stated/estimate over 356 OSM surface lots, IQR 0.979-2.000 (run 20260925_2217); recompute from round-1 survey counts"}
   ranking.financial_weight:        {status: SCOPE,  source: "SCOPE §5.8"}
   ranking.suitability_weight:      {status: SCOPE,  source: "SCOPE §5.8"}

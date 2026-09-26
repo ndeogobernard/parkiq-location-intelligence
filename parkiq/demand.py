@@ -297,6 +297,9 @@ def mode_factors(a: gpd.GeoDataFrame, ctx: RunContext) -> pd.Series:
         return f
     t = pd.read_csv(dm.workplace_drive_share_path, dtype={"geoid": str})
     base = float(t.loc[t["geography"] == "county", "drive_share"].iloc[0])
+    if dm.workplace_min_commuters is not None and "commuters" in t.columns:
+        small = t["commuters"] < dm.workplace_min_commuters
+        t.loc[small & (t["geography"] != "county"), "drive_share"] = np.nan  # → county (factor 1)
     if dm.workplace_places_path is None:
         return f
     pl = gpd.read_file(dm.workplace_places_path).to_crs(a.crs)
@@ -338,6 +341,20 @@ def run_demand(ctx: RunContext) -> dict[str, Any]:
     cfg, dm = ctx.cfg, ctx.cfg.market.demand
     xw = yaml.safe_load((cfg.config_dir / "anchor_crosswalk.yaml").read_text(encoding="utf-8"))
     a, rep = build_anchors(ctx, xw)
+    if dm.workplace_source_id and dm.workplace_source_id in cfg.sources:
+        from parkiq.ingest.base import register_source
+
+        register_source(
+            ctx,
+            dm.workplace_source_id,
+            cfg.sources[dm.workplace_source_id],
+            status="loaded",
+            row_count=len(pd.read_csv(dm.workplace_drive_share_path))
+            if dm.workplace_drive_share_path
+            else 0,
+            endpoint=f"local: {dm.workplace_drive_share_path}",
+            notes="workplace drive share for the office mode factor (ADR-0073)",
+        )
     rates = {r.anchor_category: r for r in cfg.rates.rates.values()}
     calib = cfg.rates.calibration_factors
     a["mode_factor"] = mode_factors(a, ctx)

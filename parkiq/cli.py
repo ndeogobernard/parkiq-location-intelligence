@@ -228,6 +228,27 @@ def survey_package_cmd(
     typer.echo(f"written to {folder}")
 
 
+@app.command("report-pdf")
+def report_pdf_cmd(
+    market: MarketOpt,
+    run_id: Annotated[str, typer.Option("--run-id", help="run the numbers come from")],
+    source: Annotated[Path, typer.Option(help="docs/portfolio/<slug>.md", exists=True)],
+    out: Annotated[Path, typer.Option(help="output PDF")],
+    short_title: Annotated[str, typer.Option(help="running header text")] = "Portfolio report",
+    final: Annotated[bool, typer.Option(help="omit the DRAFT header")] = False,
+    config_dir: Annotated[Path | None, typer.Option(help="configs/ directory")] = None,
+) -> None:
+    """Build a portfolio report PDF; every {{number}} is computed from the run (ADR-0077)."""
+    from parkiq import portfolio
+    from parkiq.runner import open_run
+
+    cfg = _load(market, config_dir)
+    ctx = open_run(cfg, run_id=run_id)
+    values = portfolio.key_numbers(ctx.run_dir, ctx.store.schema, cfg.crs)
+    pdf = portfolio.render(source, out, values, short_title, draft=not final)
+    typer.echo(f"written {pdf}")
+
+
 @app.command()
 def validate(
     run_id: Annotated[str, typer.Option("--run-id")],

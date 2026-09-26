@@ -13,9 +13,13 @@ for _d in "$(cygpath -u "${LOCALAPPDATA:-}")"/Microsoft/WinGet/Packages/GitHub.c
 done
 unset _d
 # User-level environment variables set after this app/shell started are not inherited; read the
-# Census key from the user environment into this session only (never printed or written).
-if [ -z "${CENSUS_API_KEY:-}" ]; then
-  _k=$(powershell.exe -NoProfile -Command "[Environment]::GetEnvironmentVariable('CENSUS_API_KEY','User')" 2>/dev/null | tr -d '\r\n')
-  if [ -n "$_k" ]; then export CENSUS_API_KEY="$_k"; fi
-  unset _k
-fi
+# API keys (Census, CTPP) from the user environment into this session only (never printed or
+# written).
+for _n in CENSUS_API_KEY CTPP_API_KEY; do
+  if [ -z "$(printenv "$_n")" ]; then
+    _k=$(powershell.exe -NoProfile -Command "[Environment]::GetEnvironmentVariable('$_n','User')" 2>/dev/null | tr -d '\r\n')
+    if [ -n "$_k" ]; then export "$_n=$_k"; fi
+    unset _k
+  fi
+done
+unset _n

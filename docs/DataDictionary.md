@@ -441,6 +441,8 @@ Geometry: MultiPolygon · CRS: analysis CRS
 | `curb_sensitive_flag` | BOOLEAN | yes |  |  | Any curb-sensitive hex (ADR-0021) |
 | `jurisdictions` | TEXT | yes |  |  | Places the zone touches, ';'-joined (addition) |
 | `below_min_lot_flag` | BOOLEAN | yes |  |  | Positive weekday-day gap < minimum viable lot (site.target_stalls_range min) (addition, ADR-0072) |
+| `zone_class` | TEXT | yes |  |  | paid-market (screening) | free-parking area — context only (addition, ADR-0075) |
+| `paid_market_hexes` | INTEGER | yes |  |  | Hexes with paid parking within an 8-min walk (addition, ADR-0075) |
 
 ### `CandidateParcels`
 
@@ -738,6 +740,7 @@ Geometry: table · CRS: —
 | `gap_stalls` | REAL | yes |  |  | demand − effective supply |
 | `gap_ratio` | REAL | yes |  |  | demand / supply |
 | `rate_index` | REAL | yes |  |  | Normalized achievable rate |
+| `paid_market_flag` | BOOLEAN | yes |  |  | Paid parking within an 8-min walk (addition, ADR-0075) |
 
 ## Rasters
 
