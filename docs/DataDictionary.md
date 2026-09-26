@@ -460,6 +460,25 @@ Geometry: MultiPolygon · CRS: analysis CRS
 | `flood_flag` | BOOLEAN | yes |  |  | Intersects SFHA |
 | `pipeline_flag` | BOOLEAN | yes |  |  | Active development permit |
 | `slope_pct` | REAL | yes |  |  | Mean slope, percent |
+| `member_parcel_ids` | TEXT | yes |  |  | Component parcel ids of an assembled site, ';'-joined (addition, M5 assembly rule) |
+| `assembled_count` | INTEGER | yes |  |  | Parcels in the site (1 = single parcel) (addition) |
+| `address` | TEXT | yes |  |  | Site address (first component) (addition) |
+| `jurisdiction` | TEXT | yes |  |  | Zoning jurisdiction (addition) |
+| `land_use_class` | TEXT | yes |  | `dm_LandUseClass` | Land-use class (first component) (addition) |
+| `owner_type` | TEXT | yes |  | `dm_OwnerType` | Owner class — due-diligence flag only (addition) |
+| `zoning_code` | TEXT | yes |  |  | Base zoning code(s) (addition) |
+| `zoning_screen` | TEXT | yes |  | `dm_ZoningScreen` | Least permissive component zoning screen (addition) |
+| `lot_sqft` | REAL | yes |  |  | Site area, sq ft (addition) |
+| `stalls` | REAL | yes |  |  | Buildable stalls (new lot, rounded down) or existing-lot capacity (addition, ADR-0049/0063) |
+| `stalls_basis` | TEXT | yes |  |  | new lot layout | existing lot polygon (addition) |
+| `shape_index` | REAL | yes |  |  | Rectangularity 0–1 (addition, ADR-0025) |
+| `frontage_ft` | REAL | yes |  |  | Street frontage, ft (addition, ADR-0026) |
+| `corner_flag` | BOOLEAN | yes |  |  | Frontage on two streets (addition, ADR-0026) |
+| `arterial_flag` | BOOLEAN | yes |  |  | Frontage on a primary/secondary/trunk street (addition, ADR-0026) |
+| `existing_lot_flag` | BOOLEAN | yes |  |  | Existing surface lot (addition, ADR-0063) |
+| `zone_a_flag` | BOOLEAN | yes |  |  | In Downtown parking Zone A — new lots prohibited, only an existing lot can work (addition) |
+| `hotzone_id` | TEXT | yes |  |  | Nearest paid-market screening hot zone within 8 min (addition, ADR-0075) |
+| `land_value` | REAL | yes |  |  | Assessed land value, summed over components (addition) |
 
 ### `WalkSheds`
 
@@ -506,6 +525,7 @@ Geometry: MultiPolygon · CRS: analysis CRS
 | `c10_s` | REAL | yes |  | `rg_Score` | C10 scaled 0–100 |
 | `composite` | REAL | yes |  | `rg_Score` | Weighted composite 0–100 |
 | `rank` | INTEGER | yes |  |  | Rank within scenario (tie-break parcel_id) |
+| `preliminary_flag` | BOOLEAN | yes |  |  | Ranking uses neutral criteria awaiting data (addition, M5) |
 
 ### `SiteFinancials`
 
@@ -601,6 +621,46 @@ Geometry: table · CRS: —
 | `passed` | BOOLEAN | yes |  |  | Passed |
 | `severity` | TEXT | yes |  |  | error | warning | info |
 | `timestamp` | DATETIME | yes |  |  | UTC time |
+
+### `CandidateCriteria`
+
+Raw criterion values per Pass/Review candidate before normalization (addition, ADR-0028).
+
+Geometry: table · CRS: —
+
+| Field | Type | Null | Unique | Domain | Description |
+|---|---|---|---|---|---|
+| `run_id` | TEXT | no |  |  | Run id |
+| `parcel_id` | TEXT | no |  |  | CandidateParcels.parcel_id |
+| `c01_raw` | REAL | yes |  |  | C01 raw |
+| `c02_raw` | REAL | yes |  |  | C02 raw |
+| `c03_raw` | REAL | yes |  |  | C03 raw |
+| `c04_raw` | REAL | yes |  |  | C04 raw |
+| `c05_raw` | REAL | yes |  |  | C05 raw |
+| `c06_raw` | REAL | yes |  |  | C06 raw |
+| `c07_raw` | REAL | yes |  |  | C07 raw |
+| `c08_raw` | REAL | yes |  |  | C08 raw |
+| `c09_raw` | REAL | yes |  |  | C09 raw |
+| `c10_raw` | REAL | yes |  |  | C10 raw |
+| `notes_json` | JSON | yes |  |  | Measurement notes (e.g. AADT station used, anchors) |
+
+### `RankStability`
+
+Rank stability per candidate: scenario ranks, OAT ±25 % and flat-Dirichlet draws (addition, ADR-0029).
+
+Geometry: table · CRS: —
+
+| Field | Type | Null | Unique | Domain | Description |
+|---|---|---|---|---|---|
+| `run_id` | TEXT | no |  |  | Run id |
+| `parcel_id` | TEXT | no |  |  | CandidateParcels.parcel_id |
+| `rank_Balanced` | INTEGER | yes |  |  | Rank, Balanced |
+| `rank_DemandFirst` | INTEGER | yes |  |  | Rank, DemandFirst |
+| `rank_CostFirst` | INTEGER | yes |  |  | Rank, CostFirst |
+| `top10_freq` | REAL | yes |  |  | Share of Dirichlet draws ranking the site in the top 10 |
+| `median_rank` | REAL | yes |  |  | Median rank over the draws |
+| `iqr_rank` | REAL | yes |  |  | Interquartile range of rank over the draws |
+| `oat_max_change` | INTEGER | yes |  |  | Largest absolute rank change over OAT runs (all scenarios) |
 
 ### `ScoreRuns`
 

@@ -40,9 +40,9 @@ consequence and confirmed before any code builds on it.
 | 0023 | Listing-rate → daypart mapping | D-18 | — | **Accepted** 2026-09-26 | M3 |
 | 0024 | Hot-zone contiguity = H3 k=1 components | D-19 | — | **Accepted** 2026-09-26 | M4 |
 | 0025 | Shape index = rectangularity | D-20 | D-09 | **Accepted** 2026-09-24 | M5 |
-| 0026 | Frontage / corner definitions | D-21 | — | Proposed — **review at M5** | M5 |
+| 0026 | Frontage / corner definitions | D-21 | — | **Applied — analyst may revisit** 2026-09-26 | M5 |
 | 0027 | Walk-shed polygons = buffered reachable edges | D-22 | — | **Accepted** 2026-09-24 | M5 |
-| 0028 | Criteria C01–C10 measurement details | D-23 | — | Proposed — **review at M5** | M5 |
+| 0028 | Criteria C01–C10 measurement details | D-23 | — | **Applied — analyst may revisit** 2026-09-26 | M5 |
 | 0029 | Dirichlet sensitivity = flat (α = 1) | D-24 | D-11 | **Accepted** 2026-09-24 | M5 |
 | 0030 | 40–200 candidate rule: report, don't auto-adjust | D-25 | — | **Accepted** 2026-09-24 | M5 |
 | 0031 | Size vs stall range: apply both | Q2 | D-10 | **Accepted** 2026-09-24 | M5 |
@@ -564,3 +564,46 @@ Set in the market file (`c04_daypart_weights`, validated to sum to 1.00); the sh
 daypart's rate index is weighted by how many days a year it applies (weekday 5/7, weekend 2/7,
 split evenly between day and evening); event revenue is scored separately by C03. C04 still waits
 for the rate surface (round-1 survey, ADR-0023).
+
+## ADR-0026 — Frontage / corner definitions — Applied (analyst may revisit), 2026-09-26
+Frontage = length of the site boundary within `site.frontage_buffer_ft` (50 ft, ADR-0080) of a
+drive-street centerline (OSM residential, unclassified, tertiary, secondary, primary, trunk; service
+roads, alleys and footways excluded), measured on the union of the clipped boundary so a stretch
+near two streets counts once. Corner = frontage on two streets with different names, or on
+stretches whose bearings differ by ≥ 45° (unnamed streets). Arterial frontage = any frontage on a
+primary/secondary/trunk street (feeds C08). FRONTAGE fails a site below `min_frontage_ft` (60).
+Measured for sites within the 8-minute paid-market reach only (all others already fail HOTZONE).
+
+## ADR-0028 — Criteria C01–C10 measurement — Applied (analyst may revisit), 2026-09-26
+As D-23, with these Franklin specifics: walk times from the site's representative point on the
+walk network; C01/C02 net Σ signed hex gap within 5 min, floor 0; C03 Σ event gap within 8 min ×
+events per year of venues within 8 min — venues excluded (S10 disabled) → **neutral 50, logged**;
+C04 daypart-weighted rate index (ADR-0081) — no rate surface until the round-1 survey → **neutral
+50, logged**; C05 effective stalls (private × 0.5) of facilities and metered block faces within
+3 min, excluding facilities inside the site; C06 top-3 anchors by total demand within 15 min,
+missing = 15; C07 assessed land value ÷ buildable stalls (a constant assessed-to-market ratio does
+not change min–max scores); C08 mean of corner, arterial and the AADT percentile of the busiest
+count station within 500 ft of the site boundary (none → left out; curb-cut not collected → left
+out); C09 ByRight 100 / Conditional 60 / Unknown 40, and a Review site whose zoning screen is
+Prohibited (existing lot, near the Zone A/B line, or L- limitation text) scores as Unknown; C10
+pipeline (S22 not configured) → **neutral 50, logged**. Neutral criteria keep their weights (no
+renormalization); any ranking built with a neutral criterion is marked PRELIMINARY
+(`SiteScores.preliminary_flag`). A single missing raw value scores 50.
+
+## ADR-0082 — M5 screen rules for Franklin — Applied (analyst may revisit), 2026-09-26
+* **Hot-zone rule:** a site qualifies only within an 8-minute network walk of a PAID-MARKET
+  screening zone (`HZ-P`, ADR-0075); context-only zones never qualify a site.
+* **Parcel assembly** (recorded M5 rule): inside the reach, contiguous land-use-eligible parcels
+  with the same normalized owner are merged before the size/stall screen (component ids kept in
+  `member_parcel_ids`; site id `ASM:<lowest parcel id>`). An assembly larger than
+  `max_parcel_sqft` falls back to its components. Franklin: 196 assemblies from 643 parcels
+  (1 fallback); 28 candidates are assemblies, 18 of them existing lots.
+* **Existing surface lots** (ADR-0063 + recorded M5 rule): not failed on shape; stalls from the lot
+  polygon (OSM surface area in the site × 0.90 ÷ 320 × 1.414, ADR-0067), then the stall range
+  applies.
+* **Zone A flag:** `zone_a_flag` marks sites touching Downtown parking Zone A (new lots
+  prohibited — only an existing lot can work there). Sites near the digitized A/B line stay Review
+  (ADR-0061) and carry the flag.
+* **Least permissive zoning** of an assembly's components is the site's `zoning_screen`.
+* Frontage, corner and slope are measured only inside the reach; PERMIT (S22) not applied.
+* Candidate pool vs SCOPE 40–200: reported as QA-E01 (warning only, ADR-0030).

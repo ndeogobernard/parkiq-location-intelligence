@@ -374,6 +374,15 @@ class CriteriaConfig(_Strict):
     c04_daypart_weights: dict[Daypart, float] | None = None
     c06: dict[str, float]
     c09_scores: dict[str, float]
+    sensitivity: dict[str, float] = Field(
+        default_factory=lambda: {
+            "oat_pct": 0.25,
+            "draws": 1000,
+            "alpha": 1.0,
+            "seed": 0,
+            "top_n": 10,
+        }
+    )
     provenance: dict[str, Provenance] = Field(default_factory=dict)
 
     @model_validator(mode="after")

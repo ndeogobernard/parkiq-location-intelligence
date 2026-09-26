@@ -108,7 +108,7 @@ def test_dependency_blocking_and_unimplemented(fixture_cfg, fresh_out) -> None: 
     with pytest.raises(StepBlocked, match="needs 'setup'"):
         run_steps(ctx, ["ingest"])
     with pytest.raises(StepNotImplemented):
-        run_steps(ctx, ["schema", "screen"], stop_at_unimplemented=False)
+        run_steps(ctx, ["schema", "finance"], stop_at_unimplemented=False)
 
 
 def test_decide_value_blocks_step(variant, fresh_out, monkeypatch) -> None:  # type: ignore[no-untyped-def]

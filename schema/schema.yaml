@@ -386,6 +386,25 @@ layers:
       flood_flag:          {type: BOOLEAN, desc: "Intersects SFHA"}
       pipeline_flag:       {type: BOOLEAN, desc: "Active development permit"}
       slope_pct:           {type: REAL, desc: "Mean slope, percent"}
+      member_parcel_ids:   {type: TEXT, desc: "Component parcel ids of an assembled site, ';'-joined (addition, M5 assembly rule)"}
+      assembled_count:     {type: INTEGER, desc: "Parcels in the site (1 = single parcel) (addition)"}
+      address:             {type: TEXT, desc: "Site address (first component) (addition)"}
+      jurisdiction:        {type: TEXT, desc: "Zoning jurisdiction (addition)"}
+      land_use_class:      {type: TEXT, domain: dm_LandUseClass, desc: "Land-use class (first component) (addition)"}
+      owner_type:          {type: TEXT, domain: dm_OwnerType, desc: "Owner class — due-diligence flag only (addition)"}
+      zoning_code:         {type: TEXT, desc: "Base zoning code(s) (addition)"}
+      zoning_screen:       {type: TEXT, domain: dm_ZoningScreen, desc: "Least permissive component zoning screen (addition)"}
+      lot_sqft:            {type: REAL, desc: "Site area, sq ft (addition)"}
+      stalls:              {type: REAL, desc: "Buildable stalls (new lot, rounded down) or existing-lot capacity (addition, ADR-0049/0063)"}
+      stalls_basis:        {type: TEXT, desc: "new lot layout | existing lot polygon (addition)"}
+      shape_index:         {type: REAL, desc: "Rectangularity 0–1 (addition, ADR-0025)"}
+      frontage_ft:         {type: REAL, desc: "Street frontage, ft (addition, ADR-0026)"}
+      corner_flag:         {type: BOOLEAN, desc: "Frontage on two streets (addition, ADR-0026)"}
+      arterial_flag:       {type: BOOLEAN, desc: "Frontage on a primary/secondary/trunk street (addition, ADR-0026)"}
+      existing_lot_flag:   {type: BOOLEAN, desc: "Existing surface lot (addition, ADR-0063)"}
+      zone_a_flag:         {type: BOOLEAN, desc: "In Downtown parking Zone A — new lots prohibited, only an existing lot can work (addition)"}
+      hotzone_id:          {type: TEXT, desc: "Nearest paid-market screening hot zone within 8 min (addition, ADR-0075)"}
+      land_value:          {type: REAL, desc: "Assessed land value, summed over components (addition)"}
   WalkSheds:
     feature_dataset: Analysis
     geometry: MultiPolygon
@@ -425,6 +444,7 @@ layers:
       c10_s: {type: REAL, domain: rg_Score, desc: "C10 scaled 0–100"}
       composite: {type: REAL, domain: rg_Score, desc: "Weighted composite 0–100"}
       rank:      {type: INTEGER, desc: "Rank within scenario (tie-break parcel_id)"}
+      preliminary_flag: {type: BOOLEAN, desc: "Ranking uses neutral criteria awaiting data (addition, M5)"}
   SiteFinancials:
     feature_dataset: Results
     geometry: MultiPolygon
@@ -521,6 +541,34 @@ tables:
       passed:     {type: BOOLEAN, desc: "Passed"}
       severity:   {type: TEXT, desc: "error | warning | info"}
       timestamp:  {type: DATETIME, desc: "UTC time"}
+  CandidateCriteria:
+    desc: "Raw criterion values per Pass/Review candidate before normalization (addition, ADR-0028)."
+    fields:
+      run_id:    {type: TEXT, nullable: false, desc: "Run id"}
+      parcel_id: {type: TEXT, nullable: false, desc: "CandidateParcels.parcel_id"}
+      c01_raw: {type: REAL, desc: "C01 raw"}
+      c02_raw: {type: REAL, desc: "C02 raw"}
+      c03_raw: {type: REAL, desc: "C03 raw"}
+      c04_raw: {type: REAL, desc: "C04 raw"}
+      c05_raw: {type: REAL, desc: "C05 raw"}
+      c06_raw: {type: REAL, desc: "C06 raw"}
+      c07_raw: {type: REAL, desc: "C07 raw"}
+      c08_raw: {type: REAL, desc: "C08 raw"}
+      c09_raw: {type: REAL, desc: "C09 raw"}
+      c10_raw: {type: REAL, desc: "C10 raw"}
+      notes_json: {type: JSON, desc: "Measurement notes (e.g. AADT station used, anchors)"}
+  RankStability:
+    desc: "Rank stability per candidate: scenario ranks, OAT ±25 % and flat-Dirichlet draws (addition, ADR-0029)."
+    fields:
+      run_id:           {type: TEXT, nullable: false, desc: "Run id"}
+      parcel_id:        {type: TEXT, nullable: false, desc: "CandidateParcels.parcel_id"}
+      rank_Balanced:    {type: INTEGER, desc: "Rank, Balanced"}
+      rank_DemandFirst: {type: INTEGER, desc: "Rank, DemandFirst"}
+      rank_CostFirst:   {type: INTEGER, desc: "Rank, CostFirst"}
+      top10_freq:       {type: REAL, desc: "Share of Dirichlet draws ranking the site in the top 10"}
+      median_rank:      {type: REAL, desc: "Median rank over the draws"}
+      iqr_rank:         {type: REAL, desc: "Interquartile range of rank over the draws"}
+      oat_max_change:   {type: INTEGER, desc: "Largest absolute rank change over OAT runs (all scenarios)"}
   ScoreRuns:
     desc: "Run log: one row per step per run."
     fields:

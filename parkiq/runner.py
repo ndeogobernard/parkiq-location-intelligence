@@ -118,7 +118,17 @@ def _placeholder(name: str, deps: tuple[str, ...], milestone: str) -> None:
 
 def steps() -> dict[str, Step]:
     """All steps (implemented or placeholder), importing step modules on first use."""
-    from parkiq import demand, gap, ingest, qaqc, schema_step, setup, supply  # noqa: F401
+    from parkiq import (  # noqa: F401
+        demand,
+        gap,
+        ingest,
+        qaqc,
+        schema_step,
+        score,
+        screen,
+        setup,
+        supply,
+    )
 
     _placeholder("demand", ("qaqc",), "M4")
     _placeholder("supply", ("qaqc",), "M3")

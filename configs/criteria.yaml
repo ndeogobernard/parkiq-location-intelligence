@@ -25,10 +25,13 @@ criteria:
 c04_daypart_weights: null   # set per market (markets/<slug>.yaml c04_daypart_weights)
 # C06 search (ADR-0028): top-N anchors within a search radius; missing anchors take the cap value.
 c06: {top_n: 3, search_minutes: 15, missing_minutes: 15}
+# Sensitivity (SCOPE §5.7): OAT ± oat_pct with renormalization; flat Dirichlet (ADR-0029), seed recorded.
+sensitivity: {oat_pct: 0.25, draws: 1000, alpha: 1.0, seed: 20260926, top_n: 10}
 # C09 scores — SCOPE §5.7 verbatim. Prohibited parcels never reach scoring (screened out).
 c09_scores: {ByRight: 100, Conditional: 60, Unknown: 40}
 
 provenance:
   normalization:       {status: SCOPE, source: "SCOPE §5.7"}
   c09_scores:          {status: SCOPE, source: "SCOPE §5.7"}
+  sensitivity:         {status: SCOPE, source: "SCOPE §5.7 (±25 %, 1,000 draws); ADR-0029 flat α = 1; seed fixed for reproducibility"}
   c06:                 {status: SCOPE, source: "ADR-0028 (15-min search, cap 15) — proposed"}
