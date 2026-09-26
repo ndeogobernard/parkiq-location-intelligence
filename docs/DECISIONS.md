@@ -38,7 +38,7 @@ consequence and confirmed before any code builds on it.
 | 0021 | On-street curb length | D-16 | — | **Accepted** 2026-09-26 | M3 |
 | 0022 | Anchor category crosswalk `configs/anchor_crosswalk.yaml` | D-17 | — | **Accepted** 2026-09-24 | M4 |
 | 0023 | Listing-rate → daypart mapping | D-18 | — | **Accepted** 2026-09-26 | M3 |
-| 0024 | Hot-zone contiguity = H3 k=1 components | D-19 | — | Proposed — **review at M4** | M4 |
+| 0024 | Hot-zone contiguity = H3 k=1 components | D-19 | — | **Accepted** 2026-09-26 | M4 |
 | 0025 | Shape index = rectangularity | D-20 | D-09 | **Accepted** 2026-09-24 | M5 |
 | 0026 | Frontage / corner definitions | D-21 | — | Proposed — **review at M5** | M5 |
 | 0027 | Walk-shed polygons = buffered reachable edges | D-22 | — | **Accepted** 2026-09-24 | M5 |
@@ -406,5 +406,57 @@ double-counts staff demand at hospitals; a rule is needed (e.g. subtract hospita
 **ADR-0066 amendment (2026-09-26).** Where one CMS record combines campuses, beds are split by the
 hospital's published per-campus figures and each campus is placed separately: CCN 360035 (937
 beds) → Mount Carmel East 614 and Mount Carmel Grove City 323 (shares of the published 400 / 210).
+**Revised (Bernard, 2026-09-26):** use the published campus figures directly — East 400, Grove City
+210; the other 327 CMS beds are at neither current campus (V-36).
 Nationwide Children's is not overridden (CMS 378 vs 703 licensed is a definition difference, not a
 structure error); the gap is noted in V-36 and must appear in the memo assumptions.
+
+## ADR-0068 — Mode and transit adjustments by category — Applied (Bernard M4 decisions + analyst)
+* **Commute categories** (`demand.commute_categories: [Office]`, job-based demand) get the mode
+  factor = workplace drive share of the place the anchor is in ÷ county workplace drive share,
+  from ACS 2024 5-year **B08601 (workplace geography)**, drive share = car/truck/van ÷ (total −
+  worked from home). Work-from-home is excluded because B08601 places home workers at their home,
+  which would depress residential suburbs. County baseline 0.9433; Columbus 0.9375.
+  *Applied — analyst may revisit.* ACS publishes B08601 only for counties and places (tract values
+  are null), so the downtown effect needs CTPP tract-of-work (2017–2021), whose API needs a
+  registered key (V-43).
+* **Non-commute categories** (Medical, University, Hotel, RestaurantBar, Retail, Venue) get no ACS
+  commute adjustment. The transit factor (`demand_factor` 0.85 within 400 m of a stop with AM-peak
+  headway ≤ 15 min, 07:00–09:00 weekday) applies to non-commute categories only: commute mode
+  shares already reflect transit use, so applying both would count transit twice.
+  Medical and University are treated as non-commute (their rates cover visitors/students as well
+  as staff) — *Applied — analyst may revisit.*
+* Rates' `baseline_drive_share` is superseded for Franklin by the county workplace baseline.
+
+## ADR-0069 — Size metrics for places — Applied (analyst may revisit)
+* Restaurant/bar and retail floor area = ground-floor footprint of the Overture building containing
+  the place, shared equally among all places in that building; places outside any building are
+  skipped and counted.
+* Hotel rooms = OSM `rooms` tag (12 of 238 hotels), else building gross floor area (footprint ×
+  floors, floors = levels or height ÷ `demand.meters_per_floor` 3.5 m) shared among the places in
+  the building ÷ `demand.hotel_sqft_per_room` 713. Both constants derived from Franklin data:
+  3.5 m = median height/levels of 5,351 buildings (IQR 2.77–4.29); 713 sq ft = median over 10
+  hotels with a rooms tag and a building (IQR in the memo).
+
+## ADR-0070 — Campus rule against double counting — Applied (Bernard M4 decisions)
+For each hospital and university anchor, the campus = the parcel under the anchor point plus
+contiguous parcels with the same normalized owner. LODES jobs of the named sectors on campus
+(`demand.campus_rule`: Medical → CNS16, University → CNS15) are removed from job-based demand.
+Because only office-type sectors carry a per-job rate (anchor crosswalk), CNS15/CNS16 jobs generate
+no job-based demand anyway; the rule is kept so that a market with a health or education per-job
+rate cannot double count, and the removed jobs are reported.
+
+## ADR-0071 — Hot-zone rule and flags — Applied (Bernard M4 decisions)
+Hot-zone hex: weekday-day gap > 0 and gap > 0 in at least one of wd_eve, we_eve, event. Zones =
+edge-connected components (H3 k = 1; ADR-0024 accepted). Single-hex zones are kept and flagged
+(`zone_size` = 1); a zone is flagged single-anchor when one anchor contributes more than 50 % of its
+positive weekday-day gap. Curb-sensitive hexes are counted per zone. Screening use of single-hex
+zones is Bernard's decision after the map.
+
+## ADR-0072 — Floor-area cap and minimum-lot flag — Applied (analyst may revisit)
+* A place's floor-area share (ADR-0069) is capped at the 90th percentile of standalone-building
+  footprints of its category (one place per building): restaurant/bar 12,220 sq ft (n 1,449),
+  retail 40,758 sq ft (n 1,795). Without it, a restaurant inside a mall or office tower inherited
+  the whole footprint share (19.6 M sq ft for 2,547 restaurants; 291 k weekend-evening stalls).
+* A hot zone whose positive weekday-day gap is below the minimum viable lot
+  (`site.target_stalls_range[0]` = 50 stalls) is flagged `below_min_lot_flag` (kept, reported).

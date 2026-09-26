@@ -249,6 +249,14 @@ Geometry: Point · CRS: analysis CRS
 | `size_value` | REAL | yes |  |  | Size in size_metric units |
 | `drive_share` | REAL | yes |  | `rg_Occupancy` | Driver mode share 0–1 |
 | `venue_id` | TEXT | yes |  |  | Venues.venue_id for venue anchors |
+| `origin` | TEXT | yes |  |  | Source layer and record id (addition, ADR-0068) |
+| `mode_factor` | REAL | yes |  |  | Workplace drive share ÷ county baseline (commute categories) (addition, ADR-0068) |
+| `transit_factor` | REAL | yes |  |  | Transit factor near high-frequency stops (non-commute) (addition, ADR-0068) |
+| `demand_wd_day` | REAL | yes |  |  | Generated demand, stalls, weekday day (addition) |
+| `demand_wd_eve` | REAL | yes |  |  | Generated demand, weekday evening (addition) |
+| `demand_we_day` | REAL | yes |  |  | Generated demand, weekend day (addition) |
+| `demand_we_eve` | REAL | yes |  |  | Generated demand, weekend evening (addition) |
+| `demand_event` | REAL | yes |  |  | Generated demand, event (addition) |
 
 ### `TransitStops`
 
@@ -424,6 +432,15 @@ Geometry: MultiPolygon · CRS: analysis CRS
 | `dayparts_positive` | TEXT | yes |  |  | Dayparts with gap > 0, ';'-joined |
 | `total_gap_stalls` | REAL | yes |  |  | Sum of positive gap stalls |
 | `mean_rate_index` | REAL | yes |  |  | Mean rate index |
+| `zone_size` | INTEGER | yes |  |  | Hexes in the zone (addition, ADR-0071) |
+| `single_hex_flag` | BOOLEAN | yes |  |  | zone_size = 1 (addition, ADR-0071) |
+| `top_anchor_id` | TEXT | yes |  |  | Anchor with the largest weekday-day demand in the zone (addition) |
+| `top_anchor_share` | REAL | yes |  |  | Its share of the zone's positive weekday-day gap (addition) |
+| `single_anchor_flag` | BOOLEAN | yes |  |  | top_anchor_share > demand.single_anchor_share (addition, ADR-0071) |
+| `curb_sensitive_hexes` | INTEGER | yes |  |  | Curb-sensitive hexes in the zone (ADR-0021) |
+| `curb_sensitive_flag` | BOOLEAN | yes |  |  | Any curb-sensitive hex (ADR-0021) |
+| `jurisdictions` | TEXT | yes |  |  | Places the zone touches, ';'-joined (addition) |
+| `below_min_lot_flag` | BOOLEAN | yes |  |  | Positive weekday-day gap < minimum viable lot (site.target_stalls_range min) (addition, ADR-0072) |
 
 ### `CandidateParcels`
 

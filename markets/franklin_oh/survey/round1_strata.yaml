@@ -7,6 +7,8 @@ backups_per_area: 5
 exclude:                    # not public paid parking — never sampled
   - {field: operator, pattern: "Columbus State", reason: "student permit lot"}
   - {field: name, pattern: "\bpermit\b", reason: "permit-only lot"}
+  - {field: operator, pattern: "Kroger", reason: "grocery customer lot (Bernard, M4 review)"}
+  - {field: operator, pattern: "Nationwide Children's Homecare", reason: "likely staff lot (Bernard, M4 review)"}
 strata:
   - {label: "Downtown Zone A/B", areas: ["Downtown (Zone A/B)"], n: 12, garages: 4}
   - {label: "Arena District", areas: ["Arena District"], n: 3, garages: 0}
@@ -16,9 +18,9 @@ strata:
     n: 5
     garages: 0
     manual:                 # OSU campus garages outside the SID strip (CampusParc publishes rates)
-      - {facility_id: F001952, operator: CampusParc, source: "operator website",
+      - {name: "Ohio Union South Parking Garage", operator: CampusParc, source: "operator website",
          why: "OSU visitor garage, CampusParc — rates from operator website"}
-      - {facility_id: F001951, operator: CampusParc, source: "operator website",
+      - {name: "Lane Avenue Parking Garage", operator: CampusParc, source: "operator website",
          why: "OSU visitor garage near the stadium, CampusParc — rates from operator website"}
   - {label: "Brewery District / German Village", areas: ["Brewery District / German Village"], n: 4, garages: 0}
   - {label: "Franklinton", areas: ["Franklinton"], n: 4, garages: 0}

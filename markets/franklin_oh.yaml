@@ -37,9 +37,17 @@ demand:
   transit_adjustment:
     high_frequency_radius_m: 400
     demand_factor: 0.85
-    high_frequency_headway_max_min: null   # DECIDE
-    peak_window: null                      # DECIDE, e.g. ["07:00", "09:00"] (manual §6.3)
-  mode_adjustment: null         # DECIDE: relative (ADR-0014, proposed) needs baseline drive shares
+    high_frequency_headway_max_min: 15     # SET (Bernard, M4 2026-09-26): COTA frequent-network definition
+    peak_window: ["07:00", "09:00"]        # SET (Bernard, M4 2026-09-26): weekday AM peak
+  mode_adjustment: relative     # SET (Bernard): commute categories only, workplace-based drive share (ADR-0068)
+  commute_categories: [Office]  # ADR-0068: job-based demand; all other categories get the transit factor instead
+  workplace_drive_share_path: franklin_oh/workplace_drive_share.csv   # ACS B08601 place/county, WFH excluded
+  workplace_places_path: "C:/GIS/ParkIQ_cache/franklin_oh/demand/tl_2024_39_place.zip"
+  meters_per_floor: 3.5         # ADR-0069: median height/levels, 5,351 Overture buildings (IQR 2.77-4.29)
+  hotel_sqft_per_room: 713      # ADR-0069: median gross sq ft per room, 10 OSM hotels with rooms (building GFA shared among POIs)
+  campus_rule: {Medical: [CNS16], University: [CNS15]}   # ADR-0070: jobs removed on the anchor's campus parcels
+  single_anchor_share: 0.5      # SET (Bernard): hot zone flagged when one anchor supplies > 50% of its gap
+  floor_area_cap_sqft: {RestaurantBar: 12220, Retail: 40758}   # ADR-0072: 90th pct of standalone-building footprints (1,449 / 1,795 places)
   residential_offstreet_share: null        # not used: residential excluded for the pilot (ADR-0015)
   excluded_anchor_categories: [ResidentialBlock]   # ADR-0015: no residential demand generation; rates stay in config
 network:
@@ -222,8 +230,13 @@ provenance:
   site.improvement_ratio_max:      {status: SCOPE,  source: "SCOPE §5.5"}
   site.frontage_buffer_ft:         {status: DECIDE, source: ""}
   demand.transit_adjustment.high_frequency_radius_m: {status: VERIFY, source: "SCOPE §2.1"}
+  demand.transit_adjustment.high_frequency_headway_max_min: {status: SET, source: "Bernard, M4 decisions 2026-09-26 (COTA frequent network)"}
+  demand.meters_per_floor:         {status: SET,    source: "ADR-0069: derived, median of 5,351 Overture buildings with height and levels"}
+  demand.hotel_sqft_per_room:      {status: SET,    source: "ADR-0069: derived, median of 10 OSM hotels with rooms; IQR in memo"}
+  demand.single_anchor_share:      {status: SET,    source: "Bernard, M4 decisions 2026-09-26"}
+  demand.floor_area_cap_sqft.RestaurantBar: {status: SET, source: "ADR-0072: 90th pct standalone-building footprint, 1,449 restaurants/bars"}
+  demand.floor_area_cap_sqft.Retail:        {status: SET, source: "ADR-0072: 90th pct standalone-building footprint, 1,795 shops"}
   demand.transit_adjustment.demand_factor:           {status: VERIFY, source: "SCOPE §2.1"}
-  demand.transit_adjustment.high_frequency_headway_max_min: {status: DECIDE, source: ""}
   demand.excluded_anchor_categories: {status: SET, source: "ADR-0015 — Bernard 2026-09-24; revisit after Phase K validation"}
   network.walking_speed_m_s:       {status: VERIFY, source: "SCOPE §5.1 [PARAMETER]; needs citation"}
   supply.private_effective_share:  {status: SCOPE,  source: "SCOPE §2.1"}

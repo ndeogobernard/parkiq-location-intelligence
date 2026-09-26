@@ -1,0 +1,42 @@
+# Anchor category crosswalk (ADR-0022; M4). Maps source records to dm_AnchorCategory and names the
+# size metric each category uses. Shared by every market; a market switches categories off with
+# demand.excluded_anchor_categories.
+#
+# LODES WAC sectors (CNS01–CNS20, NAICS 2-digit). Only office-type sectors get a job-based rate
+# (Bernard, M4 decisions 2026-09-26): information, finance, real estate, professional, management,
+# administrative support, public administration. Every other sector has NO defensible per-job rate
+# here and generates NO job-based demand (stated in the memo): their parking is either covered by a
+# floor-area / bed / enrollment / room rate (retail, food & lodging, health care, education) or is
+# not a paid-parking market (agriculture, manufacturing, warehousing, construction, ...).
+
+lodes_sectors:
+  Office: [CNS09, CNS10, CNS11, CNS12, CNS13, CNS14, CNS20]
+  none:
+    CNS01: agriculture, forestry, fishing
+    CNS02: mining, oil and gas
+    CNS03: utilities
+    CNS04: construction
+    CNS05: manufacturing
+    CNS06: wholesale trade
+    CNS07: retail trade — covered by the retail floor-area rate
+    CNS08: transportation and warehousing
+    CNS15: educational services — university covered by the enrollment rate
+    CNS16: health care and social assistance — hospitals covered by the bed rate
+    CNS17: arts, entertainment, recreation — venues covered by the seat rate (S10)
+    CNS18: accommodation and food services — covered by room and floor-area rates
+    CNS19: other services
+
+# OSM / Overture places → category (first match wins). Size metric per category below.
+places:
+  - {category: Hotel, match: {tourism: [hotel, motel, hostel, guest_house]}}
+  - {category: RestaurantBar, match: {amenity: [restaurant, bar, pub, cafe, fast_food, nightclub]}}
+  - {category: Retail, match: {shop: "*"}}
+
+size_metrics:
+  Office: Jobs
+  Medical: Beds
+  University: Enrollment
+  Hotel: Rooms        # OSM rooms tag, else building floor area ÷ demand.hotel_sqft_per_room
+  RestaurantBar: Sqft # ground-floor footprint of the containing building, shared among its places
+  Retail: Sqft
+  Venue: Seats        # S10 venues table only (event daypart)

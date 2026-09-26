@@ -23,12 +23,14 @@ from parkiq import units
 
 TEMPLATE_COLUMNS = [
     "facility_id", "osm_ids", "parcel_id", "name", "operator", "type", "lat", "lon", "area",
-    "visit_date", "visit_time", "observer", "source",  # sign | app rate screen | operator website
+    "visit_date", "visit_time", "observer", "outcome", "source",  # outcome: rates posted |
+    # no posted rate / free | not accessible | closed / gone; source: sign | app | operator website
     "rate_hour", "rate_daily", "rate_early_bird", "early_bird_rule", "rate_evening_flat",
     "evening_starts", "rate_weekend_daily", "rate_event", "rate_monthly", "max_stay",
     "hours_posted", "payment_app", "app_zone", "capacity_counted", "photo_ref", "notes",
 ]  # fmt: skip
 SOURCE_VALUES = ["sign", "app rate screen", "operator website"]
+OUTCOME_VALUES = ["rates posted", "no posted rate / free", "not accessible", "closed / gone"]
 
 
 def _score(f: pd.DataFrame) -> pd.DataFrame:
@@ -81,7 +83,15 @@ def select_sample(
         pool = _score(fac[fac["submarket"].isin(s["areas"]) & (fac["type"] != "OnStreet")])
         picked: list[Any] = []
         chosen: list[Any] = []
-        manual = {m["facility_id"]: m for m in s.get("manual", [])}
+        manual: dict[str, dict[str, Any]] = {}
+        for m in s.get("manual", []):  # by facility_id or exact name (ids change between runs)
+            hit = (
+                fac[fac["facility_id"] == m["facility_id"]]
+                if "facility_id" in m
+                else fac[fac["name"] == m["name"]]
+            )
+            if len(hit):
+                manual[str(hit["facility_id"].iloc[0])] = m
         if manual:
             extra = _score(fac[fac["facility_id"].isin(list(manual))])
             pool = pd.concat([extra, pool[~pool.index.isin(extra.index)]])
@@ -156,6 +166,7 @@ def field_sheet_pdf(path: Path, market: str, round_no: int) -> None:
     fields = [
         ("Facility ID / name", "Operator"), ("Type (surface / garage)", "Area"),
         ("Date", "Time"), ("Observer", "Source (sign / app / website)"),
+        ("Outcome: rates posted / NO POSTED RATE - FREE", "  / not accessible / closed-gone"),
         ("Hourly rate", "Max stay"), ("Daily (all day)", "Early bird rate + rule"),
         ("Evening flat rate", "Evening starts at"), ("Weekend daily", "Event rate"),
         ("Monthly", "Hours posted"), ("Payment app", "App zone #"),

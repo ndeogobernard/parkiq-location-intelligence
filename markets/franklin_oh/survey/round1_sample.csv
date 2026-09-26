@@ -3,14 +3,14 @@ sample,1,Downtown Zone A/B,Downtown (Zone A/B),F002196,RiverSouth Garage,Lazarus
 sample,2,Downtown Zone A/B,Downtown (Zone A/B),F000021,Peninsula Garage,LAZ Parking,Garage,39.960524,-83.008444,tagged paid (fee=yes); operator LAZ Parking; 600 stalls (stated),sign / app rate screen,node/6362958735
 sample,3,Downtown Zone A/B,Downtown (Zone A/B),F002172,Columbus Commons Garage,,Garage,39.957102,-82.998114,tagged paid (fee=yes); 3784 stalls (footprint x levels),sign / app rate screen,way/32803036
 sample,4,Downtown Zone A/B,Downtown (Zone A/B),F005271,Vern Riffe Center Parking Garage,,Garage,39.960247,-83.001581,tagged paid (fee=yes); 2334 stalls (footprint x levels),sign / app rate screen,way/617454267
-sample,5,Downtown Zone A/B,Downtown (Zone A/B),F002095,,Nationwide Children's Homecare,Surface,39.956455,-82.99185,tagged paid (fee=yes); operator Nationwide Children's Homecare; 241 stalls (stated),sign / app rate screen,way/292819978
-sample,6,Downtown Zone A/B,Downtown (Zone A/B),F002336,Courthouse Parking,Parking Company of America,Surface,39.955314,-83.001608,tagged paid (fee=yes); operator Parking Company of America; 208 stalls (area x factor),sign / app rate screen,way/38022226;way/610875781
-sample,7,Downtown Zone A/B,Downtown (Zone A/B),F002448,,,Surface,39.970836,-82.997926,tagged paid (fee=yes); 1093 stalls (area x factor),sign / app rate screen,way/40477669
-sample,8,Downtown Zone A/B,Downtown (Zone A/B),F002047,,,Surface,39.955766,-82.993495,tagged paid (fee=yes); 245 stalls (stated),sign / app rate screen,way/231227658
-sample,9,Downtown Zone A/B,Downtown (Zone A/B),F002122,,,Surface,39.957134,-82.994141,tagged paid (fee=yes); 216 stalls (area x factor),sign / app rate screen,way/293478815
-sample,10,Downtown Zone A/B,Downtown (Zone A/B),F002671,,,Surface,39.960374,-82.995003,tagged paid (fee=yes); 109 stalls (area x factor),sign / app rate screen,way/440637975;way/440637997
-sample,11,Downtown Zone A/B,Downtown (Zone A/B),F002655,,,Surface,39.96691,-82.99921,tagged paid (fee=yes); 92 stalls (area x factor),sign / app rate screen,way/440254491
-sample,12,Downtown Zone A/B,Downtown (Zone A/B),F003942,,,Surface,39.95402,-82.997368,tagged paid (fee=yes); 83 stalls (area x factor),sign / app rate screen,way/557125922
+sample,5,Downtown Zone A/B,Downtown (Zone A/B),F002336,Courthouse Parking,Parking Company of America,Surface,39.955314,-83.001608,tagged paid (fee=yes); operator Parking Company of America; 208 stalls (area x factor),sign / app rate screen,way/38022226;way/610875781
+sample,6,Downtown Zone A/B,Downtown (Zone A/B),F002448,,,Surface,39.970836,-82.997926,tagged paid (fee=yes); 1093 stalls (area x factor),sign / app rate screen,way/40477669
+sample,7,Downtown Zone A/B,Downtown (Zone A/B),F002047,,,Surface,39.955766,-82.993495,tagged paid (fee=yes); 245 stalls (stated),sign / app rate screen,way/231227658
+sample,8,Downtown Zone A/B,Downtown (Zone A/B),F002122,,,Surface,39.957134,-82.994141,tagged paid (fee=yes); 216 stalls (area x factor),sign / app rate screen,way/293478815
+sample,9,Downtown Zone A/B,Downtown (Zone A/B),F002671,,,Surface,39.960374,-82.995003,tagged paid (fee=yes); 109 stalls (area x factor),sign / app rate screen,way/440637975;way/440637997
+sample,10,Downtown Zone A/B,Downtown (Zone A/B),F002655,,,Surface,39.96691,-82.99921,tagged paid (fee=yes); 92 stalls (area x factor),sign / app rate screen,way/440254491
+sample,11,Downtown Zone A/B,Downtown (Zone A/B),F003942,,,Surface,39.95402,-82.997368,tagged paid (fee=yes); 83 stalls (area x factor),sign / app rate screen,way/557125922
+sample,12,Downtown Zone A/B,Downtown (Zone A/B),F003562,,,Surface,39.962879,-82.998578,tagged paid (fee=yes); 63 stalls (area x factor),sign / app rate screen,way/494888216
 backup,1,Downtown Zone A/B,Downtown (Zone A/B),F002038,,,Garage,39.961334,-82.998971,tagged paid (fee=yes); 2260 stalls (footprint x levels),sign / app rate screen,way/230998777
 backup,2,Downtown Zone A/B,Downtown (Zone A/B),F005099,Franklin County Parking Garage,,Garage,39.953987,-83.001223,tagged paid (fee=yes); 782 stalls (footprint x levels),sign / app rate screen,way/611304312
 backup,3,Downtown Zone A/B,Downtown (Zone A/B),F002033,,,Garage,39.965663,-83.0036,tagged paid (fee=yes); 633 stalls (footprint x levels),sign / app rate screen,way/221134828
@@ -27,10 +27,10 @@ backup,5,Arena District,Arena District,F006318,,,Surface,39.967042,-83.013311,ta
 sample,1,Short North,Short North,F002666,,,Surface,39.986136,-83.005849,tagged paid (fee=yes); 97 stalls (area x factor),sign / app rate screen,way/440637963;way/440638018
 sample,2,Short North,Short North,F006028,,,Surface,39.9877,-83.006234,tagged paid (fee=yes); 44 stalls (area x factor),sign / app rate screen,way/833503376;way/833503377;way/833503378
 backup,1,Short North,Short North,F004797,Joseph Garage,,Garage,39.975166,-83.004076,tagged paid (fee=yes); 378 stalls (footprint x levels),sign / app rate screen,way/599895898
-backup,2,Short North,Short North,F002697,,Kroger,Surface,39.989918,-83.00524,UNVERIFIED as paid (no fee tag); operator Kroger; 234 stalls (area x factor),sign / app rate screen,way/440638022
-backup,3,Short North,Short North,F005539,,,Surface,39.983093,-83.003853,UNVERIFIED as paid (no fee tag); 112 stalls (area x factor),sign / app rate screen,way/698092528
-backup,4,Short North,Short North,F005302,,,Surface,39.977663,-83.004232,UNVERIFIED as paid (no fee tag); 60 stalls (area x factor),sign / app rate screen,way/633453948
-backup,5,Short North,Short North,F002680,,,Surface,39.980945,-83.00469,UNVERIFIED as paid (no fee tag); 47 stalls (area x factor),sign / app rate screen,way/440637992
+backup,2,Short North,Short North,F005539,,,Surface,39.983093,-83.003853,UNVERIFIED as paid (no fee tag); 112 stalls (area x factor),sign / app rate screen,way/698092528
+backup,3,Short North,Short North,F005302,,,Surface,39.977663,-83.004232,UNVERIFIED as paid (no fee tag); 60 stalls (area x factor),sign / app rate screen,way/633453948
+backup,4,Short North,Short North,F002680,,,Surface,39.980945,-83.00469,UNVERIFIED as paid (no fee tag); 47 stalls (area x factor),sign / app rate screen,way/440637992
+backup,5,Short North,Short North,F006069,,,Surface,39.985636,-83.004146,UNVERIFIED as paid (no fee tag); 44 stalls (area x factor),sign / app rate screen,way/846522603
 sample,1,University District,,F001952,Ohio Union South Parking Garage,CampusParc,Garage,39.998902,-83.008937,"MANUAL: OSU visitor garage, CampusParc — rates from operator website",operator website,way/162877497;way/30172346
 sample,2,University District,,F001951,Lane Avenue Parking Garage,CampusParc,Garage,40.0057,-83.016162,"MANUAL: OSU visitor garage near the stadium, CampusParc — rates from operator website",operator website,way/158734277
 sample,3,University District,University District,F006172,,,Surface,39.997854,-83.007166,tagged paid (fee=yes); 28 stalls (area x factor),sign / app rate screen,way/916523971
@@ -41,12 +41,12 @@ backup,2,University District,University District,F005721,,,Garage,40.005519,-83.
 backup,3,University District,University District,F001936,,,Garage,40.003483,-83.008131,UNVERIFIED as paid (no fee tag); 116 stalls (footprint x levels),sign / app rate screen,way/1560901952
 backup,4,University District,University District,F005720,,,Surface,40.006583,-83.01399,UNVERIFIED as paid (no fee tag); 52 stalls (area x factor),sign / app rate screen,way/761775348
 backup,5,University District,University District,F000626,,,Surface,40.006596,-83.009899,UNVERIFIED as paid (no fee tag); 38 stalls (area x factor),sign / app rate screen,way/1226370521;way/1226370522
-sample,1,Brewery District / German Village,Brewery District / German Village,F002120,Lot 37E,Kroger,Surface,39.949449,-83.001175,tagged paid (fee=yes); operator Kroger; 1055 stalls (area x factor),sign / app rate screen,way/293478811;way/293478812;way/480727126
-sample,2,Brewery District / German Village,Brewery District / German Village,F003852,,,Surface,39.952033,-83.002158,tagged paid (fee=yes); 405 stalls (area x factor),sign / app rate screen,way/554543134;way/554543135;way/554543136;way/554543137
-sample,3,Brewery District / German Village,Brewery District / German Village,F003860,,,Surface,39.948116,-83.001729,tagged paid (fee=yes); 381 stalls (area x factor),sign / app rate screen,way/554543149
-sample,4,Brewery District / German Village,Brewery District / German Village,F003963,,,Surface,39.942083,-82.99786,tagged paid (fee=yes); 19 stalls (area x factor),sign / app rate screen,way/558263950
-backup,1,Brewery District / German Village,Brewery District / German Village,F004127,Brewery District Parking,,Garage,39.95179,-82.999691,tagged paid (fee=yes); 674 stalls (footprint x levels),sign / app rate screen,way/588427790
-backup,2,Brewery District / German Village,Brewery District / German Village,F002121,,Sherwin-Williams,Surface,39.949331,-82.997628,UNVERIFIED as paid (no fee tag); operator Sherwin-Williams; 166 stalls (area x factor),sign / app rate screen,way/293478813;way/556041543;way/589003580;way/589003588
+sample,1,Brewery District / German Village,Brewery District / German Village,F003852,,,Surface,39.952033,-83.002158,tagged paid (fee=yes); 405 stalls (area x factor),sign / app rate screen,way/554543134;way/554543135;way/554543136;way/554543137
+sample,2,Brewery District / German Village,Brewery District / German Village,F003860,,,Surface,39.948116,-83.001729,tagged paid (fee=yes); 381 stalls (area x factor),sign / app rate screen,way/554543149
+sample,3,Brewery District / German Village,Brewery District / German Village,F003963,,,Surface,39.942083,-82.99786,tagged paid (fee=yes); 19 stalls (area x factor),sign / app rate screen,way/558263950
+sample,4,Brewery District / German Village,Brewery District / German Village,F002121,,Sherwin-Williams,Surface,39.949331,-82.997628,UNVERIFIED as paid (no fee tag); operator Sherwin-Williams; 166 stalls (area x factor),sign / app rate screen,way/293478813;way/556041543;way/589003580;way/589003588
+backup,1,Brewery District / German Village,Brewery District / German Village,F002808,,,Garage,39.949518,-82.999504,tagged paid (fee=yes); 930 stalls (footprint x levels),sign / app rate screen,way/448752011
+backup,2,Brewery District / German Village,Brewery District / German Village,F004127,Brewery District Parking,,Garage,39.95179,-82.999691,tagged paid (fee=yes); 674 stalls (footprint x levels),sign / app rate screen,way/588427790
 backup,3,Brewery District / German Village,Brewery District / German Village,F000172,,Fifth Third Bank,Surface,39.945771,-82.998158,UNVERIFIED as paid (no fee tag); operator Fifth Third Bank; 118 stalls (area x factor),sign / app rate screen,way/1013711265;way/1013711268;way/556041533
 backup,4,Brewery District / German Village,Brewery District / German Village,F003999,,Education First Credit Union,Surface,39.951817,-82.987831,UNVERIFIED as paid (no fee tag); operator Education First Credit Union; 60 stalls (area x factor),sign / app rate screen,way/560979668
 backup,5,Brewery District / German Village,Brewery District / German Village,F003969,,McDonald's,Surface,39.941567,-82.996045,UNVERIFIED as paid (no fee tag); operator McDonald's; 54 stalls (area x factor),sign / app rate screen,way/558321105;way/558321113

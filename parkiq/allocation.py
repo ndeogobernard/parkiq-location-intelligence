@@ -74,39 +74,39 @@ def band_weight(minutes: np.ndarray, bands: list[float], weights: dict[float, fl
     return out
 
 
-def allocate(
+def allocate_matrix(
     points: gpd.GeoDataFrame,
     values: np.ndarray,
     hexes: gpd.GeoDataFrame,
     graph: WalkGraph,
     bands: list[float],
     weights: dict[float, float],
-) -> tuple[pd.Series, dict[str, int]]:
-    """Allocate ``values`` at ``points`` to hexes; returns (value per hex_id, stats).
+    keep_weights: bool = False,
+) -> tuple[pd.DataFrame, dict[str, int], pd.DataFrame | None]:
+    """Allocate several value columns (n points × k) with one walk-shed computation per point.
 
-    Args:
-        points: Source points (analysis CRS).
-        values: Quantity per point (e.g. stalls); zero/NaN points are skipped.
-        hexes: HexGrid (``hex_id`` + polygons, analysis CRS).
-        graph: Walk graph.
-        bands: Walk-shed band upper edges in minutes (ascending).
-        weights: Decay weight per band edge.
+    Returns:
+        (hex_id × k totals, stats, per-source weights ``src, hex_id, w`` if ``keep_weights``) —
+        ``src`` is the row position in ``points``; weights sum to 1 per allocated source.
     """
-    values = np.nan_to_num(np.asarray(values, dtype=float))
-    keep = values > 0
-    pts = points.loc[keep]
-    vals = values[keep]
+    vals2 = np.nan_to_num(np.asarray(values, dtype=float))
+    if vals2.ndim == 1:
+        vals2 = vals2[:, None]
+    keep = vals2.sum(axis=1) > 0
+    src_pos = np.flatnonzero(keep)
+    pts = points.iloc[src_pos]
+    vals = vals2[keep]
     cent = hexes.geometry.centroid
     hex_xy = np.c_[cent.x.to_numpy(), cent.y.to_numpy()]
     hex_node, hex_snap = graph.snap(hex_xy)
     src_xy = np.c_[pts.geometry.x.to_numpy(), pts.geometry.y.to_numpy()]
     src_node, src_snap = graph.snap(src_xy)
     limit = max(bands)
-    total = np.zeros(len(hexes))
+    total = np.zeros((len(hexes), vals.shape[1]))
     isolated = outside = 0
-    # candidate hexes per source: only centroids within straight-line reach of the shed
-    reach = limit / graph.min_per_unit
+    reach = limit / graph.min_per_unit  # candidate centroids within straight-line reach
     hex_tree = cKDTree(hex_xy)
+    wrows: list[tuple[np.ndarray, np.ndarray, np.ndarray]] = []
     for start in range(0, len(vals), BATCH):
         sl = slice(start, start + BATCH)
         dist = csgraph.dijkstra(
@@ -120,7 +120,8 @@ def allocate(
             else:
                 w = np.zeros(0)
             if w.sum() > 0:
-                total[cand] += vals[j] * w / w.sum()
+                nz = w > 0
+                cand, w = cand[nz], w[nz] / w.sum()
             else:
                 isolated += 1
                 own = hexes.index.get_indexer(
@@ -130,15 +131,41 @@ def allocate(
                         predicate="within",
                     )["index_right"]
                 )
-                if len(own):
-                    total[own[0]] += vals[j]
-                else:
+                if not len(own):
                     outside += 1
-    out = pd.Series(total, index=hexes["hex_id"].to_numpy())
+                    continue
+                cand, w = own[:1], np.array([1.0])
+            total[cand] += np.outer(w, vals[j])
+            if keep_weights:
+                wrows.append((np.full(len(cand), src_pos[j]), cand, w))
+    out = pd.DataFrame(total, index=hexes["hex_id"].to_numpy())
     stats = {
         "sources": len(vals),
         "isolated_to_own_hex": isolated - outside,
         "outside_grid_dropped": outside,
     }
     log.info("allocation: %s; conserved %.1f of %.1f", stats, total.sum(), vals.sum())
-    return out, stats
+    wdf = None
+    if keep_weights and wrows:
+        hid = hexes["hex_id"].to_numpy()
+        wdf = pd.DataFrame(
+            {
+                "src": np.concatenate([r[0] for r in wrows]),
+                "hex_id": hid[np.concatenate([r[1] for r in wrows])],
+                "w": np.concatenate([r[2] for r in wrows]),
+            }
+        )
+    return out, stats, wdf
+
+
+def allocate(
+    points: gpd.GeoDataFrame,
+    values: np.ndarray,
+    hexes: gpd.GeoDataFrame,
+    graph: WalkGraph,
+    bands: list[float],
+    weights: dict[float, float],
+) -> tuple[pd.Series, dict[str, int]]:
+    """Allocate one value column; returns (value per hex_id, stats). See :func:`allocate_matrix`."""
+    out, stats, _ = allocate_matrix(points, values, hexes, graph, bands, weights)
+    return out[0], stats

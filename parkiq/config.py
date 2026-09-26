@@ -173,6 +173,15 @@ class DemandSection(_Strict):
     mode_adjustment: Literal["relative", "none"] | None = None
     residential_offstreet_share: float | None = None
     excluded_anchor_categories: list[AnchorCategory] = Field(default_factory=list)
+    # M4 (ADR-0068..0071)
+    commute_categories: list[AnchorCategory] = Field(default_factory=list)
+    workplace_drive_share_path: Path | None = None
+    workplace_places_path: Path | None = None
+    meters_per_floor: float | None = Field(default=None, gt=0)
+    hotel_sqft_per_room: float | None = Field(default=None, gt=0)
+    campus_rule: dict[str, list[str]] = Field(default_factory=dict)
+    single_anchor_share: float | None = Field(default=None, gt=0, le=1)
+    floor_area_cap_sqft: dict[str, float] = Field(default_factory=dict)
 
     @model_validator(mode="after")
     def _consistent(self) -> DemandSection:
@@ -609,6 +618,14 @@ def load_config(
         upd["network"] = m.network.model_copy(
             update={"graph_path": _resolve_path(m.network.graph_path, market_path.parent)}
         )
+    dm = m.demand
+    dupd = {
+        k: _resolve_path(getattr(dm, k), market_path.parent)
+        for k in ("workplace_drive_share_path", "workplace_places_path")
+        if getattr(dm, k) is not None
+    }
+    if dupd:
+        upd["demand"] = dm.model_copy(update=dupd)
     if m.supply.exclusions_path is not None:
         upd["supply"] = m.supply.model_copy(
             update={"exclusions_path": _resolve_path(m.supply.exclusions_path, market_path.parent)}
@@ -661,6 +678,8 @@ STEP_REQUIREMENTS: dict[str, list[str]] = {
         "market.demand.transit_adjustment.high_frequency_headway_max_min",
         "market.demand.transit_adjustment.peak_window",
         "market.demand.mode_adjustment",
+        "market.demand.hotel_sqft_per_room",
+        "market.demand.meters_per_floor",
     ],
     "supply": [
         "market.supply.dedupe_name_similarity",

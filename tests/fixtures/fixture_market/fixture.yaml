@@ -36,6 +36,12 @@ demand:
     high_frequency_headway_max_min: 15
     peak_window: ["07:00", "09:00"]
   mode_adjustment: none
+  commute_categories: [Office]
+  meters_per_floor: 3.5
+  hotel_sqft_per_room: 700
+  campus_rule: {Medical: [CNS16], University: [CNS15]}
+  single_anchor_share: 0.5
+  floor_area_cap_sqft: {RestaurantBar: 12000, Retail: 40000}
   residential_offstreet_share: 0.5
 network:
   backend: osmnx
@@ -159,6 +165,11 @@ provenance:
   site.frontage_buffer_ft:         {status: SET, source: "SYNTHETIC fixture"}
   demand.transit_adjustment.high_frequency_radius_m: {status: SET, source: "SYNTHETIC fixture"}
   demand.transit_adjustment.demand_factor:           {status: SET, source: "SYNTHETIC fixture"}
+  demand.meters_per_floor:     {status: SET, source: "SYNTHETIC fixture"}
+  demand.hotel_sqft_per_room:  {status: SET, source: "SYNTHETIC fixture"}
+  demand.single_anchor_share:  {status: SET, source: "SYNTHETIC fixture"}
+  demand.floor_area_cap_sqft.RestaurantBar: {status: SET, source: "SYNTHETIC fixture"}
+  demand.floor_area_cap_sqft.Retail:        {status: SET, source: "SYNTHETIC fixture"}
   demand.transit_adjustment.high_frequency_headway_max_min: {status: SET, source: "SYNTHETIC fixture"}
   demand.residential_offstreet_share: {status: SET, source: "SYNTHETIC fixture"}
   network.walking_speed_m_s:       {status: SET, source: "SYNTHETIC fixture"}

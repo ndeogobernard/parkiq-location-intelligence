@@ -43,18 +43,15 @@ def test_run_artifacts(m1_run) -> None:  # type: ignore[no-untyped-def]
     params = yaml.safe_load((d / "params.yaml").read_text(encoding="utf-8"))
     assert params["run_id"] == m1_run.run_id and "finance" in params and "sources" in params
     log = json.loads((d / "run_log.json").read_text(encoding="utf-8"))
-    assert {k: v["status"] for k, v in log["steps"].items()} == {
-        "schema": "succeeded",
-        "setup": "succeeded",
-        "ingest": "succeeded",
-        "qaqc": "succeeded",
-    }
+    status = {k: v["status"] for k, v in log["steps"].items()}
+    # slow M3/M4 tests may add later steps to this shared run; the M1 steps must have succeeded
+    assert all(status[s] == "succeeded" for s in ("schema", "setup", "ingest", "qaqc"))
     ds = pd.read_csv(d / "data_sources.csv")
     assert {"source_id", "vintage", "license", "native_crs", "transformation"} <= set(ds.columns)
     assert (d / "rasters" / "Slope_pct.tif").exists()
     assert (d / "logs" / f"{m1_run.run_id}.log").exists()
     runs = m1_run.store.read_table("ScoreRuns")
-    assert set(runs["step"]) == {"schema", "setup", "ingest", "qaqc"}
+    assert {"schema", "setup", "ingest", "qaqc"} <= set(runs["step"])
 
 
 def test_every_layer_has_lineage(m1_run) -> None:  # type: ignore[no-untyped-def]
@@ -111,7 +108,7 @@ def test_dependency_blocking_and_unimplemented(fixture_cfg, fresh_out) -> None: 
     with pytest.raises(StepBlocked, match="needs 'setup'"):
         run_steps(ctx, ["ingest"])
     with pytest.raises(StepNotImplemented):
-        run_steps(ctx, ["schema", "demand"], stop_at_unimplemented=False)
+        run_steps(ctx, ["schema", "screen"], stop_at_unimplemented=False)
 
 
 def test_decide_value_blocks_step(variant, fresh_out, monkeypatch) -> None:  # type: ignore[no-untyped-def]

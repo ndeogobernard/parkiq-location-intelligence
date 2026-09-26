@@ -212,6 +212,14 @@ layers:
       size_value:  {type: REAL, desc: "Size in size_metric units"}
       drive_share: {type: REAL, domain: rg_Occupancy, desc: "Driver mode share 0–1"}
       venue_id:    {type: TEXT, desc: "Venues.venue_id for venue anchors"}
+      origin:        {type: TEXT, desc: "Source layer and record id (addition, ADR-0068)"}
+      mode_factor:   {type: REAL, desc: "Workplace drive share ÷ county baseline (commute categories) (addition, ADR-0068)"}
+      transit_factor: {type: REAL, desc: "Transit factor near high-frequency stops (non-commute) (addition, ADR-0068)"}
+      demand_wd_day: {type: REAL, desc: "Generated demand, stalls, weekday day (addition)"}
+      demand_wd_eve: {type: REAL, desc: "Generated demand, weekday evening (addition)"}
+      demand_we_day: {type: REAL, desc: "Generated demand, weekend day (addition)"}
+      demand_we_eve: {type: REAL, desc: "Generated demand, weekend evening (addition)"}
+      demand_event:  {type: REAL, desc: "Generated demand, event (addition)"}
   TransitStops:
     feature_dataset: Demand
     geometry: Point
@@ -353,6 +361,15 @@ layers:
       dayparts_positive: {type: TEXT, desc: "Dayparts with gap > 0, ';'-joined"}
       total_gap_stalls:  {type: REAL, desc: "Sum of positive gap stalls"}
       mean_rate_index:   {type: REAL, desc: "Mean rate index"}
+      zone_size:         {type: INTEGER, desc: "Hexes in the zone (addition, ADR-0071)"}
+      single_hex_flag:   {type: BOOLEAN, desc: "zone_size = 1 (addition, ADR-0071)"}
+      top_anchor_id:     {type: TEXT, desc: "Anchor with the largest weekday-day demand in the zone (addition)"}
+      top_anchor_share:  {type: REAL, desc: "Its share of the zone's positive weekday-day gap (addition)"}
+      single_anchor_flag: {type: BOOLEAN, desc: "top_anchor_share > demand.single_anchor_share (addition, ADR-0071)"}
+      curb_sensitive_hexes: {type: INTEGER, desc: "Curb-sensitive hexes in the zone (ADR-0021)"}
+      curb_sensitive_flag: {type: BOOLEAN, desc: "Any curb-sensitive hex (ADR-0021)"}
+      jurisdictions:     {type: TEXT, desc: "Places the zone touches, ';'-joined (addition)"}
+      below_min_lot_flag: {type: BOOLEAN, desc: "Positive weekday-day gap < minimum viable lot (site.target_stalls_range min) (addition, ADR-0072)"}
   CandidateParcels:
     feature_dataset: Analysis
     geometry: MultiPolygon
