@@ -59,8 +59,3 @@ backup,2,Franklinton,Franklinton,F005483,Gravity Apartments parking garage,,Gara
 backup,3,Franklinton,Franklinton,F006023,,,Surface,39.957565,-83.014142,UNVERIFIED as paid (no fee tag); 62 stalls (area x factor),sign / app rate screen,way/830845404
 backup,4,Franklinton,Franklinton,F005275,,,Surface,39.959696,-83.024439,UNVERIFIED as paid (no fee tag); 31 stalls (area x factor),sign / app rate screen,way/621514404
 backup,5,Franklinton,Franklinton,F000032,,,Surface,39.957073,-83.040209,UNVERIFIED as paid (no fee tag); 0 stalls (nan),sign / app rate screen,node/7933197057
-sample,1,Paid-signal check (V-45),,F004919,,Hilton Columbus at Easton,Surface,40.049788,-82.91273,"MANUAL: V-45: Easton hotel lot tagged fee=yes — public paid, guest-only or free?",sign / hotel website,way/608043845
-sample,2,Paid-signal check (V-45),,F000139,,,Surface,40.049687,-82.921161,MANUAL: V-45: Easton fee=yes lot (261 stalls est.) — paid or free?,sign / app rate screen,relation/8277325;way/586138471
-sample,3,Paid-signal check (V-45),,F004122,,,Surface,40.049334,-82.923492,MANUAL: V-45: Easton fee=yes lot — paid or free?,sign / app rate screen,way/587344291
-sample,4,Paid-signal check (V-45),,F004121,,,Surface,40.049545,-82.925307,MANUAL: V-45: Easton fee=yes lot — paid or free?,sign / app rate screen,way/587344190
-sample,5,Paid-signal check (V-45),,F000066,,,Garage,39.998054,-82.885869,MANUAL: V-45: fee=yes garage near Mount Carmel East — paid to visitors or free?,sign / app rate screen,relation/10567279;way/762274471;way/762274474

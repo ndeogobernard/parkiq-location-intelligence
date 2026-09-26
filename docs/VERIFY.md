@@ -46,7 +46,6 @@ Status: **Open** unless noted. "Owner" = who can close it (A = analyst, P = part
 | V-37 | Licence of Columbus PublicService/MapServer/38 (no Hub item; sibling City items CC0) | S20 | A |
 | V-38 | ODOT TIMS terms of use (copyright 'ODOT Office of Technical Services'; no terms page found) | S13 | A |
 | V-42 | Arena District survey stratum is an analyst construct (downtown overlay north of W Spring St, west of N High St); Short North / University District are the SIDs (High St corridors; OSU campus garages outside) | survey | A |
-| V-45 | Paid-market indicators outside the core: HZ-P0002 (Easton) rests on four OSM `fee=yes` surface lots and HZ-P0001 (east side, near Mount Carmel East) on one `fee=yes` garage. Bernard: not sure (2026-09-26) → kept, and added to round-1 survey (stratum 'Paid-signal check (V-45)'); if free, add to paid_signal_overrides.csv and re-run gap | gap | survey |
 | V-46 | Benchmark gaps vs SPP 2019 (report only; calibration M8). After the attendance factor (ADR-0078): Downtown Zone A/B model 0.93 vs Capitol Square 81.6 % (+14 %), Short North 0.77 vs 60.9 % (+26 %), Arena 0.64 vs 92.5 % (−30 %), Brewery 0.35 vs 65 % (−45 %). 2019 is pre-pandemic | demand | M8 |
 | V-48 | Office attendance factor 0.71 (ADR-0078) is a nationwide Placer.ai figure vs 2019; a Columbus-specific ratio vs 2019 (DCI / Placer.ai) would replace it | demand | A |
 
@@ -54,6 +53,7 @@ Status: **Open** unless noted. "Owner" = who can close it (A = analyst, P = part
 
 | ID | Item | Closed | Evidence |
 |---|---|---|---|
+| V-45 | Paid signals at Easton and Mount Carmel East | 2026-09-26 | Bernard (local knowledge): Easton Town Center lots/garages and Mount Carmel East visitor parking are free → 5 OSM fee=yes signals dropped via markets/franklin_oh/paid_signal_overrides.csv; survey V-45 group removed |
 | V-43 | Workplace drive share below place level | 2026-09-26 | ADR-0073: CTPP 2017–2021 B202105 tract of work (S25), min 100 commuters |
 | V-44 | Downtown demand benchmark | 2026-09-26 | City SPP 2019 (Kimley-Horn; operator data fall 2018, LPR on-street Nov 2018): off-street surveyed/peak — Arena 7,839 / 92.5 %, Capitol Square 10,582 / 81.6 %, Short North–Warehouse 7,092 / 60.9 %, Brewery–RiverSouth 2,027 / 65 %, Scioto Peninsula 917 / 22 %, East Downtown 283 / 64.7 %; on-street ≈ 40 % at system peak. Comparison → V-46 |
 | V-47 | Auditor Edge-of-Pavement as parking polygons | 2026-09-26 | ADR-0074: lines only; polygonized precision 5.7 %, recall 55 % → rejected; parcel-based estimate instead |

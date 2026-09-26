@@ -59,3 +59,9 @@ to a source and a parameter, and so that a new market runs with nothing but a ne
   environment variables named in the market config (e.g. `CENSUS_API_KEY`).
 * No notebooks are required for any step.
 * Scope changes (new criteria, dayparts or outputs) need an ADR in `docs/DECISIONS.md` first.
+
+## Pre-push check
+Before every push run `bash scripts/prepush.sh` (installed as the git `pre-push` hook). It runs the
+CI gates — `ruff check`, `ruff format --check`, `mypy --strict parkiq`,
+`pytest -m "not network and not arcpy"` — checks each exit code explicitly and never pipes output
+through `tail`/`head`, so a failing gate cannot be hidden. Any failure exits 1 and blocks the push.

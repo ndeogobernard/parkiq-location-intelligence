@@ -24,18 +24,3 @@ strata:
          why: "OSU visitor garage near the stadium, CampusParc — rates from operator website"}
   - {label: "Brewery District / German Village", areas: ["Brewery District / German Village"], n: 4, garages: 0}
   - {label: "Franklinton", areas: ["Franklinton"], n: 4, garages: 0}
-  - label: "Paid-signal check (V-45)"
-    areas: []               # outside the survey areas: only these manual picks
-    n: 5
-    garages: 0
-    manual:                 # OSM fee=yes is the only paid signal behind hot zones at Easton and Mount Carmel East
-      - {osm_id: "relation/10567279", operator: "", source: "sign / app rate screen",
-         why: "V-45: fee=yes garage near Mount Carmel East — paid to visitors or free?"}
-      - {osm_id: "relation/8277325", operator: "", source: "sign / app rate screen",
-         why: "V-45: Easton fee=yes lot (261 stalls est.) — paid or free?"}
-      - {osm_id: "way/608043845", operator: "Hilton Columbus at Easton", source: "sign / hotel website",
-         why: "V-45: Easton hotel lot tagged fee=yes — public paid, guest-only or free?"}
-      - {osm_id: "way/587344190", operator: "", source: "sign / app rate screen",
-         why: "V-45: Easton fee=yes lot — paid or free?"}
-      - {osm_id: "way/587344291", operator: "", source: "sign / app rate screen",
-         why: "V-45: Easton fee=yes lot — paid or free?"}
