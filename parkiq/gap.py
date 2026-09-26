@@ -1,14 +1,14 @@
-"""Step ``gap`` — Phase D gap analysis and hot zones (SCOPE §5.4; ADR-0024, 0071, 0075).
+"""Step ``gap``, Phase D gap analysis and hot zones (SCOPE §5.4; ADR-0024, 0071, 0075).
 
 ``gap_stalls = demand − effective supply`` and ``gap_ratio = demand / supply`` per hex and daypart
-(``rate_index`` stays null until the rate surface exists — ADR-0023). A hex qualifies for a hot zone
+(``rate_index`` stays null until the rate surface exists, ADR-0023). A hex qualifies for a hot zone
 when its weekday-day gap is positive and its gap is also positive in at least one evening or event
 daypart (wd_eve, we_eve, event). Qualifying hexes that share an edge (H3 k = 1) form one zone.
 
 Paid-market mask (ADR-0075): a hex is *paid market* when paid parking exists within the largest
 walk band (metered curb, ``fee=yes`` facilities, paid-operator facilities, survey observations with
 a posted price). Zones built from qualifying paid-market hexes are **screening** zones (they feed
-M5); zones from the remaining qualifying hexes are kept as "free-parking area — context only".
+M5); zones from the remaining qualifying hexes are kept as "free-parking area, context only".
 
 Flags per zone (ADR-0071): ``zone_size`` / ``single_hex_flag``; ``single_anchor_flag`` when one
 anchor contributes more than ``demand.single_anchor_share`` of the zone's positive weekday-day gap;
@@ -38,7 +38,7 @@ if TYPE_CHECKING:
 log = logging.getLogger(__name__)
 SECOND = ("wd_eve", "we_eve", "event")
 PAID = "paid-market (screening)"
-CONTEXT = "free-parking area — context only"
+CONTEXT = "free-parking area, context only"
 
 
 def components(hex_ids: list[str]) -> list[list[str]]:

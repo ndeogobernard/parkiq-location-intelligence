@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Pre-push check: the same gates as CI (.github/workflows), run locally before every push.
+# Pre-push check: the CI gates (.github/workflows) plus the project text rules (scripts/check_text.py),
+# run locally before every push.
 # Each gate's exit code is checked explicitly; output is never piped, so a failure cannot be
 # hidden by a pager or a filter. Exit status 0 only if every gate passed.
 #
@@ -28,10 +29,11 @@ gate() {
 gate "ruff check" ruff check .
 gate "ruff format" ruff format --check .
 gate "mypy" mypy --strict parkiq
+gate "text rules" python scripts/check_text.py
 gate "pytest" python -m pytest -q -m "not network and not arcpy"
 
 if [ "${#failed[@]}" -ne 0 ]; then
-  echo "PRE-PUSH CHECK FAILED: ${failed[*]} — do not push"
+  echo "PRE-PUSH CHECK FAILED: ${failed[*]}, do not push"
   exit 1
 fi
 echo "PRE-PUSH CHECK PASSED"

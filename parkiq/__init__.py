@@ -1,4 +1,4 @@
-"""ParkIQ — config-driven site selection and underwriting for paid surface parking lots.
+"""ParkIQ: config-driven site selection and underwriting for paid surface parking lots.
 
 The analytical core never imports ``arcpy`` (docs/ENGINEERING.md); ArcGIS integration lives in
 ``toolbox/`` and ``arcgis/``.

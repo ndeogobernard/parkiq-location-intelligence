@@ -46,7 +46,6 @@ def main(run: Path) -> None:
             "Census TIGER county (2025)",
         ],
         uses_osm=False,
-        preliminary=True,
         public=True,
         units="parcel result",
         market_extent=tuple(county.total_bounds),

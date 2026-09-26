@@ -1,4 +1,4 @@
-# ParkIQ — Engineering standards
+# ParkIQ: Engineering standards
 
 The rules the codebase follows. They exist so that a partner or lender can trace any number back
 to a source and a parameter, and so that a new market runs with nothing but a new config file.
@@ -8,7 +8,7 @@ to a source and a parameter, and so that a new market runs with nothing but a ne
 * Python 3.11, type hints everywhere; `mypy --strict` clean on `parkiq/`.
 * Google-style docstrings on every public function, stating the **units** of inputs and outputs.
 * `ruff` for lint and format; line length 100.
-* Logging via `logging.getLogger(__name__)` — no `print` in library code. Every run logs to
+* Logging via `logging.getLogger(__name__)`, no `print` in library code. Every run logs to
   `outputs/<market>/<run_id>/logs/<run_id>.log`.
 * Library functions are pure where possible: (Geo)DataFrames + resolved config in, frames out. I/O
   lives in `store.py` and the runner.
@@ -33,7 +33,7 @@ to a source and a parameter, and so that a new market runs with nothing but a ne
   `[VERIFY]` and listed in `docs/VERIFY.md`.
 * **No synthetic data standing in for licensed sources** (Regrid, parking apps, foot traffic,
   CoStar/LoopNet/Crexi, RSMeans, ITE/ULI, STR). A disabled source takes the "not configured" path.
-  Synthetic data exists only in `tests/fixtures/`, labelled `SYNTHETIC — NOT REAL DATA`.
+  Synthetic data exists only in `tests/fixtures/`, labelled `SYNTHETIC: NOT REAL DATA`.
 * **No scraping** of any site unless its terms are confirmed in `docs/VERIFY.md`.
 * Naming: layers `PascalCase` (SCOPE §4.2); fields `snake_case` with unit suffixes (`_sqft`,
   `_ft`, `_m`, `_usd`, `_pct`); every layer carries `source_id`, `run_id`, `load_ts`.
@@ -62,6 +62,6 @@ to a source and a parameter, and so that a new market runs with nothing but a ne
 
 ## Pre-push check
 Before every push run `bash scripts/prepush.sh` (installed as the git `pre-push` hook). It runs the
-CI gates — `ruff check`, `ruff format --check`, `mypy --strict parkiq`,
-`pytest -m "not network and not arcpy"` — checks each exit code explicitly and never pipes output
+CI gates, `ruff check`, `ruff format --check`, `mypy --strict parkiq`,
+`pytest -m "not network and not arcpy"`, checks each exit code explicitly and never pipes output
 through `tail`/`head`, so a failing gate cannot be hidden. Any failure exits 1 and blocks the push.

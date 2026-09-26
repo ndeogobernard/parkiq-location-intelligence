@@ -1,4 +1,4 @@
-# Franklin County, OH — pilot market (ADR-0001, admin workbook).
+# Franklin County, OH: pilot market (ADR-0001, admin workbook).
 # Values and statuses mirror docs/reference/ParkIQ_FranklinOH_Admin.xlsx → Parameters.
 # null = DECIDE (blank in the workbook): check-config shows which steps each one blocks.
 # `parkiq check-config --market markets/franklin_oh.yaml --report franklin_params.csv`
@@ -12,11 +12,11 @@ market:
     path: franklin_oh/submarkets.geojson
     name_field: name
     type_field: type
-  analysis_crs: EPSG:3735       # NAD83 / Ohio South (ftUS) — ADR-0007
+  analysis_crs: EPSG:3735       # NAD83 / Ohio South (ftUS), ADR-0007
   units: ft
 study:
   buffer_miles: 1.0             # SCOPE §2.2
-  h3_resolution: 9              # SCOPE §2.2 [DECISION] — ADR-0009
+  h3_resolution: 9              # SCOPE §2.2 [DECISION], ADR-0009
 site:
   min_parcel_sqft: 15000
   max_parcel_sqft: 200000
@@ -29,6 +29,7 @@ site:
   min_shape_index: 0.60         # metric = rectangularity (ADR-0025)
   improvement_ratio_max: 0.25
   frontage_buffer_ft: 50        # ADR-0080: ≈ p90 centerline→parcel-edge distance on drive streets (n 3,675)
+  university_owner_pattern: '\bUNIVERSITY\b|\bCOLLEGE\b'   # ADR-0084: university/college land fails (campus parking concession); Public/Institutional owners only
 demand:
   walk_shed_minutes: [3, 5, 8]
   decay_weights: {3: 1.0, 5: 0.6, 8: 0.25}
@@ -140,7 +141,7 @@ sources:
     vintage: "2026-09-07"       # feed_version 2026-SEP-07-BB_20260904, valid 2026-09-07..2027-01-03
     options: {service_date: "20261014"}   # a plain Wednesday: no event supplements or holiday swaps
   S10:
-    enabled: false              # DRAFT venues.csv (2026-09-26), every value [VERIFY] — enable after Bernard's check
+    enabled: false              # DRAFT venues.csv (2026-09-26), every value [VERIFY], enable after Bernard's check
     path: franklin_oh/venues.csv
     options: {x: lon, y: lat, xy_crs: "EPSG:4326"}
   S12a:
@@ -242,6 +243,7 @@ provenance:
   site.min_shape_index:            {status: SCOPE,  source: "SCOPE §2.1; rectangularity (ADR-0025)"}
   site.improvement_ratio_max:      {status: SCOPE,  source: "SCOPE §5.5"}
   criteria.c04_daypart_weights:    {status: SET,    source: "ADR-0081: share of operating days; applied (analyst may revisit)"}
+  site.university_owner_pattern:  {status: SET,    source: "ADR-0084: Bernard M5 review (university land not available)"}
   site.frontage_buffer_ft:         {status: SET,    source: "ADR-0080: derived from Franklin parcels/OSM streets; applied (analyst may revisit)"}
   demand.transit_adjustment.high_frequency_radius_m: {status: VERIFY, source: "SCOPE §2.1"}
   demand.transit_adjustment.high_frequency_headway_max_min: {status: SET, source: "Bernard, M4 decisions 2026-09-26 (COTA frequent network)"}
@@ -253,7 +255,7 @@ provenance:
   demand.floor_area_cap_sqft.RestaurantBar: {status: SET, source: "ADR-0072: 90th pct standalone-building footprint, 1,449 restaurants/bars"}
   demand.floor_area_cap_sqft.Retail:        {status: SET, source: "ADR-0072: 90th pct standalone-building footprint, 1,795 shops"}
   demand.transit_adjustment.demand_factor:           {status: VERIFY, source: "SCOPE §2.1"}
-  demand.excluded_anchor_categories: {status: SET, source: "ADR-0015 — Bernard 2026-09-24; revisit after Phase K validation"}
+  demand.excluded_anchor_categories: {status: SET, source: "ADR-0015, Bernard 2026-09-24; revisit after Phase K validation"}
   network.walking_speed_m_s:       {status: VERIFY, source: "SCOPE §5.1 [PARAMETER]; needs citation"}
   supply.practical_capacity:       {status: SET,    source: "ADR-0079: 85 % practical-capacity convention (Bernard, 2026-09-26)"}
   supply.private_effective_share:  {status: SCOPE,  source: "SCOPE §2.1"}

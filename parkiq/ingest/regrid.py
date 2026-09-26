@@ -1,7 +1,7 @@
-"""S01R — Regrid parcels (licensed; flag ``data_licenses.regrid``). Thin stub (M2).
+"""S01R, Regrid parcels (licensed; flag ``data_licenses.regrid``). Thin stub (M2).
 
 With the flag off (default) the adapter takes the not-configured path: a registry row, a WARNING
-naming the effect, no rows — the county fallback (S01) supplies ``Parcels``. With the flag on,
+naming the effect, no rows, the county fallback (S01) supplies ``Parcels``. With the flag on,
 ``standardize`` refuses until it has been written and tested against a real Regrid export
 (PLAN Q5: vendor formats are never synthesized).
 """
@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 
 
 class RegridParcelsAdapter(SourceAdapter):
-    """S01R — Regrid parcels (stub)."""
+    """S01R, Regrid parcels (stub)."""
 
     source_id = "S01R"
     license_flag = "regrid"
@@ -25,6 +25,6 @@ class RegridParcelsAdapter(SourceAdapter):
 
     def standardize(self, raw: Any, ctx: RunContext) -> Standardized:
         raise IngestError(
-            "S01R Regrid: licensed but not implemented — needs a real Regrid export sample to "
+            "S01R Regrid: licensed but not implemented, needs a real Regrid export sample to "
             "build and test the field mapping against (PLAN Q5). Use the county fallback S01."
         )

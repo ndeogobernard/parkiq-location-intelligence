@@ -1,5 +1,5 @@
 # ============================================================================================
-#  FIXTURE MARKET — SYNTHETIC — NOT REAL DATA
+#  FIXTURE MARKET: SYNTHETIC: NOT REAL DATA
 #  Exercises every M1 code path offline. Values are invented; never copy them to a real market.
 #  Finance inputs are set HERE (not in configs/) so shared defaults stay [VERIFY]/null (docs/ARCHITECTURE.md §5).
 # ============================================================================================

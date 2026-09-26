@@ -14,7 +14,7 @@ outputs/
 *.lock
 .backups/
 ~$*.xlsx
-# fixture inputs ARE committed (synthetic, small) — re-include them
+# fixture inputs ARE committed (synthetic, small): re-include them
 !tests/fixtures/**/*.tif
 !tests/fixtures/**/*.zip
 !tests/fixtures/**/*.parquet

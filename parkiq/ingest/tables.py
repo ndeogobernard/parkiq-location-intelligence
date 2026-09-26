@@ -1,9 +1,9 @@
 """Point/attribute-table sources configured entirely by ``field_map`` + ``options``:
-S10 venues (events.py), S12a hospitals, S12b IPEDS, S13 AADT, S14 FEMA NFHL, S15 EPA — each
+S10 venues (events.py), S12a hospitals, S12b IPEDS, S13 AADT, S14 FEMA NFHL, S15 EPA, each
 in its own module; this module holds the shared reader and base class.
 
 For CSV/XLSX inputs, ``options.x`` / ``options.y`` name the coordinate columns and
-``options.xy_crs`` their CRS (required — no silent default).
+``options.xy_crs`` their CRS (required, no silent default).
 Vector inputs (shp/gpkg/geojson) carry their own CRS. ArcGIS REST ``url``s (S13, S14) are queried
 for the study-area bbox.
 """

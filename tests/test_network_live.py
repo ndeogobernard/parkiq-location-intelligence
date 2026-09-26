@@ -1,4 +1,4 @@
-"""Live endpoint smoke tests — opt-in: ``pytest -m network``.
+"""Live endpoint smoke tests, opt-in: ``pytest -m network``.
 
 They only check that each [VERIFY] endpoint answers in the expected shape; passing one is evidence
 toward closing the matching docs/VERIFY.md item, not a closure by itself.
@@ -24,7 +24,7 @@ def test_tiger_county_url_exists() -> None:  # V-33
     assert r.status_code == 200
 
 
-def test_acs_block_group_api() -> None:  # V-15 — the API now requires a key
+def test_acs_block_group_api() -> None:  # V-15, the API now requires a key
     import os
 
     key = os.environ.get("CENSUS_API_KEY")

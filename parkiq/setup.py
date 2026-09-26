@@ -1,6 +1,6 @@
-"""Phase A — market setup (SCOPE §5.1; tool 2 ``SetupMarket``).
+"""Phase A, market setup (SCOPE §5.1; tool 2 ``SetupMarket``).
 
-Named ``setup.py`` because SCOPE §6.2 names it so. It is NOT a setuptools script — packaging is
+Named ``setup.py`` because SCOPE §6.2 names it so. It is NOT a setuptools script, packaging is
 ``pyproject.toml``.
 
 Writes: MarketBoundary, StudyArea, Submarkets, HexGrid, WalkNodes, WalkEdges, Slope_pct (GeoTIFF),
@@ -205,7 +205,7 @@ def build_slope(ctx: RunContext, study_a: gpd.GeoDataFrame) -> dict[str, Any]:
     ok, why = adapter.is_enabled(ctx)
     if not ok:
         log.warning(
-            "S18 DEM not configured (%s) — effect: no Slope_pct; the screen's slope "
+            "S18 DEM not configured (%s), effect: no Slope_pct; the screen's slope "
             "filter cannot run",
             why,
         )
@@ -376,7 +376,7 @@ def setup_market(ctx: RunContext) -> dict[str, Any]:
 
     qa = qaqc.check_setup(ctx, boundary, study, hexes, nodes, edges)
     if qa:
-        raise RuntimeError(f"SetupMarket: {qa} error-level QA checks failed — see QAQC_Log")
+        raise RuntimeError(f"SetupMarket: {qa} error-level QA checks failed, see QAQC_Log")
     return {
         "boundary_area_sqmi": round(float(boundary["area_sqmi"].iloc[0]), 3),
         "study_area_sqmi": round(float(study["area_sqmi"].iloc[0]), 3),

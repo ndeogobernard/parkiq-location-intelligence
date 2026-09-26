@@ -12,7 +12,7 @@
 <key id="d1" for="graph" attr.name="note" attr.type="string"/>
 <key id="d0" for="graph" attr.name="crs" attr.type="string"/>
 <graph edgedefault="directed"><data key="d0">EPSG:4326</data>
-<data key="d1">SYNTHETIC — NOT REAL DATA</data>
+<data key="d1">SYNTHETIC: NOT REAL DATA</data>
 <node id="1000000">
   <data key="d2">-82.20738103214951</data>
   <data key="d3">41.995665604511956</data>

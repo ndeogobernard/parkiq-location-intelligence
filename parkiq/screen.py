@@ -2,14 +2,14 @@
 
 Screen (every parcel is evaluated; each site gets a status and ALL failing reasons):
 
-* **hot-zone rule** — network walk ≤ 8 min to a PAID-MARKET screening hot zone (``HZ-P``,
+* **hot-zone rule**: network walk ≤ 8 min to a PAID-MARKET screening hot zone (``HZ-P``,
   ADR-0075); context-only zones never qualify a parcel.
-* **land use** — Vacant / SurfaceParking / improvement ratio < max / auto-oriented, plus the
+* **land use**: Vacant / SurfaceParking / improvement ratio < max / auto-oriented, plus the
   crosswalk special rules (600–699 exempt owner → Review; code 456 surface-vs-garage check).
-* **existing surface lots** (ADR-0063) — zoning Fail (incl. Zone A) and design overlays become
+* **existing surface lots** (ADR-0063), zoning Fail (incl. Zone A) and design overlays become
   Review; they are not failed on shape (M5 rule) and their stalls come from the lot polygon
   (area × layout efficiency ÷ stall area × ``supply.surface_capacity_factor``, ADR-0067).
-* **parcel assembly** (M5 rule) — contiguous land-use-eligible parcels with the same normalized
+* **parcel assembly** (M5 rule), contiguous land-use-eligible parcels with the same normalized
   owner inside the 8-minute reach are merged BEFORE the size/stall screen; an assembly larger than
   ``max_parcel_sqft`` falls back to its component parcels (reported).
 * **size + stall range** (ADR-0031, stalls rounded down ADR-0049), **shape** (rectangularity,
@@ -55,11 +55,12 @@ DRIVE = ("residential", "unclassified", "tertiary", "secondary", "primary", "tru
 ARTERIAL = ("primary", "secondary", "trunk")
 SHED_BUFFER_M = 15.0  # ADR-0027
 EXISTING = (
-    "existing surface lot — possible legal nonconforming use; verify grandfathered status "
+    "existing surface lot, possible legal nonconforming use; verify grandfathered status "
     "(§3359.27 pre-1999 exception / nonconforming-use rules)"
 )
 ZS_ORDER = {"Prohibited": 0, "Unknown": 1, "Conditional": 2, "ByRight": 3}
 SCOPE_POOL = (40, 200)  # SCOPE §5.5 expectation (ADR-0030: report, never auto-adjust)
+UNIVERSITY_LAND = "university land: not available for acquisition"
 
 
 def walk_graph(ctx: RunContext) -> WalkGraph:
@@ -296,6 +297,13 @@ def run_screen(ctx: RunContext) -> dict[str, Any]:
     pool = np.flatnonzero(reach & (eligible | exempt_low) & ~excluded)
     if len(pool):
         labels[pool] = n + assemble(p.iloc[pool])
+    # Zone A parcels that are not existing surface lots leave their assembly (ADR-0084)
+    zone_a_p = (p["parking_zone"] == "A").to_numpy()
+    grp = pd.Series(labels).map(pd.Series(labels).value_counts()).to_numpy() > 1
+    drop_a = grp & zone_a_p & ~existing
+    lost_groups = set(labels[drop_a].tolist())
+    labels[drop_a] = np.flatnonzero(drop_a)
+    za_lost = np.isin(labels, list(lost_groups))
     lab_s = pd.Series(labels)
     cnt = lab_s.map(lab_s.value_counts()).to_numpy()
     area_by = pd.Series(sqft).groupby(labels).transform("sum").to_numpy()
@@ -391,6 +399,30 @@ def run_screen(ctx: RunContext) -> dict[str, Any]:
     # zoning (least permissive component), Zone A
     zs = p["zoning_screen"].fillna("Unknown").astype(str).to_numpy()
     zst = p["zoning_status"].fillna("Review").astype(str).to_numpy()
+    # limited (L-) zoning restricts uses, it never adds them: Prohibited base → Fail (ADR-0084)
+    lim = p["zoning_reason"].fillna("").str.contains("limitation text").to_numpy()
+    zst = np.where((zs == "Prohibited") & lim & (zst == "Review"), "Fail", zst)
+    za_lost_site = agg(za_lost, "max").astype(bool)
+    # owner feasibility (flag, not a score); university land fails (ADR-0084)
+    uni_rx = site.university_owner_pattern
+    otype = p["owner_type"].fillna("").astype(str)
+    uni = (
+        (
+            otype.isin(["Public", "Institutional"])
+            & p["owner"].fillna("").str.contains(uni_rx, case=False, regex=True)
+        ).to_numpy()
+        if uni_rx
+        else np.zeros(n, dtype=bool)
+    )
+    pubinst = otype.isin(["Public", "Institutional"]).to_numpy()
+    uni_site = agg(uni, "max").astype(bool)
+    pubinst_site = agg(pubinst, "max").astype(bool)
+    feasibility = [
+        UNIVERSITY_LAND
+        if u
+        else ("acquisition likely difficult; ground lease possible" if q else None)
+        for u, q in zip(uni_site, pubinst_site, strict=True)
+    ]
     zrank = np.array([ZS_ORDER.get(v, 1) for v in zs])
     zs_site = np.array(list(ZS_ORDER))[agg(zrank, "min").astype(int)]
     zone_a = agg((p["parking_zone"] == "A").to_numpy(), "max").astype(bool)
@@ -410,12 +442,17 @@ def run_screen(ctx: RunContext) -> dict[str, Any]:
         nl: list[str] = []
         if not reach_site[k]:
             h.append(f"HOTZONE: not within {HOTZONE_MINUTES:.0f} min of a paid-market hot zone")
+        n_geo = len(h)
         if lot[k] < lo or lot[k] > hi:
             h.append(f"SIZE: {lot[k]:,.0f} sq ft outside {lo:,.0f}–{hi:,.0f}")
         elif stalls[k] < smin or stalls[k] > smax:
             h.append(f"STALLS: {stalls[k]:.0f} outside {smin}–{smax} ({basis[k]})")
         if not ex_site[k] and shape_index[k] < site.min_shape_index:
             h.append(f"SHAPE: {shape_index[k]:.2f} < {site.min_shape_index}")
+        if za_lost_site[k] and len(h) > n_geo:
+            h.insert(n_geo, "ZONE_A: Zone A portion removed")
+        if uni_site[k]:
+            h.append(f"OWNER: {UNIVERSITY_LAND}")
         if reach_site[k] and front[k] < site.min_frontage_ft:
             h.append(f"FRONTAGE: {front[k]:.0f} ft < {site.min_frontage_ft:.0f}")
         if excl_site[k]:
@@ -429,7 +466,7 @@ def run_screen(ctx: RunContext) -> dict[str, Any]:
                 f"LANDUSE: {lu[mm[0]]} with improvement ratio >= {site.improvement_ratio_max}"
             )
         if exlow_site[k]:
-            rv.append("tax-exempt owner, vacant/low improvement — possible ground lease")
+            rv.append("tax-exempt owner, vacant/low improvement, possible ground lease")
         zf = sorted({zcode[i] for i in mm if zst[i] == "Fail"})
         if zf:
             nl.append("ZONING: prohibits a new lot (" + ", ".join(zf) + ")")
@@ -487,6 +524,8 @@ def run_screen(ctx: RunContext) -> dict[str, Any]:
             "zone_a_flag": zone_a,
             "hotzone_id": [zones["zone_id"].iloc[z] if z >= 0 else None for z in zone_site],
             "land_value": land_value,
+            "owner_feasibility": feasibility,
+            "zone_a_portion_removed": za_lost_site,
         },
         geometry=sgeo,
         crs=p.crs,
@@ -544,6 +583,9 @@ def run_screen(ctx: RunContext) -> dict[str, Any]:
             ),
         },
         "zone_a_candidates": int(cands["zone_a_flag"].astype(bool).sum()),
+        "zone_a_portion_removed_sites": int(za_lost_site.sum()),
+        "university_land_sites_in_reach": int((uni_site & reach_site).sum()),
+        "owner_feasibility_candidates": dict(Counter(cands["owner_feasibility"].fillna("none"))),
         "not_applied": ["PERMIT (S22 pipeline not configured)"],
         "frontage_measured": "sites within the 8-minute reach only",
     }

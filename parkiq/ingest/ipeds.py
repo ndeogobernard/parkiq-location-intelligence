@@ -1,4 +1,4 @@
-"""S12b — IPEDS directory (HD) points + enrollment (EFFY) [VERIFY V-19]."""
+"""S12b, IPEDS directory (HD) points + enrollment (EFFY) [VERIFY V-19]."""
 
 from __future__ import annotations
 
@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 
 
 class IpedsAdapter(_TableAdapter):
-    """S12b — IPEDS directory (HD) points + enrollment (EFFY) [VERIFY V-19].
+    """S12b, IPEDS directory (HD) points + enrollment (EFFY) [VERIFY V-19].
 
     ``options.enrollment_path`` (or ``enrollment_url``) is joined on UNITID;
     ``options.enrollment_field`` names the total column and ``options.enrollment_filter``

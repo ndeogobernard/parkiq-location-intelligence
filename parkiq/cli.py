@@ -1,6 +1,6 @@
 """``parkiq`` command line.
 
-Argument parsing only — all logic lives in the library (docs/ENGINEERING.md).
+Argument parsing only, all logic lives in the library (docs/ENGINEERING.md).
 """
 
 from __future__ import annotations
@@ -20,7 +20,7 @@ from parkiq.config import verify_items as _verify_items
 app = typer.Typer(
     add_completion=False,
     no_args_is_help=True,
-    help="ParkIQ — surface-lot site selection and underwriting.",
+    help="ParkIQ: surface-lot site selection and underwriting.",
 )
 
 MarketOpt = Annotated[
@@ -45,7 +45,7 @@ def check_config(
     """Validate a market config; show step readiness, open [VERIFY] items and untagged values."""
     cfg = _load(market, config_dir)
     typer.secho(
-        f"OK: {cfg.market.market.name} ({cfg.slug}) — {cfg.crs.to_string()}, "
+        f"OK: {cfg.market.market.name} ({cfg.slug}), {cfg.crs.to_string()}, "
         f"units {cfg.market.market.units}",
         fg=typer.colors.GREEN,
     )
@@ -221,7 +221,7 @@ def survey_package_cmd(
     roads = edges[edges.intersects(area)]
     survey.sample_map_pdf(
         folder / f"round{rnd}_sample_map.pdf", sample, subs, roads,
-        f"{cfg.market.market.name} — field rate survey round {rnd} (run {run_id})",
+        f"{cfg.market.market.name}, field rate survey round {rnd} (run {run_id})",
     )  # fmt: skip
     n = sample.groupby(["stratum", "role"]).size().unstack(fill_value=0)
     typer.echo(n.to_string())

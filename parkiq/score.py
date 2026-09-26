@@ -3,24 +3,24 @@
 Criteria (raw, per Pass/Review candidate; walk times on the network from the site's
 representative point):
 
-* C01 — net Σ weekday-day gap over hexes within 5 min, floored at 0 (net, because supply is
+* C01: net Σ weekday-day gap over hexes within 5 min, floored at 0 (net, because supply is
   already walk-allocated, ADR-0028).
-* C02 — net Σ (wd_eve + we_day + we_eve) gap within 5 min, floor 0.
-* C03 — Σ event gap within 8 min × events per year of venues within 8 min. Venues are excluded
+* C02: net Σ (wd_eve + we_day + we_eve) gap within 5 min, floor 0.
+* C03: Σ event gap within 8 min × events per year of venues within 8 min. Venues are excluded
   for Franklin (S10 disabled): no data → neutral.
-* C04 — rate index at the site, daypart-weighted (``c04_daypart_weights``). No rate surface until
+* C04: rate index at the site, daypart-weighted (``c04_daypart_weights``). No rate surface until
   the round-1 survey → neutral.
-* C05 — effective competing stalls within 3 min (facilities + metered curb), excluding the
+* C05: effective competing stalls within 3 min (facilities + metered curb), excluding the
   site's own facility.
-* C06 — mean walk minutes to the top-3 anchors by total demand within 15 min; missing = 15.
-* C07 — land value per buildable stall (assessed land value ÷ stalls; a constant
+* C06: mean walk minutes to the top-3 anchors by total demand within 15 min; missing = 15.
+* C07: land value per buildable stall (assessed land value ÷ stalls; a constant
   assessed-to-market ratio does not change normalized scores).
-* C08 — mean of corner (0/100), arterial frontage (0/100) and the AADT percentile of the
+* C08: mean of corner (0/100), arterial frontage (0/100) and the AADT percentile of the
   busiest count station within 500 ft (null → left out of the mean); curb-cut score not
   collected (left out).
-* C09 — zoning certainty: ByRight 100, Conditional 60, Unknown 40; an existing lot on
+* C09: zoning certainty: ByRight 100, Conditional 60, Unknown 40; an existing lot on
   Prohibited zoning scores as Unknown (legal nonconforming status to verify).
-* C10 — pipeline projects within 5 min (S22 not configured → neutral).
+* C10: pipeline projects within 5 min (S22 not configured → neutral).
 
 Normalization: winsorize at p5/p95 (PERCENTILE.INC), min–max to 0–100, costs inverted. A
 criterion with no data or zero variance scores 50 for every site and is logged; a single missing
@@ -195,7 +195,7 @@ def run_criteria(ctx: RunContext) -> dict[str, Any]:
             notes[j]["top_anchors"] = [str(an["anchor_id"].iloc[t]) for t in top]
             notes[j]["own_facilities_excluded"] = len(mine)
 
-    # C04 — rate index at the site (hex containing the representative point)
+    # C04: rate index at the site (hex containing the representative point)
     w04 = cfg.criteria.c04_daypart_weights or {}
     if rate.notna().to_numpy().any() and w04:
         hx = gpd.sjoin(
@@ -209,12 +209,12 @@ def run_criteria(ctx: RunContext) -> dict[str, Any]:
             np.isfinite(r), ww, 0
         ).sum(axis=1)
 
-    # C07 — land value per buildable stall
+    # C07: land value per buildable stall
     stalls = c["stalls"].to_numpy(dtype=float)
     lv = c["land_value"].to_numpy(dtype=float)
     raw[:, 6] = np.where((stalls > 0) & (lv > 0), lv / np.maximum(stalls, 1), np.nan)
 
-    # C08 — access: corner, arterial, AADT percentile within 500 ft
+    # C08: access: corner, arterial, AADT percentile within 500 ft
     tc = ctx.store.read_layer("TrafficCounts")
     tc = tc[tc["aadt"].notna()]
     aadt_pct = np.full(n, np.nan)
@@ -235,13 +235,13 @@ def run_criteria(ctx: RunContext) -> dict[str, Any]:
     ]
     raw[:, 7] = np.nanmean(parts, axis=1)
 
-    # C09 — zoning certainty
+    # C09: zoning certainty
     sc = cfg.criteria.c09_scores
     zs = c["zoning_screen"].fillna("Unknown").astype(str)
     zs = zs.where(zs != "Prohibited", "Unknown")  # existing lots only (verify nonconforming)
     raw[:, 8] = zs.map(lambda v: float(sc.get(v, sc.get("Unknown", 40)))).to_numpy()
 
-    # C10 — pipeline (S22) not configured → no data (neutral)
+    # C10: pipeline (S22) not configured → no data (neutral)
     out = pd.DataFrame(raw, columns=[f"{x.lower()}_raw" for x in CRIT])
     out.insert(0, "parcel_id", c["parcel_id"].to_numpy())
     out["notes_json"] = [json.dumps(x) for x in notes]

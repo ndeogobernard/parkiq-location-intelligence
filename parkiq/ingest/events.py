@@ -1,4 +1,4 @@
-"""S10 — analyst-maintained venue table: seats and events per year (+ calendar source)."""
+"""S10, analyst-maintained venue table: seats and events per year (+ calendar source)."""
 
 from __future__ import annotations
 
@@ -11,7 +11,7 @@ if TYPE_CHECKING:
 
 
 class VenuesAdapter(_TableAdapter):
-    """S10 — analyst-maintained venue table: seats and events per year (+ calendar source).
+    """S10, analyst-maintained venue table: seats and events per year (+ calendar source).
 
     OSM/Overture venue candidates are in ``Places`` for review; seats/events come from here.
     """

@@ -49,7 +49,7 @@ def test_complete_map_passes_and_records_elements(tmp_path: Path) -> None:
     out = _draw(_spec(), out=tmp_path / "ok.png")
     side = json.loads(Path(str(out) + ".json").read_text(encoding="utf-8"))["elements"]
     for k in ("title", "subtitle", "legend", "how_to_read", "scale_bar", "north_arrow",
-              "sources", "brand_date", "preliminary", "osm_credit"):  # fmt: skip
+              "sources", "brand_date", "status_line", "osm_credit", "text_rules"):  # fmt: skip
         assert side[k], k
     assert out.exists()
 
@@ -77,3 +77,18 @@ def test_zoomed_map_needs_locator(tmp_path: Path) -> None:
 def test_public_map_rejects_parcel_ids(tmp_path: Path) -> None:
     with pytest.raises(MapStandardError, match="public_clean"):
         _draw(_spec(public=True, how_to_read="Lot 010-012345 is shown."), out=tmp_path / "x.png")
+
+
+def test_result_map_carries_analysis_date_and_no_preliminary(tmp_path: Path) -> None:
+    out = _draw(_spec(result=True, map_date="2026-09-26"), out=tmp_path / "r.png")
+    side = json.loads(Path(str(out) + ".json").read_text(encoding="utf-8"))["elements"]
+    assert side["status_line"] == "Analysis as of September 2026"
+    data = _draw(_spec(), out=tmp_path / "d.png")
+    side = json.loads(Path(str(data) + ".json").read_text(encoding="utf-8"))["elements"]
+    assert side["status_line"].startswith("n/a")
+
+
+@pytest.mark.parametrize("text", ["Supply " + chr(0x2014) + " weekday", "PRELIMINARY draft"])
+def test_map_text_rules(tmp_path: Path, text: str) -> None:
+    with pytest.raises(MapStandardError, match="text_rules"):
+        _draw(_spec(subtitle=text), out=tmp_path / "x.png")

@@ -441,7 +441,7 @@ Geometry: MultiPolygon · CRS: analysis CRS
 | `curb_sensitive_flag` | BOOLEAN | yes |  |  | Any curb-sensitive hex (ADR-0021) |
 | `jurisdictions` | TEXT | yes |  |  | Places the zone touches, ';'-joined (addition) |
 | `below_min_lot_flag` | BOOLEAN | yes |  |  | Positive weekday-day gap < minimum viable lot (site.target_stalls_range min) (addition, ADR-0072) |
-| `zone_class` | TEXT | yes |  |  | paid-market (screening) | free-parking area — context only (addition, ADR-0075) |
+| `zone_class` | TEXT | yes |  |  | paid-market (screening) | free-parking area, context only (addition, ADR-0075) |
 | `paid_market_hexes` | INTEGER | yes |  |  | Hexes with paid parking within an 8-min walk (addition, ADR-0075) |
 
 ### `CandidateParcels`
@@ -465,7 +465,7 @@ Geometry: MultiPolygon · CRS: analysis CRS
 | `address` | TEXT | yes |  |  | Site address (first component) (addition) |
 | `jurisdiction` | TEXT | yes |  |  | Zoning jurisdiction (addition) |
 | `land_use_class` | TEXT | yes |  | `dm_LandUseClass` | Land-use class (first component) (addition) |
-| `owner_type` | TEXT | yes |  | `dm_OwnerType` | Owner class — due-diligence flag only (addition) |
+| `owner_type` | TEXT | yes |  | `dm_OwnerType` | Owner class, due-diligence flag only (addition) |
 | `zoning_code` | TEXT | yes |  |  | Base zoning code(s) (addition) |
 | `zoning_screen` | TEXT | yes |  | `dm_ZoningScreen` | Least permissive component zoning screen (addition) |
 | `lot_sqft` | REAL | yes |  |  | Site area, sq ft (addition) |
@@ -476,9 +476,11 @@ Geometry: MultiPolygon · CRS: analysis CRS
 | `corner_flag` | BOOLEAN | yes |  |  | Frontage on two streets (addition, ADR-0026) |
 | `arterial_flag` | BOOLEAN | yes |  |  | Frontage on a primary/secondary/trunk street (addition, ADR-0026) |
 | `existing_lot_flag` | BOOLEAN | yes |  |  | Existing surface lot (addition, ADR-0063) |
-| `zone_a_flag` | BOOLEAN | yes |  |  | In Downtown parking Zone A — new lots prohibited, only an existing lot can work (addition) |
+| `zone_a_flag` | BOOLEAN | yes |  |  | In Downtown parking Zone A, new lots prohibited, only an existing lot can work (addition) |
 | `hotzone_id` | TEXT | yes |  |  | Nearest paid-market screening hot zone within 8 min (addition, ADR-0075) |
 | `land_value` | REAL | yes |  |  | Assessed land value, summed over components (addition) |
+| `owner_feasibility` | TEXT | yes |  |  | Owner feasibility flag, not a score (addition, ADR-0084) |
+| `zone_a_portion_removed` | BOOLEAN | yes |  |  | Zone A new-lot parcels dropped from the assembly (addition, ADR-0084) |
 
 ### `WalkSheds`
 
@@ -584,7 +586,7 @@ Geometry: MultiPolygon · CRS: analysis CRS
 
 Provenance: one row per source per run.
 
-Geometry: table · CRS: —
+Geometry: table · CRS: n/a
 
 | Field | Type | Null | Unique | Domain | Description |
 |---|---|---|---|---|---|
@@ -606,7 +608,7 @@ Geometry: table · CRS: —
 
 QA check results.
 
-Geometry: table · CRS: —
+Geometry: table · CRS: n/a
 
 | Field | Type | Null | Unique | Domain | Description |
 |---|---|---|---|---|---|
@@ -626,7 +628,7 @@ Geometry: table · CRS: —
 
 Raw criterion values per Pass/Review candidate before normalization (addition, ADR-0028).
 
-Geometry: table · CRS: —
+Geometry: table · CRS: n/a
 
 | Field | Type | Null | Unique | Domain | Description |
 |---|---|---|---|---|---|
@@ -648,7 +650,7 @@ Geometry: table · CRS: —
 
 Rank stability per candidate: scenario ranks, OAT ±25 % and flat-Dirichlet draws (addition, ADR-0029).
 
-Geometry: table · CRS: —
+Geometry: table · CRS: n/a
 
 | Field | Type | Null | Unique | Domain | Description |
 |---|---|---|---|---|---|
@@ -666,7 +668,7 @@ Geometry: table · CRS: —
 
 Run log: one row per step per run.
 
-Geometry: table · CRS: —
+Geometry: table · CRS: n/a
 
 | Field | Type | Null | Unique | Domain | Description |
 |---|---|---|---|---|---|
@@ -684,7 +686,7 @@ Geometry: table · CRS: —
 
 Generation rates by category and daypart.
 
-Geometry: table · CRS: —
+Geometry: table · CRS: n/a
 
 | Field | Type | Null | Unique | Domain | Description |
 |---|---|---|---|---|---|
@@ -700,7 +702,7 @@ Geometry: table · CRS: —
 
 Scoring criteria C01–C10.
 
-Geometry: table · CRS: —
+Geometry: table · CRS: n/a
 
 | Field | Type | Null | Unique | Domain | Description |
 |---|---|---|---|---|---|
@@ -716,7 +718,7 @@ Geometry: table · CRS: —
 
 Weights per scenario and criterion.
 
-Geometry: table · CRS: —
+Geometry: table · CRS: n/a
 
 | Field | Type | Null | Unique | Domain | Description |
 |---|---|---|---|---|---|
@@ -729,7 +731,7 @@ Geometry: table · CRS: —
 
 Resolved finance parameters per run.
 
-Geometry: table · CRS: —
+Geometry: table · CRS: n/a
 
 | Field | Type | Null | Unique | Domain | Description |
 |---|---|---|---|---|---|
@@ -741,7 +743,7 @@ Geometry: table · CRS: —
 
 Pilot back-test: observed vs modeled (Phase I).
 
-Geometry: table · CRS: —
+Geometry: table · CRS: n/a
 
 | Field | Type | Null | Unique | Domain | Description |
 |---|---|---|---|---|---|
@@ -756,7 +758,7 @@ Geometry: table · CRS: —
 
 Modeled demand stalls per hex and daypart (Phase B).
 
-Geometry: table · CRS: —
+Geometry: table · CRS: n/a
 
 | Field | Type | Null | Unique | Domain | Description |
 |---|---|---|---|---|---|
@@ -771,7 +773,7 @@ Geometry: table · CRS: —
 
 Supply stalls per hex and daypart (Phase C).
 
-Geometry: table · CRS: —
+Geometry: table · CRS: n/a
 
 | Field | Type | Null | Unique | Domain | Description |
 |---|---|---|---|---|---|
@@ -783,14 +785,14 @@ Geometry: table · CRS: —
 | `offstreet_stalls` | REAL | yes |  |  | Off-street share of supply_stalls (addition, ADR-0065) |
 | `onstreet_stalls` | REAL | yes |  |  | Metered on-street share of supply_stalls (addition, ADR-0065) |
 | `unmetered_curb_ft` | REAL | yes |  |  | Local-street curb length (both sides) not metered (addition, ADR-0021) |
-| `potential_curb_stalls` | REAL | yes |  |  | unmetered_curb_ft / on-street stall length — NOT counted as supply |
+| `potential_curb_stalls` | REAL | yes |  |  | unmetered_curb_ft / on-street stall length, NOT counted as supply |
 | `curb_sensitive_flag` | BOOLEAN | yes |  |  | potential_curb_stalls >= curb_sensitive_ratio × effective supply (ADR-0021) |
 
 ### `Hex_Gap_Daypart`
 
 Demand − effective supply per hex and daypart (Phase D).
 
-Geometry: table · CRS: —
+Geometry: table · CRS: n/a
 
 | Field | Type | Null | Unique | Domain | Description |
 |---|---|---|---|---|---|
@@ -831,9 +833,9 @@ Immutable, EPSG:4326, source attributes as delivered: `Raw_Boundary`, `Raw_Parce
 
 ## Rules
 
-- topology: `Parcels` — must not overlap (tolerance 0.1 ft)
-- topology: `HexGrid` — must not overlap or have gaps
-- attribute: `Parcels`.lot_sqft — = Shape_Area (market units)
-- attribute: `Parcels`.improvement_value_ratio — assessed_improvement_value / NULLIF(assessed_land_value, 0)
-- attribute: `SiteScores`.composite — BETWEEN 0 AND 100 (rg_Score)
-- attribute: `SiteFinancials`.occ_* — BETWEEN 0 AND 1 (rg_Occupancy)
+- topology: `Parcels`, must not overlap (tolerance 0.1 ft)
+- topology: `HexGrid`, must not overlap or have gaps
+- attribute: `Parcels`.lot_sqft, = Shape_Area (market units)
+- attribute: `Parcels`.improvement_value_ratio, assessed_improvement_value / NULLIF(assessed_land_value, 0)
+- attribute: `SiteScores`.composite, BETWEEN 0 AND 100 (rg_Score)
+- attribute: `SiteFinancials`.occ_*, BETWEEN 0 AND 1 (rg_Occupancy)

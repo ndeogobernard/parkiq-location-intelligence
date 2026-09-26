@@ -314,8 +314,7 @@ def _save(p: arcpy.mp.ArcGISProject) -> int:
         except OSError as exc:
             if attempt == 4:
                 print(
-                    f"Could not save {APRX} — is it open in ArcGIS Pro? Close it and re-run. "
-                    f"({exc})"
+                    f"Could not save {APRX}, is it open in ArcGIS Pro? Close it and re-run. ({exc})"
                 )
                 return 2
             time.sleep(2)

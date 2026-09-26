@@ -1,7 +1,7 @@
 """Portfolio reports: Markdown source → HTML → PDF, numbers pulled from run outputs (ADR-0077).
 
 A report source (``docs/portfolio/<slug>.md``) uses ``{{key}}`` placeholders; :func:`key_numbers`
-computes every value from the run GeoPackage and ``schema.yaml`` — nothing is typed by hand, and a
+computes every value from the run GeoPackage and ``schema.yaml``, nothing is typed by hand, and a
 placeholder without a value stops the build. The HTML is printed to PDF by a headless Chromium
 browser (Edge/Chrome), matching the site's existing ``<slug>-documentation.md.pdf`` files, with a
 running header, page numbers and repo/site links added by CSS.
@@ -80,13 +80,23 @@ def key_numbers(run_dir: Path, schema: Schema, crs: Any) -> dict[str, str]:
     }
 
 
+EM = chr(0x2014)  # em dash: not allowed in project text (ADR-0083)
+
+
+def plain(v: object) -> str:
+    """Registry text written before ADR-0083 may hold em dashes: rewrite them as commas."""
+    return str(v).replace(f" {EM} ", ", ").replace(EM, ", ")
+
+
 def sources_table(reg: pd.DataFrame) -> str:
     """Markdown table of loaded sources: source, vintage, licence."""
     r = reg[reg["status"] == "loaded"].sort_values("source_id")
     rows = ["| Source | Dataset | Vintage | Licence |", "|---|---|---|---|"]
     for x in r.itertuples():
         lic = str(x.license or "").replace("[VERIFY]", "(to confirm)")
-        rows.append(f"| {x.provider} | {x.dataset} | {x.vintage or '—'} | {lic} |")
+        rows.append(
+            f"| {plain(x.provider)} | {plain(x.dataset)} | {plain(x.vintage or 'n/a')} | {plain(lic)} |"
+        )
     return "\n".join(rows)
 
 
@@ -119,6 +129,8 @@ def render(
     if missing:
         raise KeyError(f"{source.name}: no value for placeholders {missing}")
     text = PLACEHOLDER.sub(lambda m: values[m.group(1)], text)
+    if EM in text:
+        raise ValueError(f"{source.name}: em dash in report text (ADR-0083)")
     body = markdown.markdown(text, extensions=["tables", "md_in_html", "attr_list"])
     base = source.parent.resolve()
     body = re.sub(
@@ -138,7 +150,7 @@ def render(
     if browser is None:
         raise FileNotFoundError("no headless Edge/Chrome found to print the PDF")
     with (
-        tempfile.TemporaryDirectory() as prof
+        tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as prof
     ):  # isolated profile: no hand-off to a running browser
         subprocess.run(
             [

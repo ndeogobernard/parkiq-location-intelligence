@@ -1,20 +1,20 @@
-"""Step ``demand`` — Phase B demand model (SCOPE §5.2; ADR-0013, 0014, 0022, 0068–0070).
+"""Step ``demand``, Phase B demand model (SCOPE §5.2; ADR-0013, 0014, 0022, 0068–0070).
 
 Anchors (``DemandAnchors``) and their size metric, per ``configs/anchor_crosswalk.yaml``:
 
-* **Office** — LODES WAC jobs in office-type sectors only (CNS09–14, CNS20); other sectors carry no
+* **Office**: LODES WAC jobs in office-type sectors only (CNS09–14, CNS20); other sectors carry no
   per-job rate and generate no job-based demand.
-* **Medical** — hospital beds (S12a). **University** — enrollment (S12b).
-* **Hotel** — OSM ``rooms``, else building floor area ÷ ``demand.hotel_sqft_per_room``.
-* **RestaurantBar / Retail** — ground-floor footprint of the containing building, shared among the
+* **Medical**: hospital beds (S12a). **University**: enrollment (S12b).
+* **Hotel**: OSM ``rooms``, else building floor area ÷ ``demand.hotel_sqft_per_room``.
+* **RestaurantBar / Retail**: ground-floor footprint of the containing building, shared among the
   places in it (no building → skipped and counted).
-* **Venue** — S10 seats × events (blank = unknown → skipped with a WARNING, never 0).
+* **Venue**: S10 seats × events (blank = unknown → skipped with a WARNING, never 0).
 
 Demand per daypart = size × rate × calibration × mode factor × transit factor, where
 * the **mode factor** (commute categories only) = workplace drive share of the place the anchor is
   in ÷ county workplace drive share (ACS B08601, work-from-home excluded) (ADR-0068);
 * the **transit factor** applies to non-commute categories within the high-frequency radius of a
-  high-frequency stop — commute shares already reflect transit use (ADR-0068);
+  high-frequency stop, commute shares already reflect transit use (ADR-0068);
 * **campus rule** (ADR-0070): jobs of the named sectors on an anchor's campus (parcel under the
   anchor + contiguous parcels with the same normalized owner) are removed from job-based demand.
 
@@ -266,7 +266,7 @@ def build_anchors(ctx: RunContext, xw: dict[str, Any]) -> tuple[gpd.GeoDataFrame
         v = ctx.store.read_layer("Venues")
         unk = v["seats"].isna() | v["events_per_year"].isna()
         for n in v.loc[unk, "name"]:
-            log.warning("venue %s: seats or events unknown — event demand skipped", n)
+            log.warning("venue %s: seats or events unknown, event demand skipped", n)
         rep["skipped"]["venues_unknown"] = list(v.loc[unk, "name"])
         v = v[~unk]
         rows.append(
@@ -284,7 +284,7 @@ def build_anchors(ctx: RunContext, xw: dict[str, Any]) -> tuple[gpd.GeoDataFrame
             )
         )
     elif "Venues" not in written:
-        rep["skipped"]["venues"] = "S10 not configured — no event demand"
+        rep["skipped"]["venues"] = "S10 not configured, no event demand"
     a = gpd.GeoDataFrame(pd.concat(rows, ignore_index=True), crs=crs)
     return a, rep
 

@@ -1,4 +1,4 @@
-"""S12a — hospitals with beds [VERIFY V-18 source]."""
+"""S12a, hospitals with beds [VERIFY V-18 source]."""
 
 from __future__ import annotations
 
@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 
 
 class HospitalsAdapter(_TableAdapter):
-    """S12a — hospitals with beds [VERIFY V-18 source]."""
+    """S12a, hospitals with beds [VERIFY V-18 source]."""
 
     source_id = "S12a"
     target, raw_layer, id_field = "Hospitals", "Raw_Hospitals", "hospital_id"

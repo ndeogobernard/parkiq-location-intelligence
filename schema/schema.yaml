@@ -1,5 +1,5 @@
-# ParkIQ data model — machine-readable (SCOPE §4). Identical for every market.
-# v1.0 (M2): complete §4.2–4.5 — every feature class and table, domains, subtypes, relationships
+# ParkIQ data model: machine-readable (SCOPE §4). Identical for every market.
+# v1.0 (M2): complete §4.2–4.5: every feature class and table, domains, subtypes, relationships
 # and rules. BuildSchema creates all of it on an empty GeoPackage; schema-diff compares a
 # GeoPackage to this file; docs/ERD.* and docs/DataDictionary.md are generated from it.
 #
@@ -370,7 +370,7 @@ layers:
       curb_sensitive_flag: {type: BOOLEAN, desc: "Any curb-sensitive hex (ADR-0021)"}
       jurisdictions:     {type: TEXT, desc: "Places the zone touches, ';'-joined (addition)"}
       below_min_lot_flag: {type: BOOLEAN, desc: "Positive weekday-day gap < minimum viable lot (site.target_stalls_range min) (addition, ADR-0072)"}
-      zone_class:        {type: TEXT, desc: "paid-market (screening) | free-parking area — context only (addition, ADR-0075)"}
+      zone_class:        {type: TEXT, desc: "paid-market (screening) | free-parking area, context only (addition, ADR-0075)"}
       paid_market_hexes: {type: INTEGER, desc: "Hexes with paid parking within an 8-min walk (addition, ADR-0075)"}
   CandidateParcels:
     feature_dataset: Analysis
@@ -391,7 +391,7 @@ layers:
       address:             {type: TEXT, desc: "Site address (first component) (addition)"}
       jurisdiction:        {type: TEXT, desc: "Zoning jurisdiction (addition)"}
       land_use_class:      {type: TEXT, domain: dm_LandUseClass, desc: "Land-use class (first component) (addition)"}
-      owner_type:          {type: TEXT, domain: dm_OwnerType, desc: "Owner class — due-diligence flag only (addition)"}
+      owner_type:          {type: TEXT, domain: dm_OwnerType, desc: "Owner class, due-diligence flag only (addition)"}
       zoning_code:         {type: TEXT, desc: "Base zoning code(s) (addition)"}
       zoning_screen:       {type: TEXT, domain: dm_ZoningScreen, desc: "Least permissive component zoning screen (addition)"}
       lot_sqft:            {type: REAL, desc: "Site area, sq ft (addition)"}
@@ -402,9 +402,11 @@ layers:
       corner_flag:         {type: BOOLEAN, desc: "Frontage on two streets (addition, ADR-0026)"}
       arterial_flag:       {type: BOOLEAN, desc: "Frontage on a primary/secondary/trunk street (addition, ADR-0026)"}
       existing_lot_flag:   {type: BOOLEAN, desc: "Existing surface lot (addition, ADR-0063)"}
-      zone_a_flag:         {type: BOOLEAN, desc: "In Downtown parking Zone A — new lots prohibited, only an existing lot can work (addition)"}
+      zone_a_flag:         {type: BOOLEAN, desc: "In Downtown parking Zone A, new lots prohibited, only an existing lot can work (addition)"}
       hotzone_id:          {type: TEXT, desc: "Nearest paid-market screening hot zone within 8 min (addition, ADR-0075)"}
       land_value:          {type: REAL, desc: "Assessed land value, summed over components (addition)"}
+      owner_feasibility:   {type: TEXT, desc: "Owner feasibility flag, not a score (addition, ADR-0084)"}
+      zone_a_portion_removed: {type: BOOLEAN, desc: "Zone A new-lot parcels dropped from the assembly (addition, ADR-0084)"}
   WalkSheds:
     feature_dataset: Analysis
     geometry: MultiPolygon
@@ -624,7 +626,7 @@ tables:
       modeled_value:   {type: REAL, desc: "Modeled"}
       error_pct:       {type: REAL, desc: "(modeled − observed) / observed × 100"}
   # SCOPE shows the hex × daypart outputs as "Polygon/table": stored as tables keyed by hex_id and
-  # joined to HexGrid for display (ADR-0060) — avoids storing each hexagon five times.
+  # joined to HexGrid for display (ADR-0060): avoids storing each hexagon five times.
   Hex_Demand_Daypart:
     desc: "Modeled demand stalls per hex and daypart (Phase B)."
     fields:
@@ -645,7 +647,7 @@ tables:
       offstreet_stalls:        {type: REAL, desc: "Off-street share of supply_stalls (addition, ADR-0065)"}
       onstreet_stalls:         {type: REAL, desc: "Metered on-street share of supply_stalls (addition, ADR-0065)"}
       unmetered_curb_ft:       {type: REAL, desc: "Local-street curb length (both sides) not metered (addition, ADR-0021)"}
-      potential_curb_stalls:   {type: REAL, desc: "unmetered_curb_ft / on-street stall length — NOT counted as supply"}
+      potential_curb_stalls:   {type: REAL, desc: "unmetered_curb_ft / on-street stall length, NOT counted as supply"}
       curb_sensitive_flag:     {type: BOOLEAN, desc: "potential_curb_stalls >= curb_sensitive_ratio × effective supply (ADR-0021)"}
   Hex_Gap_Daypart:
     desc: "Demand − effective supply per hex and daypart (Phase D)."

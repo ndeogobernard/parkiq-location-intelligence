@@ -1,6 +1,6 @@
 """Shared map layout and the ParkIQ map standard (SCOPE §7, §10; ADR-0076).
 
-Every map — portfolio image, report figure, M1–M15 map or review draft — is made with
+Every map, portfolio image, report figure, M1–M15 map or review draft, is made with
 :func:`new_map` and finished with :func:`finish`, which adds and then **checks** the required
 elements. ``finish`` raises :class:`MapStandardError` (and writes nothing) if any is missing:
 
@@ -10,9 +10,12 @@ elements. ``finish`` raises :class:`MapStandardError` (and writes nothing) if an
 * a scale bar and a north arrow
 * data sources with vintages, and "© OpenStreetMap contributors" when OSM data is used
 * "ParkIQ" and the map date
-* a "PRELIMINARY" label on anything not final
+* on maps of results that can still change (demand, gap, hot zones, candidates, scores): a plain
+  "Analysis as of <Month YYYY>" line in the sources area; data maps (supply, zoning, network)
+  carry no status line. No map carries a "PRELIMINARY" label.
 * a locator inset when the view is zoomed in below the market extent
 * no parcel IDs or owner names on anything public (text scan)
+* no em dash (U+2014) and no "PRELIMINARY" in any map text (project text rules)
 
 A JSON sidecar next to each image records the elements present, for audit.
 """
@@ -33,8 +36,10 @@ import matplotlib.pyplot as plt
 from matplotlib.artist import Artist
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
+from matplotlib.text import Text
 
 OSM_CREDIT = "© OpenStreetMap contributors"
+EM = chr(0x2014)  # em dash (project text rules)
 REQUIRED = (
     "title",
     "subtitle",
@@ -44,10 +49,11 @@ REQUIRED = (
     "north_arrow",
     "sources",
     "brand_date",
-    "preliminary",
+    "status_line",
     "locator",
     "osm_credit",
     "public_clean",
+    "text_rules",
 )
 PARCEL_ID = re.compile(r"\b\d{3}-\d{6}(-\d{2})?\b")  # Franklin Auditor parcel-id pattern
 
@@ -65,7 +71,7 @@ class MapSpec:
     how_to_read: str  # 1–2 sentences
     sources: list[str]  # each "name (vintage)"
     uses_osm: bool
-    preliminary: bool = True
+    result: bool = False  # True for results that can still change → "Analysis as of <Month YYYY>"
     public: bool = False
     map_date: str = field(default_factory=lambda: date.today().isoformat())
     market_extent: tuple[float, float, float, float] | None = None  # for the locator rule
@@ -185,6 +191,13 @@ def finish(
     src = "Sources: " + "; ".join(sp.sources)
     if sp.uses_osm and OSM_CREDIT not in src:
         src += f". {OSM_CREDIT}"
+    if sp.result:
+        d = date.fromisoformat(sp.map_date)
+        status = f"Analysis as of {d.strftime('%B %Y')}"
+        src += f". {status}"
+        st.elements["status_line"] = status
+    else:
+        st.elements["status_line"] = "n/a (data map)"
     _text(fig, 0.02, 0.035, src, "sources", fontsize=7.5, color="#555555", wrap=True)
     if OSM_CREDIT in src:
         st.elements["osm_credit"] = True
@@ -200,20 +213,6 @@ def finish(
         ha="right",
         color="#555555",
     )
-    if sp.preliminary:
-        _text(
-            fig,
-            0.98,
-            0.95,
-            "PRELIMINARY",
-            "preliminary",
-            fontsize=16,
-            ha="right",
-            color="#d62728",
-            fontweight="bold",
-        )
-    else:
-        st.elements["preliminary"] = "final"
     # locator rule: zoomed below the market extent needs an inset
     if view is not None and sp.market_extent is not None:
         mx0, my0, mx1, my1 = sp.market_extent
@@ -226,6 +225,9 @@ def finish(
     # public: no parcel ids / owner field names in any text
     bad = [t for t in st.texts if PARCEL_ID.search(t) or re.search(r"(?i)\bowner\b", t)]
     st.elements["public_clean"] = not bad if sp.public else "n/a (not public)"
+    legend_text = [t.get_text() for t in fig.findobj(Text) if isinstance(t, Text)]
+    rule_bad = [t for t in st.texts + legend_text if EM in str(t) or "PRELIMINARY" in str(t)]
+    st.elements["text_rules"] = not rule_bad
     check(fig)
     out.parent.mkdir(parents=True, exist_ok=True)
     if out.suffix.lower() in (".jpg", ".jpeg"):
@@ -248,6 +250,8 @@ def check(fig: Figure) -> None:
         missing.append("public_clean (parcel id or owner text found)")
     if st.spec.uses_osm and st.elements.get("osm_credit") is not True:
         missing.append("osm_credit")
+    if st.elements.get("text_rules") is False:
+        missing.append("text_rules (em dash or PRELIMINARY in map text)")
     if not st.spec.sources or any("(" not in s for s in st.spec.sources):
         missing.append("sources with vintages ('name (vintage)')")
     if missing:

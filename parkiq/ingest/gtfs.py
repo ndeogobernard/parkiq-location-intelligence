@@ -1,4 +1,4 @@
-"""S09 — GTFS schedule → TransitStops with peak departures and headway (manual §6.3).
+"""S09, GTFS schedule → TransitStops with peak departures and headway (manual §6.3).
 
 For the ``options.service_date`` (YYYYMMDD, a representative weekday you choose), active services
 are resolved from ``calendar.txt`` + ``calendar_dates.txt`` exceptions. Departures per stop are

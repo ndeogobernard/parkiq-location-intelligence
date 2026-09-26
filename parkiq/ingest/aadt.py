@@ -1,4 +1,4 @@
-"""S13 — state DOT AADT counts [VERIFY V-20 layer + field names]."""
+"""S13, state DOT AADT counts [VERIFY V-20 layer + field names]."""
 
 from __future__ import annotations
 
@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 
 
 class AadtAdapter(_TableAdapter):
-    """S13 — state DOT AADT counts [VERIFY V-20 layer + field names]."""
+    """S13, state DOT AADT counts [VERIFY V-20 layer + field names]."""
 
     source_id = "S13"
     target, raw_layer = "TrafficCounts", "Raw_AADT"

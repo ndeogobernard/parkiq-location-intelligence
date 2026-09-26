@@ -39,7 +39,7 @@ INGEST_LAYERS: dict[str, str | None] = {
     "ZoningOverlays": None,
     "ParkingZones": None,
 }
-AREA_TOL_REL = 1e-6  # numerical tolerance for tiling checks (fraction of area) — not a parameter
+AREA_TOL_REL = 1e-6  # numerical tolerance for tiling checks (fraction of area), not a parameter
 
 
 @dataclass
@@ -237,5 +237,5 @@ def run_qaqc(ctx: RunContext) -> dict[str, Any]:
     )
     failed = write_checks(ctx, "qaqc", checks)
     if failed:
-        raise RuntimeError(f"RunQAQC: {failed} error-level checks failed — see QAQC_Log")
+        raise RuntimeError(f"RunQAQC: {failed} error-level checks failed, see QAQC_Log")
     return {"checks": len(checks), "failed": failed, "not_configured": nc}

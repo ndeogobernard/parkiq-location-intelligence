@@ -18,12 +18,12 @@ lodes_sectors:
     CNS04: construction
     CNS05: manufacturing
     CNS06: wholesale trade
-    CNS07: retail trade — covered by the retail floor-area rate
+    CNS07: retail trade, covered by the retail floor-area rate
     CNS08: transportation and warehousing
-    CNS15: educational services — university covered by the enrollment rate
-    CNS16: health care and social assistance — hospitals covered by the bed rate
-    CNS17: arts, entertainment, recreation — venues covered by the seat rate (S10)
-    CNS18: accommodation and food services — covered by room and floor-area rates
+    CNS15: educational services, university covered by the enrollment rate
+    CNS16: health care and social assistance, hospitals covered by the bed rate
+    CNS17: arts, entertainment, recreation, venues covered by the seat rate (S10)
+    CNS18: accommodation and food services, covered by room and floor-area rates
     CNS19: other services
 
 # OSM / Overture places → category (first match wins). Size metric per category below.

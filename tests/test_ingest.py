@@ -80,7 +80,7 @@ def test_every_adapter_loaded(m1_run) -> None:  # type: ignore[no-untyped-def]
     ]:
         assert reg.loc[sid, "status"] == "loaded", sid
         if sid != "S00":
-            assert "SYNTHETIC — NOT REAL DATA" in reg.loc[sid, "license"], sid
+            assert "SYNTHETIC: NOT REAL DATA" in reg.loc[sid, "license"], sid
 
 
 def test_clip_to_study_area(m1_run) -> None:  # type: ignore[no-untyped-def]

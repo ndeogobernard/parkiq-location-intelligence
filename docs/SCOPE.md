@@ -1,13 +1,13 @@
-# Surface-Lot Parking Site Selection — Repeatable Location-Intelligence Workflow and Investment Package
+# Surface-Lot Parking Site Selection: Repeatable Location-Intelligence Workflow and Investment Package
 
 **Project type:** Location-intelligence toolkit (market-agnostic site selection with financial underwriting)
 **Business:** Development and operation of paid surface parking lots
 **Client / users:** Partner group (investors and operators)
 **Market:** Any U.S. city or submarket, defined per run by a market configuration file
-**Document version:** 2.0 — 23 September 2026
+**Document version:** 2.0, 23 September 2026
 **Document owner:** Bernard Issifu
 **Executed by:** GIS Analyst / Developer (hereafter "the Analyst")
-**Status:** Scoped — ready for build, then run per market
+**Status:** Scoped, ready for build, then run per market
 
 ---
 
@@ -35,7 +35,7 @@ Design principles:
 |---|---|
 | Facility | Paid surface parking lot (no structure; no automated/mechanical systems) |
 | Size | ~50–300 stalls per site [PARAMETER] |
-| Customer | Any paying parker — commuters, visitors, event-goers, monthly permits; the objective is sustained occupancy across dayparts |
+| Customer | Any paying parker, commuters, visitors, event-goers, monthly permits; the objective is sustained occupancy across dayparts |
 | Objective | Fill the lot reliably and generate a target return on total cost |
 | Tenure | Purchase or ground lease (both modeled) |
 | Markets | Multiple; identified by the partners over time |
@@ -178,7 +178,7 @@ Core sources cover any U.S. market. Optional enrichment sources are added per ma
 ### 4.1 Deliverable
 
 - `ParkIQ_<market>.gpkg` (GeoPackage, primary; produced per market run) and a file geodatabase export `ParkIQ_<market>.gdb` for ArcGIS Pro.
-- `schema/schema.yaml` — machine-readable schema used by the `BuildSchema` tool; identical structure for every market.
+- `schema/schema.yaml`: machine-readable schema used by the `BuildSchema` tool; identical structure for every market.
 - `docs/ERD.png` and `docs/ERD.drawio`; `docs/DataDictionary.md`; `docs/GDB_DesignRationale.md` (portfolio write-up).
 
 ### 4.2 Feature datasets and feature classes
@@ -257,42 +257,42 @@ Design goals; why one schema for all markets; ERD; domain and subtype rationale;
 
 ## 5. Analytical methodology
 
-### 5.1 Phase A — Market setup
+### 5.1 Phase A: Market setup
 
 Resolve the boundary; pull all core sources for the boundary plus buffer; build the pedestrian network (OSMnx `walk` network with walking speed 1.3 m/s [PARAMETER]); generate the H3 grid; compute slope; register sources; run ingest QA.
 
-### 5.2 Phase B — Demand model (hex × daypart)
+### 5.2 Phase B: Demand model (hex × daypart)
 
 1. **Anchor extraction:** classify POIs and blocks into demand categories with a size metric: office/industrial jobs (LODES), hospital beds (HIFLD), university enrollment (IPEDS), hotel rooms, venue seats and events per year, restaurant/bar and retail counts or floor area (Overture/OSM; building area as proxy), residential units in multi-unit structures with low vehicle availability (ACS).
 2. **Parking generation:** apply rates per category and daypart from `ParkingRates` (e.g., office weekday day ≈ 0.8 stalls per employee; hotel evening ≈ 0.9–1.2 per room; restaurant/bar evening peaks; venue = seats × drive share ÷ persons per car on event days) [VERIFY rates against ITE/ULI; cite]. Apply **driver mode share** from ACS commute mode and the transit adjustment near high-frequency stops [PARAMETER].
 3. **Spatial allocation:** distribute each anchor's demand across hexes within its walk-shed using the decay weights (1.0 at ≤ 3 min, 0.6 at 5 min, 0.25 at 8 min) [PARAMETER]; sum to `Hex_Demand_Daypart`, retaining components for auditability.
 4. **Calibration:** in the pilot market (and any market with S19/S20), scale category rates so modeled demand matches observed occupancy/visits; store factors in `ParkingRates.calibration_factor`.
 
-### 5.3 Phase C — Supply inventory
+### 5.3 Phase C: Supply inventory
 
 1. Merge OSM/Overture parking, app listings, and city inventories; deduplicate by location (40 m) and name.
 2. **Capacity:** stated where present; else surface = area ÷ gross stall area × efficiency; garage = footprint × levels ÷ gross stall area; on-street = curb length ÷ stall length with meter/permit flags.
 3. **Rates:** attach listed rates; build an inverse-distance-weighted **rate surface** per daypart; cross-validate.
 4. Allocate supply to hexes with the same decay; count private/reserved supply at the effective share [PARAMETER]; write `Hex_Supply_Daypart`.
 
-### 5.4 Phase D — Gap analysis
+### 5.4 Phase D: Gap analysis
 
 `gap_stalls = demand − effective_supply` and `gap_ratio = demand / supply` per hex and daypart; `rate_index` = rate surface normalized. **Hot zones** = contiguous hexes with weekday-day gap > 0 and evening or event gap > 0 (multi-daypart demand is what keeps a surface lot full). Write `Hex_Gap_Daypart`, `HotZones`.
 
-### 5.5 Phase E — Candidate parcel screen (hard filters) [PARAMETER]
+### 5.5 Phase E: Candidate parcel screen (hard filters) [PARAMETER]
 
 - `lot_sqft` within min/max; `shape_index ≥ 0.60`; `frontage_ft ≥ 60` on a public street.
 - Land use in (Vacant, SurfaceParking, low-value improvement with `improvement_value_ratio < 0.25`, auto-oriented commercial); exclude residential-zoned unless `zoning_screen` allows commercial parking.
-- `zoning_screen` in (ByRight, Conditional, Unknown) — Unknown flagged, not excluded.
+- `zoning_screen` in (ByRight, Conditional, Unknown), Unknown flagged, not excluded.
 - Not in floodway; `slope_pct < max`; not park/cemetery/right-of-way; no active development permit (S22).
 - Within an 8-minute walk of a hot zone.
 Write `CandidateParcels` with `screen_reason` for every evaluated parcel. Expect 40–200 Pass candidates; adjust size or walk thresholds per the recorded rule if outside that range.
 
-### 5.6 Phase F — Network analysis
+### 5.6 Phase F: Network analysis
 
 Walk-sheds (3/5/8 min) from each candidate; walk time to the top-3 anchors by demand; count of competing facilities within 3 min; population and jobs within 5 min. Write `WalkSheds`.
 
-### 5.7 Phase G — Criteria and scoring
+### 5.7 Phase G: Criteria and scoring
 
 | ID | Criterion | Measure | Direction |
 |---|---|---|---|
@@ -309,7 +309,7 @@ Walk-sheds (3/5/8 min) from each candidate; walk time to the top-3 anchors by de
 
 Normalization: winsorize 5th/95th, min–max to 0–100, invert costs. Scenarios `Balanced`, `DemandFirst`, `CostFirst` (Appendix B). Sensitivity: OAT ± 25% and 1,000 Dirichlet draws; report rank stability.
 
-### 5.8 Phase H — Financial model (per candidate)
+### 5.8 Phase H: Financial model (per candidate)
 
 - **Stalls** = `lot_sqft × (1 − setback_landscape_pct) × layout_efficiency ÷ stall_area_sqft_gross`.
 - **Occupancy by daypart** = f(gap_ratio in 5-min shed), capped per config; **rates** from the rate surface less the new-entrant discount; monthly-permit share in office-heavy zones [PARAMETER].
@@ -318,11 +318,11 @@ Normalization: winsorize 5th/95th, min–max to 0–100, invert costs. Scenarios
 - **Returns:** NOI, yield-on-cost, value at target cap rate, payback, 10-year IRR and NPV under buy and ground-lease; **sensitivity** on occupancy ± 15 pts, rate ± 20%, land ± 20%, construction ± 15%; tornado chart per site.
 - **Final ranking** = financial return (70%) + suitability composite (30%) [PARAMETER]; top 5–10 shortlisted; one recommended site and one alternate.
 
-### 5.9 Phase I — Validation and back-test (pilot market)
+### 5.9 Phase I: Validation and back-test (pilot market)
 
 Select 10–20 existing paid surface lots; compare modeled occupancy and rates to observed (foot-traffic data, app availability snapshots at peak hours, meter data, site visits); write `Validation`; report error and recalibrate `ParkingRates`.
 
-### 5.10 Phase J — Due-diligence flags
+### 5.10 Phase J: Due-diligence flags
 
 Per shortlisted site: title/ownership, environmental (brownfield), stormwater, curb-cut approval, zoning confirmation, adjacent development plans, ground-lease vs. purchase, operator/tech setup. Listed, not resolved.
 
@@ -353,7 +353,7 @@ parkiq/
 └── outputs/<market>/<run_id>/ (gpkg, gdb, maps/, map_series/, model.xlsx, memo.docx, dashboard/, data_sources.csv, params.yaml, run_log.json)
 ```
 
-### 6.3 Python toolbox `ParkIQ.pyt` — tool specifications
+### 6.3 Python toolbox `ParkIQ.pyt`: tool specifications
 
 Each tool validates parameters, logs to `outputs/.../logs/<run_id>.log`, writes `ScoreRuns`, and is idempotent per `run_id`.
 
@@ -401,15 +401,15 @@ Layout template (`ParkIQ_Template.pagx`): market name, run date and version, leg
 |---|---|---|
 | M01 | Market context | Boundary, submarkets, major roads, transit, venues, hospitals, universities |
 | M02 | Demand anchors | Anchors sized by demand contribution, by category |
-| M03 | Demand — weekday day | Hex demand stalls |
-| M04 | Demand — evening/weekend | Hex demand stalls |
-| M05 | Demand — event | Hex demand stalls with venues |
+| M03 | Demand, weekday day | Hex demand stalls |
+| M04 | Demand, evening/weekend | Hex demand stalls |
+| M05 | Demand, event | Hex demand stalls with venues |
 | M06 | Existing supply and rates | Facilities by type/capacity; rate surface |
-| M07 | Gap — weekday day | Hex gap and hot zones |
-| M08 | Gap — evening/weekend | Hex gap |
+| M07 | Gap, weekday day | Hex gap and hot zones |
+| M08 | Gap, evening/weekend | Hex gap |
 | M09 | Candidate screening | Evaluated parcels by `screen_status`; fail-reason inset |
-| M10 | Suitability — Balanced | Candidates by composite class; top 10 labeled |
-| M11 | Suitability — DemandFirst / CostFirst | Small multiples |
+| M10 | Suitability, Balanced | Candidates by composite class; top 10 labeled |
+| M11 | Suitability, DemandFirst / CostFirst | Small multiples |
 | M12 | Rank stability | Candidates by top-10 frequency |
 | M13 | Financial ranking | Candidates by yield-on-cost; shortlist highlighted |
 | M14 | Shortlist overview | Top sites with 5-min walk sheds and anchors |
@@ -427,7 +427,7 @@ ArcGIS Online Dashboard (hosted layers) or a Plotly/Kepler.gl HTML [DECISION]: s
 
 ---
 
-## 8. Communication — ArcGIS StoryMap (investment briefing)
+## 8. Communication: ArcGIS StoryMap (investment briefing)
 
 Title: *"Where a Surface Lot Pays: <Market> Parking Site Selection"*. Audience: the partners and their lenders.
 
@@ -474,7 +474,7 @@ Peer review: one independent reviewer reproduces the pilot run from the README b
 
 ---
 
-## 11. Timeline — build (8 weeks, part-time) and per-market run
+## 11. Timeline: build (8 weeks, part-time) and per-market run
 
 | Week | Milestone | Exit criteria |
 |---|---|---|
@@ -550,7 +550,7 @@ Peer review: one independent reviewer reproduces the pilot run from the README b
 
 ---
 
-## Appendix A — Mapping to the business requirement
+## Appendix A: Mapping to the business requirement
 
 | Requirement | Where addressed |
 |---|---|
@@ -562,7 +562,7 @@ Peer review: one independent reviewer reproduces the pilot run from the README b
 | Partners can test assumptions | Excel model with live inputs; dashboard scenario/daypart selectors |
 | Defensible and auditable | `screen_reason`, `components_json`, `ScoreRuns`, `QAQC_Log`, `Validation` |
 
-## Appendix B — Scoring weights (`configs/weights.yaml`)
+## Appendix B: Scoring weights (`configs/weights.yaml`)
 
 ```yaml
 Balanced:    {C01: 0.18, C02: 0.14, C03: 0.08, C04: 0.12, C05: 0.10, C06: 0.08, C07: 0.12, C08: 0.08, C09: 0.05, C10: 0.05}
@@ -571,7 +571,7 @@ CostFirst:   {C01: 0.12, C02: 0.10, C03: 0.05, C04: 0.12, C05: 0.10, C06: 0.06, 
 ranking: {financial_weight: 0.70, suitability_weight: 0.30}
 ```
 
-## Appendix C — Parking-rate table structure (`configs/parking_rates.yaml`)
+## Appendix C: Parking-rate table structure (`configs/parking_rates.yaml`)
 
 ```yaml
 office:        {unit: employee, wd_day: 0.80, wd_eve: 0.05, we_day: 0.05, we_eve: 0.02, event: 0.00, source: "ITE PG 6th ed. LU 701 [VERIFY]"}
@@ -585,7 +585,7 @@ residential:   {unit: unit_no_offstreet, wd_day: 0.30, wd_eve: 0.90, we_day: 0.8
 calibration_factors: {}   # filled per market by Validate
 ```
 
-## Appendix D — Signature queries (to be benchmarked and documented)
+## Appendix D: Signature queries (to be benchmarked and documented)
 
 ```sql
 -- Hot zones: hexes with unmet demand in weekday day AND (evening OR event)

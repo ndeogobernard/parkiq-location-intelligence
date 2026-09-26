@@ -72,7 +72,7 @@ def test_decide_values_block_steps(variant) -> None:  # type: ignore[no-untyped-
 
 
 def test_shared_defaults_keep_decide_null(fixture_cfg) -> None:  # type: ignore[no-untyped-def]
-    # criteria C04 weights are DECIDE in the shared config — never defaulted in code
+    # criteria C04 weights are DECIDE in the shared config: never defaulted in code
     assert missing_for_step(fixture_cfg, "criteria") == ["criteria.c04_daypart_weights"]
 
 
@@ -101,7 +101,7 @@ def test_franklin_template_validates() -> None:
 
 def test_fixture_dir_labelled_synthetic() -> None:
     text = FIXTURE_YAML.read_text(encoding="utf-8")
-    assert "SYNTHETIC — NOT REAL DATA" in text
+    assert "SYNTHETIC: NOT REAL DATA" in text
     assert (FIXTURE_DIR / "README.md").exists()
 
 

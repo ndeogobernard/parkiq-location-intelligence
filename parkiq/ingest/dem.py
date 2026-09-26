@@ -1,4 +1,4 @@
-"""S18 — USGS 3DEP DEM (used by SetupMarket for Slope_pct).
+"""S18, USGS 3DEP DEM (used by SetupMarket for Slope_pct).
 
 Fetch order: market ``path`` (one GeoTIFF or a list of tiles) → ``options.mode``:
 

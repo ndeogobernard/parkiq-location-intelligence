@@ -1,4 +1,4 @@
-"""Tool 1 BuildSchema (full), schema-diff, ERD and data dictionary — all from ``schema.yaml``.
+"""Tool 1 BuildSchema (full), schema-diff, ERD and data dictionary, all from ``schema.yaml``.
 
 * :func:`build_schema` creates every feature class and table (empty) in a GeoPackage, writes the
   coded/range domains as GeoPackage schema-extension constraints (``gpkg_data_columns`` +
@@ -397,7 +397,7 @@ def data_dictionary(schema: Schema) -> str:
         title = f"Feature dataset `{group}`" if group != "Tables" else "Standalone tables"
         lines += ["", f"## {title}"]
         for ldef in layers:
-            crs = {"analysis": "analysis CRS", "wgs84": "EPSG:4326", "none": "—"}[ldef.crs]
+            crs = {"analysis": "analysis CRS", "wgs84": "EPSG:4326", "none": "n/a"}[ldef.crs]
             lines += ["", f"### `{ldef.name}`", "", ldef.desc or "", ""]
             lines.append(f"Geometry: {_geom_label(ldef)} · CRS: {crs}")
             if ldef.subtype_field:
@@ -452,7 +452,7 @@ def data_dictionary(schema: Schema) -> str:
         for rule in rules:
             what = rule.get("field", "")
             lines.append(
-                f"- {kind}: `{rule['layer']}`{('.' + what) if what else ''} — {rule['rule']}"
+                f"- {kind}: `{rule['layer']}`{('.' + what) if what else ''}, {rule['rule']}"
                 + (f" (tolerance {rule['tolerance_ft']} ft)" if "tolerance_ft" in rule else "")
             )
     return "\n".join(lines) + "\n"
@@ -492,7 +492,7 @@ def erd_drawio(schema: Schema) -> str:
     boxes = erd_layout(schema)
     cells = ['<mxCell id="0"/>', '<mxCell id="1" parent="0"/>']
     title = (
-        f"ParkIQ data model v{schema.version} — generated from schema/schema.yaml. "
+        f"ParkIQ data model v{schema.version}, generated from schema/schema.yaml. "
         "All feature classes also carry source_id, run_id, load_ts. Raw_* snapshots omitted."
     )
     cells.append(
@@ -573,7 +573,7 @@ def erd_png(schema: Schema, path: Path) -> Path:
     ax.text(
         20,
         30,
-        f"ParkIQ data model v{schema.version} — generated from schema/schema.yaml "
+        f"ParkIQ data model v{schema.version}, generated from schema/schema.yaml "
         "(all feature classes also carry source_id, run_id, load_ts; Raw_* omitted)",
         fontsize=11,
         fontweight="bold",

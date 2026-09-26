@@ -21,22 +21,22 @@ if TYPE_CHECKING:
 class _ListingStub(SourceAdapter):
     def standardize(self, raw: Any, ctx: RunContext) -> Standardized:
         raise IngestError(
-            f"{self.source_id} {self.entry.dataset}: licensed but not implemented — needs a "
+            f"{self.source_id} {self.entry.dataset}: licensed but not implemented, needs a "
             "real-format sample file and confirmed terms of use (PLAN Q4/Q5)."
         )
 
 
 class ParkingListingsAdapter(_ListingStub):
-    """S07 — SpotHero / ParkWhiz / ParkMobile facility listings (stub)."""
+    """S07, SpotHero / ParkWhiz / ParkMobile facility listings (stub)."""
 
     source_id = "S07"
     license_flag = "parking_apps"
-    downstream_effect = "no listed rates — rate surface uses city meters/other sources only"
+    downstream_effect = "no listed rates, rate surface uses city meters/other sources only"
 
 
 class LandListingsAdapter(_ListingStub):
-    """S16 — CoStar / LoopNet / Crexi land listings (stub)."""
+    """S16, CoStar / LoopNet / Crexi land listings (stub)."""
 
     source_id = "S16"
     license_flag = "land_listings"
-    downstream_effect = "no asking prices — land cost from Auditor values only"
+    downstream_effect = "no asking prices, land cost from Auditor values only"

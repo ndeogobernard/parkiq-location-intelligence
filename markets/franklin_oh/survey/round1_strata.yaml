@@ -1,10 +1,10 @@
-# Field rate survey — round 1 (Bernard, M3 decisions 2026-09-26; revised at M3 review).
+# Field rate survey: round 1 (Bernard, M3 decisions 2026-09-26; revised at M3 review).
 # Posted rates for all dayparts. Areas are Submarkets names (markets/franklin_oh/submarkets.geojson).
 # Public right-of-way observation only; operator websites read manually count as a source.
 round: 1
 min_spacing_m: 150          # spread picks within an area (navigation aid, not a model parameter)
 backups_per_area: 5
-exclude:                    # not public paid parking — never sampled
+exclude:                    # not public paid parking, never sampled
   - {field: operator, pattern: "Columbus State", reason: "student permit lot"}
   - {field: name, pattern: "\bpermit\b", reason: "permit-only lot"}
   - {field: operator, pattern: "Kroger", reason: "grocery customer lot (Bernard, M4 review)"}
@@ -19,8 +19,8 @@ strata:
     garages: 0
     manual:                 # OSU campus garages outside the SID strip (CampusParc publishes rates)
       - {name: "Ohio Union South Parking Garage", operator: CampusParc, source: "operator website",
-         why: "OSU visitor garage, CampusParc — rates from operator website"}
+         why: "OSU visitor garage, CampusParc, rates from operator website"}
       - {name: "Lane Avenue Parking Garage", operator: CampusParc, source: "operator website",
-         why: "OSU visitor garage near the stadium, CampusParc — rates from operator website"}
+         why: "OSU visitor garage near the stadium, CampusParc, rates from operator website"}
   - {label: "Brewery District / German Village", areas: ["Brewery District / German Village"], n: 4, garages: 0}
   - {label: "Franklinton", areas: ["Franklinton"], n: 4, garages: 0}

@@ -75,7 +75,7 @@ class Boundary(_Strict):
 
 
 class SubmarketsSource(_Strict):
-    """Polygons for focus submarkets (reporting/insets only — never a filter, SCOPE §2.2)."""
+    """Polygons for focus submarkets (reporting/insets only, never a filter, SCOPE §2.2)."""
 
     path: Path
     name_field: str
@@ -111,14 +111,14 @@ class MarketSection(_Strict):
 
 
 class StudySection(_Strict):
-    """``study:`` block — study area and grid (SCOPE §2.2)."""
+    """``study:`` block, study area and grid (SCOPE §2.2)."""
 
     buffer_miles: float = Field(ge=0)
     h3_resolution: int = Field(ge=0, le=15)
 
 
 class SiteSection(_Strict):
-    """``site:`` block — screen and layout parameters (SCOPE §2.1, §5.5)."""
+    """``site:`` block, screen and layout parameters (SCOPE §2.1, §5.5)."""
 
     min_parcel_sqft: float = Field(gt=0)
     max_parcel_sqft: float = Field(gt=0)
@@ -131,6 +131,8 @@ class SiteSection(_Strict):
     min_shape_index: float = Field(ge=0, le=1)
     improvement_ratio_max: float | None = None
     frontage_buffer_ft: float | None = None
+    # ADR-0084: owner-name pattern (Public/Institutional owners) for university/college land
+    university_owner_pattern: str | None = None
 
     @model_validator(mode="after")
     def _ranges(self) -> SiteSection:
@@ -200,7 +202,7 @@ class DemandSection(_Strict):
 
 
 class NetworkSection(_Strict):
-    """``network:`` block — pedestrian network (SCOPE §5.1, ADR-0004)."""
+    """``network:`` block, pedestrian network (SCOPE §5.1, ADR-0004)."""
 
     backend: Literal["osmnx"]
     walking_speed_m_s: float = Field(gt=0)
@@ -247,7 +249,7 @@ class RankingSection(_Strict):
 
 
 class DataLicenses(_Strict):
-    """``data_licenses:`` — flags gating licensed sources. Absent flag = not licensed."""
+    """``data_licenses:``, flags gating licensed sources. Absent flag = not licensed."""
 
     regrid: bool = False
     foot_traffic: Literal["placer", "advan", "none"] = "none"
@@ -779,7 +781,7 @@ def verify_items(cfg: ResolvedConfig) -> list[tuple[str, str]]:
         if sid == "S00" and custom_boundary:
             continue  # TIGER boundary file unused
         if s.enabled and s.verify and s.path is None:
-            out.append((f"sources.{sid}", f"{s.dataset} — endpoint {s.url!r} unconfirmed"))
+            out.append((f"sources.{sid}", f"{s.dataset}, endpoint {s.url!r} unconfirmed"))
     return out
 
 

@@ -1,4 +1,4 @@
-"""Step ``supply`` — Phase C supply inventory (SCOPE §5.3; ADR-0020, ADR-0021, ADR-0065).
+"""Step ``supply``, Phase C supply inventory (SCOPE §5.3; ADR-0020, ADR-0021, ADR-0065).
 
 1. Facilities from OSM parking (S06). OSM on-street types (street_side, lane, …) are dropped:
    on-street supply is S20 metered block faces only (ADR-0021).
@@ -70,7 +70,7 @@ PRIVATE_ACCESS = {
     "students",
     "members",
 }
-TOUCH_TOL_M = 0.15  # "touching" for polygon dissolve — numerical tolerance, not a parameter
+TOUCH_TOL_M = 0.15  # "touching" for polygon dissolve, numerical tolerance, not a parameter
 
 
 def norm_name(v: Any) -> str | None:
@@ -569,7 +569,7 @@ def run_supply(ctx: RunContext) -> dict[str, Any]:
         ]
     ].copy()
     for c in ("rate_hour", "rate_day", "rate_month", "rate_event"):
-        out[c] = None  # survey observations (ADR-0023) — rate surface waits for round 1
+        out[c] = None  # survey observations (ADR-0023), rate surface waits for round 1
     out = gpd.GeoDataFrame(out, geometry="geometry", crs=crs)
     ctx.store.write_layer("SupplyFacilities", out, "S06")
 

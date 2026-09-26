@@ -1,4 +1,4 @@
-# ParkIQ — Location Intelligence for Parking Site Selection
+# ParkIQ: Location Intelligence for Parking Site Selection
 
 A repeatable, config-driven toolkit that finds developable parcels where a **paid surface parking
 lot** fills across dayparts and pays. It models demand by daypart at walk-shed resolution,
@@ -23,7 +23,7 @@ git clone https://github.com/ndeogobernard/parkiq-location-intelligence.git C:\G
 $env:CONDA_SSL_VERIFY = "truststore"      # only if your network re-signs HTTPS: use the Windows cert store
 & "C:\Program Files\ArcGIS\Pro\bin\Python\Scripts\conda.exe" env create -p C:\GIS\envs\parkiq -f C:\GIS\ParkIQ\environment.yml
 
-# every session: activate (clean PATH — see ADR-0052), then install the package once
+# every session: activate (clean PATH: see ADR-0052), then install the package once
 . C:\GIS\ParkIQ\scripts\parkiq-env.ps1
 pip install -e "C:\GIS\ParkIQ[dev]" --no-deps
 ```
@@ -88,7 +88,7 @@ geodatabase for manual work. Maps you add yourself are kept; generated maps are 
 |---|---|
 | `markets/<slug>.yaml` | one market: boundary, CRS, screen/demand/supply parameters, finance overrides, sources |
 | `configs/weights.yaml` | scenario weights (SCOPE App. B) |
-| `configs/parking_rates.yaml` | generation rates (SCOPE App. C) — every row `[VERIFY]` |
+| `configs/parking_rates.yaml` | generation rates (SCOPE App. C), every row `[VERIFY]` |
 | `configs/finance_defaults.yaml` | finance defaults; DECIDE items `null` |
 | `configs/criteria.yaml` | C01–C10 definitions and normalization |
 | `configs/sources.yaml` | source catalogue: providers, licences, URL templates, `[VERIFY]` flags |
@@ -99,7 +99,7 @@ source), mirroring the admin workbook's Parameters sheet. Unknown keys are error
 
 A source you downloaded by hand is used via `sources.<id>.path` in the market file (paths are
 relative to the market file). Licensed sources stay off unless their `data_licenses` flag is on;
-when off, they are registered as "not configured" and produce no rows — never synthetic stand-ins.
+when off, they are registered as "not configured" and produce no rows, never synthetic stand-ins.
 
 ## New-market onboarding (checklist grows each milestone)
 
@@ -112,10 +112,10 @@ when off, they are registered as "not configured" and produce no rows — never 
 
 SCOPE §6.2 plus the additions in ARCHITECTURE §1 / ADR-0005, -0006, -0051: `parkiq/` (library, no
 `arcpy`), `parkiq/ingest/` (one adapter per source), `configs/`, `markets/`, `schema/`,
-`tests/` (fixture market is **SYNTHETIC — NOT REAL DATA**), `arcgis/` (ArcPy only; `manual/` holds
+`tests/` (fixture market is **SYNTHETIC: NOT REAL DATA**), `arcgis/` (ArcPy only; `manual/` holds
 the Session-1 scripts), `toolbox/` (M7), `templates/` (M6–M7), `docs/`.
 
 ## Licence
 
 Code: MIT © 2026 Bernard Issifu (see [`LICENSE`](LICENSE)). Data retains its source licences
-(e.g. OpenStreetMap under ODbL — "© OpenStreetMap contributors" on every map that uses it).
+(e.g. OpenStreetMap under ODbL, "© OpenStreetMap contributors" on every map that uses it).

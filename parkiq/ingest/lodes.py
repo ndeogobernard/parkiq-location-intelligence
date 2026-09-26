@@ -1,4 +1,4 @@
-"""S04 — LEHD LODES WAC (jobs by census block and NAICS sector) [VERIFY V-14].
+"""S04, LEHD LODES WAC (jobs by census block and NAICS sector) [VERIFY V-14].
 
 Block locations come from the LODES geography crosswalk's internal points (``blklatdd``,
 ``blklondd``), so no statewide block shapefile is needed. Sector → anchor-category mapping is M4
@@ -33,7 +33,7 @@ class LodesAdapter(SourceAdapter):
     """LODES WAC + crosswalk → BlockJobs."""
 
     source_id = "S04"
-    downstream_effect = "no employment anchors — office/jobs demand missing"
+    downstream_effect = "no employment anchors, office/jobs demand missing"
 
     def fetch(self, ctx: RunContext) -> Any:
         """Return (wac_path, xwalk_path)."""

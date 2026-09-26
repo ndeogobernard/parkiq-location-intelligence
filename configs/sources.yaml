@@ -85,7 +85,7 @@ sources:
     verify: false
   S03b:
     provider: OpenStreetMap contributors
-    dataset: POIs — food, retail, lodging, venues, health, education (via OSMnx / Overpass)
+    dataset: POIs, food, retail, lodging, venues, health, education (via OSMnx / Overpass)
     license: ODbL
     url: overpass
     options:
@@ -136,7 +136,7 @@ sources:
     verify: true
   S14:
     provider: FEMA
-    dataset: National Flood Hazard Layer — flood hazard zones
+    dataset: National Flood Hazard Layer, flood hazard zones
     license: Public domain
     url: "https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/28"
     verify: true            # V-21
@@ -144,12 +144,12 @@ sources:
     provider: US EPA
     dataset: FRS facilities / ACRES brownfields
     license: Public domain
-    url: null                # V-22 — download to a local file for now
+    url: null                # V-22, download to a local file for now
     verify: true
   S20:
     enabled: false           # enabled per market
     provider: City (curb management)
-    dataset: On-street curb inventory by block face — metered spaces and posted rates
+    dataset: On-street curb inventory by block face, metered spaces and posted rates
     license: per city open-data terms
     url: null
     verify: true             # SCOPE S20 = meter transactions; inventory used instead (ADR-0064)
@@ -179,7 +179,7 @@ sources:
   S23c:
     enabled: false           # enabled per market
     provider: City of Columbus
-    dataset: Downtown District parking zones A/B (§3359.27, Map 2) — DERIVED
+    dataset: Downtown District parking zones A/B (§3359.27, Map 2), DERIVED
     license: City code (public record)
     url: "https://mcclibrary.blob.core.usgovcloudapi.net/codecontent/16219/487713/3359.27map.png"
     options:

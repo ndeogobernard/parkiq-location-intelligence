@@ -1,4 +1,4 @@
-"""S15 — EPA FRS / ACRES sites [VERIFY V-22]. ``options.brownfield_programs`` lists the"""
+"""S15, EPA FRS / ACRES sites [VERIFY V-22]. ``options.brownfield_programs`` lists the"""
 
 from __future__ import annotations
 
@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 
 
 class EpaAdapter(_TableAdapter):
-    """S15 — EPA FRS / ACRES sites [VERIFY V-22]. ``options.brownfield_programs`` lists the
+    """S15, EPA FRS / ACRES sites [VERIFY V-22]. ``options.brownfield_programs`` lists the
     program values that count as brownfield (method choice)."""
 
     source_id = "S15"

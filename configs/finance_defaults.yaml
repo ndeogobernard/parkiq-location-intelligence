@@ -4,14 +4,14 @@
 #   VERIFY = must be confirmed against a source before partner use (docs/VERIFY.md)
 #   SET    = confirmed, with citation
 #   DECIDE = no value; null here. The step that needs it refuses to run until the market sets it.
-# Keys marked DECIDE come from ADR-0032..0039 / manual §12 — SCOPE names the concept but gives no value.
+# Keys marked DECIDE come from ADR-0032..0039 / manual §12: SCOPE names the concept but gives no value.
 
 finance:
   land_cost_source: [regrid_assessed, listings]   # order of preference; county assessed values stand in for regrid_assessed
-  assessed_to_market_ratio: 1.20        # ratio   — calibrate per market from ≥5 land listings (manual §12.3)
-  construction_cost_per_stall_usd: 6500 # USD     — regional quote / RSMeans (V-02)
-  soft_cost_pct: 0.15                   # fraction of hard (construction) cost — base per ADR-0040
-  opex_per_stall_year_usd: 450          # USD/stall/yr — maintenance, insurance, enforcement
+  assessed_to_market_ratio: 1.20        # ratio  , calibrate per market from ≥5 land listings (manual §12.3)
+  construction_cost_per_stall_usd: 6500 # USD    , regional quote / RSMeans (V-02)
+  soft_cost_pct: 0.15                   # fraction of hard (construction) cost, base per ADR-0040
+  opex_per_stall_year_usd: 450          # USD/stall/yr, maintenance, insurance, enforcement
   property_tax_rate: 0.012              # fraction of taxable base per year
   new_entrant_rate_discount: 0.10       # fraction off the rate surface
   occupancy_caps: {wd_day: 0.85, wd_eve: 0.60, we_day: 0.40, we_eve: 0.70, event: 0.90}

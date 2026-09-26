@@ -1,6 +1,6 @@
-"""S05 — ACS 5-year block groups via the Census Data API + TIGER block-group polygons.
+"""S05, ACS 5-year block groups via the Census Data API + TIGER block-group polygons.
 
-Variables [VERIFY V-15 — table/variable IDs and vintage]:
+Variables [VERIFY V-15, table/variable IDs and vintage]:
 
 * B01003_001E total population
 * B08301_001E workers 16+; B08301_002E car, truck, or van (drove alone + carpooled)
@@ -64,7 +64,7 @@ def study_counties(ctx: RunContext) -> list[str]:
     got = read_run_log(ctx)["steps"].get("setup", {}).get("summary", {}).get("study_counties")
     if not got:
         raise IngestError(
-            "S05: study counties unknown (custom boundary?) — set "
+            "S05: study counties unknown (custom boundary?), set "
             "sources.S05.options.counties to 5-digit county GEOIDs"
         )
     return list(got)

@@ -1,4 +1,4 @@
-# ParkIQ — Manual Methodology (Desktop GIS + Excel)
+# ParkIQ: Manual Methodology (Desktop GIS + Excel)
 
 **Purpose:** Complete the surface-lot parking site-selection and investment analysis for one market **by hand**, step by step, using ArcGIS Pro (or QGIS) and Excel, following the method in `docs/SCOPE.md`.
 **Relationship to the toolkit:** This is the same method the ParkIQ code will automate. Your manual run of the first market becomes the reference result the code must reproduce.
@@ -12,18 +12,18 @@
 1. Before you start: software, scale, effort
 2. Project setup: folders, database, logs
 3. The parameter sheet (fill before any analysis)
-4. Phase A — Market setup (boundary, grid, network, slope)
-5. Phase A2 — Data acquisition and ingest QA
-6. Phase B — Demand model
-7. Phase C — Supply inventory and rates
-8. Phase D — Gap analysis and hot zones
-9. Phase E — Candidate parcel screen
-10. Phase F — Network metrics for candidates
-11. Phase G — Criteria, scoring, scenarios, sensitivity
-12. Phase H — Financial model (Excel)
-13. Phase I — Final ranking and shortlist
-14. Phase J — Due-diligence flags
-15. Phase K — Validation and calibration (pilot market)
+4. Phase A, Market setup (boundary, grid, network, slope)
+5. Phase A2, Data acquisition and ingest QA
+6. Phase B, Demand model
+7. Phase C, Supply inventory and rates
+8. Phase D, Gap analysis and hot zones
+9. Phase E, Candidate parcel screen
+10. Phase F, Network metrics for candidates
+11. Phase G, Criteria, scoring, scenarios, sensitivity
+12. Phase H, Financial model (Excel)
+13. Phase I, Final ranking and shortlist
+14. Phase J, Due-diligence flags
+15. Phase K, Validation and calibration (pilot market)
 16. QA/QC checklist
 17. Outputs: maps, dashboard, memo, StoryMap
 18. Repeating for the next market
@@ -205,7 +205,7 @@ Build `Parameter_Sheet.xlsx` **before** any analysis.
 
 ---
 
-## 4. Phase A — Market setup
+## 4. Phase A: Market setup
 
 ### 4.1 Boundary and study area
 
@@ -261,7 +261,7 @@ Build `Parameter_Sheet.xlsx` **before** any analysis.
 
 ---
 
-## 5. Phase A2 — Data acquisition and ingest QA
+## 5. Phase A2: Data acquisition and ingest QA
 
 ### 5.1 What to download (clip everything to `StudyArea`)
 
@@ -307,12 +307,12 @@ Compute or populate these in `Cadastral/Parcels`:
 | `lot_sqft` | *Calculate Geometry* area in US square feet |
 | `assessed_land_value`, `assessed_improvement_value` | Assessor attributes |
 | `improvement_value_ratio` | `improvement / land` (null if land = 0) |
-| `land_use_class` | Crosswalk county land-use codes → Vacant / SurfaceParking / Commercial / Industrial / Residential / MixedUse / Institutional / Other. Save the crosswalk table (Appendix F) — it is market-specific. |
+| `land_use_class` | Crosswalk county land-use codes → Vacant / SurfaceParking / Commercial / Industrial / Residential / MixedUse / Institutional / Other. Save the crosswalk table (Appendix F), it is market-specific. |
 | `owner_type` | Classify owner names: Public (city/county/state/authority), Institutional (university/hospital/church), Corporate (LLC/INC/CORP), Private (individuals), Unknown |
 | `zoning_code`, `zoning_screen` | Read the zoning ordinance use table for "commercial parking lot / principal-use parking". Tag each zone as ByRight, Conditional (special/conditional use permit) or Prohibited. Unmatched zones are Unknown. Save as a table and join. |
 | `listing_price`, `listing_source` | Spatial join from land listings, where present |
 
-**Tip — surface lots:** Overlay OSM surface-parking polygons on parcels. A parcel ≥ 50% covered by a surface lot with no building gets `land_use_class = SurfaceParking` if the assessor code doesn't already say so. Record this rule.
+**Tip, surface lots:** Overlay OSM surface-parking polygons on parcels. A parcel ≥ 50% covered by a surface lot with no building gets `land_use_class = SurfaceParking` if the assessor code doesn't already say so. Record this rule.
 
 ### 5.4 Ingest QA (log in `QA_Log.xlsx`)
 
@@ -325,15 +325,15 @@ Compute or populate these in `Cadastral/Parcels`:
 
 ---
 
-## 6. Phase B — Demand model (hex × daypart)
+## 6. Phase B: Demand model (hex × daypart)
 
 The five dayparts are:
 
-- `wd_day` — weekday day
-- `wd_eve` — weekday evening
-- `we_day` — weekend day
-- `we_eve` — weekend evening
-- `event` — event day
+- `wd_day`: weekday day
+- `wd_eve`: weekday evening
+- `we_day`: weekend day
+- `we_eve`: weekend evening
+- `event`: event day
 
 ### 6.1 Build the `DemandAnchors` point layer
 
@@ -457,7 +457,7 @@ Each anchor's demand is split across the hexes within its 8-minute walk, in prop
 
 ---
 
-## 7. Phase C — Supply inventory and rates
+## 7. Phase C: Supply inventory and rates
 
 ### 7.1 Merge facilities
 
@@ -481,7 +481,7 @@ Each anchor's demand is split across the hexes within its 8-minute walk, in prop
 | `capacity` tag or listing present | Stated value (also compute the estimate for QA) | stated |
 | Surface lot polygon | `area_sqft / stall_area_sqft_gross × layout_efficiency` | area |
 | Garage | `footprint_sqft × levels / stall_area_sqft_gross`. Levels come from OSM `building:levels`/`parking:levels` or a site check. | footprint |
-| Surface lot as a point only | Digitize the polygon from imagery, or flag and exclude | — |
+| Surface lot as a point only | Digitize the polygon from imagery, or flag and exclude | n/a |
 
 **QA:** on facilities with stated capacity, `|estimated − stated| / stated`. Target: median ≤ 20%. If it's worse, revisit the stall area or efficiency for this market (log it).
 
@@ -545,7 +545,7 @@ With fewer than ~8 rate points in a daypart, the surface is unreliable. Say so, 
 
 ---
 
-## 8. Phase D — Gap analysis and hot zones
+## 8. Phase D: Gap analysis and hot zones
 
 ### 8.1 Gap per hex and daypart
 
@@ -569,7 +569,7 @@ rate_index = from 7.5
 3. Add fields to `Analysis/HotZones`:
    - `zone_id`
    - `dayparts_positive` (e.g. "wd_day,wd_eve,event")
-   - `total_gap_stalls` (sum over its hexes, all dayparts or wd_day — state which)
+   - `total_gap_stalls` (sum over its hexes, all dayparts or wd_day, state which)
    - `mean_rate_index`
 
 ### 8.3 Checks
@@ -579,7 +579,7 @@ rate_index = from 7.5
 
 ---
 
-## 9. Phase E — Candidate parcel screen
+## 9. Phase E: Candidate parcel screen
 
 Evaluate every parcel in the study area. Record **every** failing reason, not just the first.
 
@@ -671,7 +671,7 @@ SCOPE expects **40–200** Pass + Review candidates.
 
 ---
 
-## 10. Phase F — Network metrics for candidates
+## 10. Phase F: Network metrics for candidates
 
 For each Pass/Review candidate (use the parcel centroid, or the frontage midpoint if the centroid is far from the street):
 
@@ -686,7 +686,7 @@ For each Pass/Review candidate (use the parcel centroid, or the frontage midpoin
 
 ---
 
-## 11. Phase G — Criteria, scoring, scenarios, sensitivity
+## 11. Phase G: Criteria, scoring, scenarios, sensitivity
 
 Export a candidate table to `04_excel/Scoring.xlsx` with one row per candidate and the raw measures.
 
@@ -697,7 +697,7 @@ Export a candidate table to `04_excel/Scoring.xlsx` with one row per candidate a
 | C01 | Σ `gap_stalls(wd_day)` over hexes within 5 minutes; if negative, use 0 | Benefit |
 | C02 | Σ `gap_stalls(wd_eve + we_day + we_eve)` within 5 minutes; floor 0 | Benefit |
 | C03 | Σ `gap_stalls(event)` within 8 minutes × `events_per_year` of venues within 8 minutes (0 if no venue) | Benefit |
-| C04 | Rate index at the parcel: weighted mean of daypart rate indices. Weights are a method choice — e.g. equal, or share of operating days; log it. | Benefit |
+| C04 | Rate index at the parcel: weighted mean of daypart rate indices. Weights are a method choice, e.g. equal, or share of operating days; log it. | Benefit |
 | C05 | Effective competing stalls within 3 minutes | Cost |
 | C06 | Mean walk minutes to the top-3 anchors | Cost |
 | C07 | Land cost per buildable stall = land cost (12.3, buy basis) ÷ stalls | Cost |
@@ -733,7 +733,7 @@ The COUNTIFS term breaks ties by parcel ID, so ranks are unique.
 
 Write `SiteScores` (`parcel_id, run_id, scenario, c01_raw…c10_raw, c01_s…c10_s, composite, rank`).
 
-### 11.4 Sensitivity A — One-at-a-time (OAT) ±25%
+### 11.4 Sensitivity A: One-at-a-time (OAT) ±25%
 
 For each criterion *i* and each scenario:
 
@@ -744,7 +744,7 @@ For each criterion *i* and each scenario:
 
 That is 20 runs per scenario. Build them as 20 weight rows and one MMULT (see 11.5).
 
-### 11.5 Sensitivity B — 1,000 random weight draws (flat Dirichlet)
+### 11.5 Sensitivity B: 1,000 random weight draws (flat Dirichlet)
 
 Excel 365 makes this practical:
 
@@ -776,7 +776,7 @@ Output: **rank-stability table** `parcel_id, rank_Balanced, rank_DemandFirst, ra
 
 ---
 
-## 12. Phase H — Financial model (Excel)
+## 12. Phase H: Financial model (Excel)
 
 Build `Financial_Model.xlsx` with **live formulas** so partners can change inputs.
 
@@ -876,7 +876,7 @@ To avoid double counting, subtract event days from the evening dayparts they fal
 ```
 opex_base   = stalls × OpexPerStall                     (maintenance, insurance, enforcement)
 opex_fees   = gross_revenue × (TechFeePct + MgmtFeePct)
-prop_tax    = PropTaxRate × (land_value + construction)  (buy; for lease, per lease terms — log)
+prop_tax    = PropTaxRate × (land_value + construction)  (buy; for lease, per lease terms, log)
 ground_rent = lease only
 NOI         = gross_revenue − opex_base − opex_fees − prop_tax − ground_rent
 ```
@@ -921,7 +921,7 @@ Write `SiteFinancials` back to GIS (join on `parcel_id`):
 
 ---
 
-## 13. Phase I — Final ranking and shortlist
+## 13. Phase I: Final ranking and shortlist
 
 1. **Financial score:** normalize the chosen metric with the 11.2 method.
    - Recommended metric: yield-on-cost (buy).
@@ -935,7 +935,7 @@ Write `SiteFinancials` back to GIS (join on `parcel_id`):
 
 ---
 
-## 14. Phase J — Due-diligence flags
+## 14. Phase J: Due-diligence flags
 
 For each shortlisted site, list (don't resolve):
 
@@ -952,7 +952,7 @@ For each shortlisted site, list (don't resolve):
 
 ---
 
-## 15. Phase K — Validation and calibration (pilot market)
+## 15. Phase K: Validation and calibration (pilot market)
 
 1. Pick 10–20 existing **paid surface lots** across submarkets.
 2. Observe each lot at the peak time of each daypart you can cover (e.g. weekday 11:00, weekday 19:00, Saturday 13:00, Saturday 20:00, one event night).
@@ -1058,12 +1058,12 @@ Sections, in order:
 
 Appendices:
 
-- A — sources
-- B — rate table + calibration
-- C — parameters
-- D — QA summary
-- E — maps
-- F — Excel model
+- A: sources
+- B: rate table + calibration
+- C: parameters
+- D: QA summary
+- E: maps
+- F: Excel model
 
 ### 17.6 StoryMap
 
@@ -1081,7 +1081,7 @@ Follow SCOPE §8's 11 sections, using the maps above and the embedded dashboard.
 
 ---
 
-## Appendix A — Minimum fields per layer
+## Appendix A: Minimum fields per layer
 
 See SCOPE §4.2–4.3. The minimum for a manual run:
 
@@ -1096,20 +1096,20 @@ See SCOPE §4.2–4.3. The minimum for a manual run:
 | SiteFinancials | See 12.8 |
 | Shortlist | `parcel_id, final_rank, recommended_flag, alternate_flag, due_diligence_flags` |
 
-## Appendix B — LODES WAC sector → anchor category (starting point [VERIFY] against LODES documentation)
+## Appendix B: LODES WAC sector → anchor category (starting point [VERIFY] against LODES documentation)
 
 | LODES column | NAICS sector | Suggested category |
 |---|---|---|
 | C000 | Total jobs | (check sum) |
 | CNS07 | Retail trade (44–45) | Retail employment (only if you use a per-employee retail rate; otherwise retail comes from floor area) |
 | CNS09–CNS14 | Information; Finance; Real estate; Professional/technical; Management; Admin/support | Office |
-| CNS15 | Educational services | University/other — beware double counting with IPEDS |
-| CNS16 | Health care | Medical — beware double counting with hospital beds |
-| CNS18 | Accommodation and food | Hotel/RestaurantBar staff — usually excluded (covered by room/sqft rates) |
+| CNS15 | Educational services | University/other, beware double counting with IPEDS |
+| CNS16 | Health care | Medical, beware double counting with hospital beds |
+| CNS18 | Accommodation and food | Hotel/RestaurantBar staff, usually excluded (covered by room/sqft rates) |
 | CNS20 | Public administration | Government → Office rate unless you have another |
-| Others (CNS01–06, 08, 17, 19) | Resource, construction, manufacturing, wholesale, transport, arts, other services | Other — include only with a defensible rate |
+| Others (CNS01–06, 08, 17, 19) | Resource, construction, manufacturing, wholesale, transport, arts, other services | Other, include only with a defensible rate |
 
-## Appendix C — Excel formula reference
+## Appendix C: Excel formula reference
 
 | Purpose | Formula |
 |---|---|
@@ -1123,22 +1123,22 @@ See SCOPE §4.2–4.3. The minimum for a manual run:
 | NPV | `=NPV(rate,Y1:Y10)+Y0` |
 | Piecewise occupancy | See 12.2 |
 
-## Appendix D — Observed-data template (`Observed.xlsx`)
+## Appendix D: Observed-data template (`Observed.xlsx`)
 
 `facility_id, name, lat, lon, stalls, daypart, date, time, occupied_count, observed_occupancy, posted_rate, rate_type, method (visit/aerial/app), observer, notes`
 
-## Appendix E — Rate-survey template (`Rates_Observed.xlsx`)
+## Appendix E: Rate-survey template (`Rates_Observed.xlsx`)
 
 `facility_name, lat, lon, operator, type, rate_hour, rate_day, rate_early_bird, rate_evening, rate_weekend, rate_month, rate_event, observed_date, observer, method (signage/phone/website), photo_ref`
 
-## Appendix F — Admin templates
+## Appendix F: Admin templates
 
 - **Source Register:** `source_id, provider, dataset, url/endpoint, vintage, download_date, license, native_crs, transformation, notes`
 - **Decision Log:** `id, date, phase, question, options considered, choice, rationale, impact, revisit?`
 - **Land-use crosswalk:** `county_code, county_description, land_use_class, auto_oriented_commercial (Y/N), notes`
 - **Zoning screen table:** `zoning_code, district_name, commercial_parking_use (ByRight/Conditional/Prohibited/Unknown), ordinance_section, notes`
 
-## Appendix G — Decisions you must log in a manual run (checklist)
+## Appendix G: Decisions you must log in a manual run (checklist)
 
 - [ ] H3 or equal-area hexes
 - [ ] Hospital/university vs. LODES double-count rule

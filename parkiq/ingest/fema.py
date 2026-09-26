@@ -1,4 +1,4 @@
-"""S14 — FEMA NFHL flood hazard zones [VERIFY V-21 floodway encoding]."""
+"""S14, FEMA NFHL flood hazard zones [VERIFY V-21 floodway encoding]."""
 
 from __future__ import annotations
 
@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 
 
 class FemaAdapter(_TableAdapter):
-    """S14 — FEMA NFHL flood hazard zones [VERIFY V-21 floodway encoding].
+    """S14, FEMA NFHL flood hazard zones [VERIFY V-21 floodway encoding].
 
     ``floodway_flag`` = ZONE_SUBTY contains "FLOODWAY"; ``sfha_flag`` = SFHA_TF == "T".
     """

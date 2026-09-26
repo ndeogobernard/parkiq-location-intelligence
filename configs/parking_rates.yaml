@@ -1,4 +1,4 @@
-# Parking-generation rates by anchor category and daypart — SCOPE Appendix C, verbatim.
+# Parking-generation rates by anchor category and daypart: SCOPE Appendix C, verbatim.
 # Units: stalls of peak parked demand per `unit`. sqft_k = per 1,000 sq ft of floor area.
 # EVERY row is [VERIFY] (docs/VERIFY.md V-01, V-04..V-12). Do not use for a partner-facing
 # result until each `source` cites a confirmed edition/table.
@@ -20,5 +20,5 @@ rates:
   venue:          {anchor_category: Venue, unit: seat,              wd_day: 0.00, wd_eve: 0.00, we_day: 0.00, we_eve: 0.00, event: 0.33, source: "seats × drive share 0.85 ÷ 2.6 persons/car [VERIFY]", baseline_drive_share: null}
   residential:    {anchor_category: ResidentialBlock, unit: unit_no_offstreet, wd_day: 0.30, wd_eve: 0.90, we_day: 0.80, we_eve: 0.95, event: 0.00, source: "[VERIFY]", baseline_drive_share: null}
 
-# Filled per market by Validate — written to markets/<slug>.calibration.yaml, never here (ADR-0043).
+# Filled per market by Validate: written to markets/<slug>.calibration.yaml, never here (ADR-0043).
 calibration_factors: {}

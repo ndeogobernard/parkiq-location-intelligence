@@ -4,8 +4,8 @@ The off-street rate surface is built from survey observations only. Round 1 reco
 for every daypart at a stratified sample of paid facilities, observed from the public
 right-of-way (signs, the payment app's rate screen) or read from the operator's website.
 
-``select_sample`` ranks the facilities in each stratum — known paid (``fee_flag``) first, then a
-named operator, then capacity — and picks greedily with a minimum spacing, garages first up to
+``select_sample`` ranks the facilities in each stratum, known paid (``fee_flag``) first, then a
+named operator, then capacity, and picks greedily with a minimum spacing, garages first up to
 the stratum's garage quota; the next picks become backups. Deterministic (ties by facility_id).
 """
 
@@ -161,7 +161,7 @@ def field_sheet_pdf(path: Path, market: str, round_no: int) -> None:
                 transform=ax.transAxes)  # fmt: skip
         y -= dy
 
-    line(f"ParkIQ field rate survey — {market} — round {round_no}", 13, True, 0.034)
+    line(f"ParkIQ field rate survey, {market}, round {round_no}", 13, True, 0.034)
     line("Record POSTED rates for every period. Public right-of-way only: do not enter gated or")
     line("private areas, do not pay, do not photograph people or plates. One sheet per facility.")
     line("source = sign | app rate screen | operator website (write which one for each value).",

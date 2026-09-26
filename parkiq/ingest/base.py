@@ -44,7 +44,7 @@ def redact(text: str) -> str:
     return _SECRET_PARAM.sub(lambda m: m.group(1) + "***", text)
 
 
-SYNTHETIC_LABEL = "SYNTHETIC — NOT REAL DATA"
+SYNTHETIC_LABEL = "SYNTHETIC: NOT REAL DATA"
 
 
 class IngestError(RuntimeError):
@@ -119,7 +119,7 @@ class SourceAdapter:
         missing = [k for k in needed if vals.get(k) in (None, "")]
         if missing:
             raise IngestError(
-                f"{self.source_id}: URL needs {missing} — set sources.{self.source_id}"
+                f"{self.source_id}: URL needs {missing}, set sources.{self.source_id}"
                 f".vintage or options.url_params in the market config"
             )
         return template.format(**vals)
@@ -144,7 +144,7 @@ def collect(adapter: SourceAdapter, ctx: RunContext) -> Standardized | None:
     if not ok:
         msg = f"{sid} {adapter.entry.dataset}: not configured ({why})"
         if adapter.downstream_effect:
-            msg += f" — effect: {adapter.downstream_effect}"
+            msg += f", effect: {adapter.downstream_effect}"
         log.warning(msg)
         register_source(ctx, sid, adapter.entry, status="not configured", row_count=0, notes=why)
         return None
@@ -225,7 +225,7 @@ def download(url: str, dest_dir: Path, filename: str | None = None) -> Path:
     try:
         with requests.get(url, stream=True, timeout=HTTP_TIMEOUT_S) as r:
             r.raise_for_status()
-            r.raw.decode_content = True  # undo Content-Encoding (e.g. gzip) — raw is not decoded
+            r.raw.decode_content = True  # undo Content-Encoding (e.g. gzip), raw is not decoded
             with tmp.open("wb") as fh:
                 shutil.copyfileobj(r.raw, fh)
     except requests.RequestException as exc:

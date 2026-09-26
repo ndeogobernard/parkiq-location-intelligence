@@ -67,7 +67,7 @@ def build_walk_network(
     graphs). ``walk_minutes = length_m / walking_speed_m_s / 60``.
 
     Returns:
-        (nodes, edges, info) — info has endpoint / native_crs / transformation / notes.
+        (nodes, edges, info), info has endpoint / native_crs / transformation / notes.
     """
     g, endpoint = load_or_download_graph(ctx, study_a)
     native = str(g.graph.get("crs", "unknown"))

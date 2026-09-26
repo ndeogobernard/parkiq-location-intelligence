@@ -1,4 +1,4 @@
-# TEMPLATE — copy to markets/<slug>.yaml and fill in. Values shown are SCOPE §2.1 defaults.
+# TEMPLATE: copy to markets/<slug>.yaml and fill in. Values shown are SCOPE §2.1 defaults.
 # (Derived from markets/franklin_oh.yaml; replace every Franklin-specific value.)
 # null = DECIDE (blank in the workbook): check-config shows which steps each one blocks.
 # `parkiq check-config --market markets/franklin_oh.yaml --report franklin_params.csv`
@@ -12,7 +12,7 @@ market:
   units: ft                     # must match the CRS unit (check-config enforces)
 study:
   buffer_miles: 1.0             # SCOPE §2.2
-  h3_resolution: 9              # SCOPE §2.2 [DECISION] — ADR-0009
+  h3_resolution: 9              # SCOPE §2.2 [DECISION], ADR-0009
 site:
   min_parcel_sqft: 15000
   max_parcel_sqft: 200000
@@ -74,7 +74,7 @@ sources:
     vintage: null
   S06: {enabled: true}                      # OSM parking via Overpass
   S09:
-    enabled: false              # COTA GTFS — current URL from Mobility Database [VERIFY V-16]
+    enabled: false              # COTA GTFS, current URL from Mobility Database [VERIFY V-16]
     url: null
     options: {service_date: null}
   S10:

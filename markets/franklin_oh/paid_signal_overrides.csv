@@ -1,6 +1,6 @@
 osm_id,action,reason,reviewed_by,date
-relation/8277325,drop,analyst local knowledge — free public parking (Easton Town Center),Bernard,2026-09-26
-way/587344190,drop,analyst local knowledge — free public parking (Easton Town Center),Bernard,2026-09-26
-way/587344291,drop,analyst local knowledge — free public parking (Easton Town Center),Bernard,2026-09-26
-way/608043845,drop,analyst local knowledge — free public parking (Easton Town Center; Hilton Columbus at Easton lot),Bernard,2026-09-26
-relation/10567279,drop,analyst local knowledge — free public parking (Mount Carmel East visitor parking),Bernard,2026-09-26
+relation/8277325,drop,analyst local knowledge: free public parking (Easton Town Center),Bernard,2026-09-26
+way/587344190,drop,analyst local knowledge: free public parking (Easton Town Center),Bernard,2026-09-26
+way/587344291,drop,analyst local knowledge: free public parking (Easton Town Center),Bernard,2026-09-26
+way/608043845,drop,analyst local knowledge: free public parking (Easton Town Center; Hilton Columbus at Easton lot),Bernard,2026-09-26
+relation/10567279,drop,analyst local knowledge: free public parking (Mount Carmel East visitor parking),Bernard,2026-09-26

@@ -1,7 +1,7 @@
-# Scoring criteria C01–C10 — SCOPE §5.7, with measurement details from ADR-0028 / manual §11.1.
+# Scoring criteria C01–C10: SCOPE §5.7, with measurement details from ADR-0028 / manual §11.1.
 # direction: Benefit (higher is better) | Cost (lower is better; inverted after normalization).
 # normalization (SCOPE §5.7): winsorize at the given percentiles, min–max to [0, 100].
-# A criterion with no data or zero variance scores `constant_score` for every site and is logged —
+# A criterion with no data or zero variance scores `constant_score` for every site and is logged,
 # weights are never silently renormalized (docs/ENGINEERING.md, ADR-0028).
 
 normalization:
@@ -21,17 +21,17 @@ criteria:
   C09: {name: "Zoning certainty",              unit: score,    direction: Benefit, description: "ByRight = 100, Conditional = 60, Unknown = 40"}
   C10: {name: "Pipeline risk",                 unit: count,    direction: Cost,    shed_minutes: 5, description: "Planned garages/developments within 5 min"}
 
-# C04 daypart weights — method choice, DECIDE (manual §11.1). null → the criteria step refuses to run.
+# C04 daypart weights: method choice, DECIDE (manual §11.1). null → the criteria step refuses to run.
 c04_daypart_weights: null   # set per market (markets/<slug>.yaml c04_daypart_weights)
 # C06 search (ADR-0028): top-N anchors within a search radius; missing anchors take the cap value.
 c06: {top_n: 3, search_minutes: 15, missing_minutes: 15}
 # Sensitivity (SCOPE §5.7): OAT ± oat_pct with renormalization; flat Dirichlet (ADR-0029), seed recorded.
 sensitivity: {oat_pct: 0.25, draws: 1000, alpha: 1.0, seed: 20260926, top_n: 10}
-# C09 scores — SCOPE §5.7 verbatim. Prohibited parcels never reach scoring (screened out).
+# C09 scores: SCOPE §5.7 verbatim. Prohibited parcels never reach scoring (screened out).
 c09_scores: {ByRight: 100, Conditional: 60, Unknown: 40}
 
 provenance:
   normalization:       {status: SCOPE, source: "SCOPE §5.7"}
   c09_scores:          {status: SCOPE, source: "SCOPE §5.7"}
   sensitivity:         {status: SCOPE, source: "SCOPE §5.7 (±25 %, 1,000 draws); ADR-0029 flat α = 1; seed fixed for reproducibility"}
-  c06:                 {status: SCOPE, source: "ADR-0028 (15-min search, cap 15) — proposed"}
+  c06:                 {status: SCOPE, source: "ADR-0028 (15-min search, cap 15), proposed"}

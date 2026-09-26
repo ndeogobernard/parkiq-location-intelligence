@@ -1,4 +1,4 @@
-"""S23 / S23b / S23c — municipal zoning from city open data (SCOPE §3, S20–S24).
+"""S23 / S23b / S23c, municipal zoning from city open data (SCOPE §3, S20–S24).
 
 * S23  base zoning districts (ArcGIS REST layer) → ``ZoningDistricts``
 * S23b commercial + planning overlays (one or two REST layers) → ``ZoningOverlays``, each coded
@@ -43,13 +43,13 @@ def _jurisdiction(entry_options: dict[str, Any], source_id: str) -> str:
 
 
 class ZoningDistrictsAdapter(_TableAdapter):
-    """S23 — base zoning districts."""
+    """S23, base zoning districts."""
 
     source_id = "S23"
     target, raw_layer = "ZoningDistricts", "Raw_Zoning"
     required = ("zoning_code",)
     optional = ("jurisdiction", "general_category", "zoning_status", "ord_no", "case_number")
-    downstream_effect = "no zoning codes on parcels — every parcel's zoning screen is Review"
+    downstream_effect = "no zoning codes on parcels, every parcel's zoning screen is Review"
 
     def shape(self, a: gpd.GeoDataFrame, ctx: RunContext) -> gpd.GeoDataFrame:
         a = a[a.geom_type.isin(["Polygon", "MultiPolygon"])].copy()
@@ -59,7 +59,7 @@ class ZoningDistrictsAdapter(_TableAdapter):
 
 
 class ZoningOverlaysAdapter(_TableAdapter):
-    """S23b — overlays. ``options.type_codes`` maps the published type/name to a table key."""
+    """S23b, overlays. ``options.type_codes`` maps the published type/name to a table key."""
 
     source_id = "S23b"
     target, raw_layer = "ZoningOverlays", "Raw_ZoningOverlays"
@@ -122,13 +122,13 @@ class ZoningOverlaysAdapter(_TableAdapter):
 
 
 class ParkingZonesAdapter(_TableAdapter):
-    """S23c — downtown parking zones (local GeoPackage layer, ``options.layer``)."""
+    """S23c, downtown parking zones (local GeoPackage layer, ``options.layer``)."""
 
     source_id = "S23c"
     target, raw_layer = "ParkingZones", "Raw_ParkingZones"
     required = ("zone",)
     optional = ("jurisdiction", "method", "derived_date")
-    downstream_effect = "Downtown (DD) parcels cannot be placed in Zone A/B — routed to Review"
+    downstream_effect = "Downtown (DD) parcels cannot be placed in Zone A/B, routed to Review"
 
     def load(self, raw: Any) -> gpd.GeoDataFrame:
         p = Path(raw if not isinstance(raw, list) else raw[0])
@@ -148,7 +148,7 @@ class ParkingZonesAdapter(_TableAdapter):
 
 
 class OnStreetMetersAdapter(_TableAdapter):
-    """S20 — city curb inventory by block face → ``OnStreetSegments`` (ADR-0064).
+    """S20, city curb inventory by block face → ``OnStreetSegments`` (ADR-0064).
 
     Franklin: Columbus "Parking Facilities" (PublicService/MapServer/38) filtered to active
     metered block faces; ``Spaces`` is the stated stall count and ``Fee1`` the posted daytime

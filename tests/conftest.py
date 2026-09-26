@@ -1,4 +1,4 @@
-"""Shared test fixtures. The fixture market is SYNTHETIC — NOT REAL DATA."""
+"""Shared test fixtures. The fixture market is SYNTHETIC: NOT REAL DATA."""
 
 from __future__ import annotations
 

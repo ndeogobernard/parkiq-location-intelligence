@@ -1,6 +1,6 @@
-# Scoring weights by scenario — SCOPE Appendix B, verbatim.
+# Scoring weights by scenario: SCOPE Appendix B, verbatim.
 # Each scenario must sum to 1.00 (enforced by parkiq.config; SCOPE §10).
-# status: SCOPE (placeholder values from the scope document; no external citation needed —
+# status: SCOPE (placeholder values from the scope document; no external citation needed,
 # these are the partners' stated priorities, not empirical rates).
 
 scenarios:

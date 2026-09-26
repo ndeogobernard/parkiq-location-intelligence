@@ -1,4 +1,4 @@
-"""S01 fallback — county assessor/auditor parcels (+ CAMA attributes). Used when Regrid is not
+"""S01 fallback, county assessor/auditor parcels (+ CAMA attributes). Used when Regrid is not
 licensed (SCOPE §14). Field names differ by county, so everything is mapped in the market config:
 
 .. code-block:: yaml
@@ -158,7 +158,7 @@ class CountyParcelsAdapter(SourceAdapter):
     """County parcels + CAMA."""
 
     source_id = "S01"
-    downstream_effect = "no Parcels — candidate screen, land cost and finance cannot run"
+    downstream_effect = "no Parcels, candidate screen, land cost and finance cannot run"
 
     def standardize(self, raw: Any, ctx: RunContext) -> Standardized:
         """Map fields, join CAMA, compute lot_sqft / ratio, classify land use and owner."""
@@ -244,7 +244,7 @@ class CountyParcelsAdapter(SourceAdapter):
         else:
             out["land_use_class"] = None
             log.warning(
-                "S01: no land_use_crosswalk configured — land_use_class left null; the "
+                "S01: no land_use_crosswalk configured, land_use_class left null; the "
                 "screen's land-use filter will mark parcels Review"
             )
             notes.append("no land-use crosswalk (land_use_class null)")

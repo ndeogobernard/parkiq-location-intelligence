@@ -85,7 +85,7 @@ class OsmParkingAdapter(_OsmBase):
     """S06 ``amenity=parking`` → ParkingOSM (supply merge happens in M3)."""
 
     source_id = "S06"
-    downstream_effect = "no OSM parking — supply inventory depends on other sources only"
+    downstream_effect = "no OSM parking, supply inventory depends on other sources only"
 
     def standardize(self, raw: Any, ctx: RunContext) -> Standardized:
         g: gpd.GeoDataFrame = raw.copy()
@@ -132,7 +132,7 @@ class OsmPoiAdapter(_OsmBase):
     """S03b POIs → Places (place_id ``osm:<element>/<id>``, category ``key=value``)."""
 
     source_id = "S03b"
-    downstream_effect = "no OSM POIs — demand anchors rely on Overture only"
+    downstream_effect = "no OSM POIs, demand anchors rely on Overture only"
 
     def standardize(self, raw: Any, ctx: RunContext) -> Standardized:
         g: gpd.GeoDataFrame = raw.copy()

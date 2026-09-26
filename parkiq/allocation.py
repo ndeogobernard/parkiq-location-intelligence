@@ -24,7 +24,7 @@ from parkiq import units
 
 log = logging.getLogger(__name__)
 
-BATCH = 32  # sources per Dijkstra batch (memory: BATCH × nodes floats) — not a parameter
+BATCH = 32  # sources per Dijkstra batch (memory: BATCH × nodes floats), not a parameter
 
 
 @dataclass
@@ -86,7 +86,7 @@ def allocate_matrix(
     """Allocate several value columns (n points × k) with one walk-shed computation per point.
 
     Returns:
-        (hex_id × k totals, stats, per-source weights ``src, hex_id, w`` if ``keep_weights``) —
+        (hex_id × k totals, stats, per-source weights ``src, hex_id, w`` if ``keep_weights``),
         ``src`` is the row position in ``points``; weights sum to 1 per allocated source.
     """
     vals2 = np.nan_to_num(np.asarray(values, dtype=float))

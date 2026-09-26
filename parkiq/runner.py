@@ -6,7 +6,7 @@ A run lives in ``<output_root>/<market>/<run_id>/``. Each step:
 2. computes an input hash (config sections it reads + upstream hashes + code version + input
    file fingerprints) and skips when ``run_log.json`` already records success with that hash
    (unless ``force``);
-3. writes its outputs (idempotent — see ``store.py``);
+3. writes its outputs (idempotent, see ``store.py``);
 4. records itself in ``run_log.json`` and ``ScoreRuns``; refreshes ``params.yaml`` and
    ``data_sources.csv``.
 """
@@ -278,7 +278,7 @@ def _write_run_log(ctx: RunContext, data: dict[str, Any]) -> None:
 
 
 def write_params(ctx: RunContext) -> None:
-    """Write ``params.yaml`` — the fully resolved config plus run identity."""
+    """Write ``params.yaml``, the fully resolved config plus run identity."""
     d = {
         "run_id": ctx.run_id,
         "code_version": code_version(),

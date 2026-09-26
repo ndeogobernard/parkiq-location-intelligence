@@ -115,7 +115,7 @@ class OvertureBuildingsAdapter(_OvertureBase):
 
     source_id = "S02"
     theme_columns = "id, height, num_floors, sources"
-    downstream_effect = "no Buildings — floor-area anchors and improvement checks degrade"
+    downstream_effect = "no Buildings, floor-area anchors and improvement checks degrade"
 
     def standardize(self, raw: Any, ctx: RunContext) -> Standardized:
         g = _read_overture(Path(raw))
@@ -146,7 +146,7 @@ class OverturePlacesAdapter(_OvertureBase):
 
     source_id = "S03a"
     theme_columns = "id, names, categories, confidence, brand, sources"
-    downstream_effect = "no Overture POIs — demand anchors rely on OSM only"
+    downstream_effect = "no Overture POIs, demand anchors rely on OSM only"
 
     def standardize(self, raw: Any, ctx: RunContext) -> Standardized:
         g = _read_overture(Path(raw))
