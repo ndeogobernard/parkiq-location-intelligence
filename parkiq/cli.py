@@ -331,20 +331,39 @@ def export_gdb_cmd(
 
 @app.command()
 def validate(
+    market: MarketOpt,
     run_id: Annotated[str, typer.Option("--run-id")],
-    observed: Annotated[Path, typer.Option(help="observed lots CSV")],
+    observed: Annotated[Path, typer.Option(help="observed counts CSV", exists=True)],
+    sample: Annotated[
+        Path, typer.Option(help="survey sample CSV (lot_no, facility_id)", exists=True)
+    ],
+    write_calibration: Annotated[
+        bool, typer.Option(help="write markets/<slug>.calibration.yaml (ADR-0043)")
+    ] = False,
+    config_dir: Annotated[Path | None, typer.Option(help="configs/ directory")] = None,
 ) -> None:
-    """Pilot back-test (tool 15). Scheduled for M8."""
-    typer.secho(
-        "validate is scheduled for M8 (needs the pilot back-test data)", fg=typer.colors.YELLOW
-    )
-    raise typer.Exit(3)
+    """Back-test (tool 15): observed lot occupancy vs the model; metrics and calibration factors."""
+    from parkiq import validate as val
+    from parkiq.runner import open_run
+
+    cfg = _load(market, config_dir)
+    ctx = open_run(cfg, run_id=run_id)
+    rep = val.run(ctx.store.gpkg, observed, sample, ctx.run_dir)
+    typer.echo(json.dumps(rep["metrics_uncalibrated"], indent=1))
+    typer.echo(f"calibration factors: {rep['calibration_factors']}")
+    if write_calibration:
+        out = Path(market).with_suffix(".calibration.yaml")
+        val.write_calibration(out, rep["calibration_factors"], run_id, rep["lots"])
+        typer.echo(f"written {out}")
 
 
 @app.command()
 def package(
+    market: MarketOpt,
     run_id: Annotated[str, typer.Option("--run-id")],
-    gdb: Annotated[bool, typer.Option("--gdb")] = False,
+    maps: Annotated[
+        list[Path] | None, typer.Option("--maps", help="extra map folders to include")
+    ] = None,
     public: Annotated[
         bool,
         typer.Option(
@@ -352,10 +371,20 @@ def package(
             help="redact parcel IDs, owners and addresses and round financials (ADR-0055)",
         ),
     ] = False,
+    config_dir: Annotated[Path | None, typer.Option(help="configs/ directory")] = None,
 ) -> None:
-    """Export the investment package (tool 16). Scheduled for M7."""
-    typer.secho("package is scheduled for M7", fg=typer.colors.YELLOW)
-    raise typer.Exit(3)
+    """PRIVATE partner package (tool 16): memo, site profiles, model placeholder, private
+    dashboard and maps, in <run>/package/ and a zip. The public redacted package is M7."""
+    from parkiq import report
+    from parkiq.runner import open_run
+
+    if public:
+        typer.secho("the public (redacted) package is scheduled for M7", fg=typer.colors.YELLOW)
+        raise typer.Exit(3)
+    cfg = _load(market, config_dir)
+    ctx = open_run(cfg, run_id=run_id)
+    z = report.build_package(ctx, maps or [])
+    typer.echo(f"written {z} (PRIVATE: contains candidate sites)")
 
 
 @app.command()

@@ -723,3 +723,19 @@ Map Series card opts into a grid overlay (`data-gallery-view="grid"`) that lists
 gallery manifest with an 800 px thumbnail; a map opens the existing lightbox, and closing it
 returns to the grid. Other gallery cards are unchanged. This replaces the "only live links" rule
 of ADR-0083.
+
+## ADR-0090: Validation, investment memo and partner package, Applied (2026-09-26)
+* **Validation (M8 code, `parkiq validate`, `parkiq/validate.py`):** observed counts
+  (`round2_observations.csv`: lot, date, time of week, occupied, total marked) are compared with
+  the model at each surveyed lot's hexagon; predicted occupancy = demand ÷ effective supply,
+  capped at 1.2. Per time of week: mean absolute error, bias, RMSE, share within 15 points, rank
+  correlation. Calibration factor = median observed ÷ predicted (at least 5 lots), written to
+  `markets/<slug>.calibration.yaml` only with `--write-calibration`; uncalibrated metrics are always
+  reported (ADR-0043). Tested on synthetic data only until the round-2 counts exist.
+* **Investment memo (`templates/memo.md`, `parkiq/report.py`):** SCOPE structure; every number is
+  computed by `memo_numbers()` with its source and listed in a number trace table (ADR-0047);
+  financial sections are marked [M6] until underwriting exists.
+* **Partner package (`parkiq package`):** PRIVATE memo, one-page site profiles for the top ten
+  (map, facts, flags, due-diligence checklist), an Excel model placeholder (finance inputs with
+  their status, site inputs from GIS; formulas in M6), the private dashboard and the run's maps, in
+  `<run>/package/` and a zip. The public redacted package (ADR-0055) stays M7.

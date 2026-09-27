@@ -186,9 +186,19 @@ code { font-size: 9pt; background: #f4f4f4; padding: 0 2pt; }
 
 
 def render(
-    source: Path, out_pdf: Path, values: dict[str, str], short_title: str, draft: bool = True
+    source: Path,
+    out_pdf: Path,
+    values: dict[str, str],
+    short_title: str,
+    draft: bool = True,
+    extra_css: str = "",
+    links: bool = True,
+    draft_label: str = "DRAFT",
 ) -> Path:
-    """Fill placeholders, convert to HTML and print to PDF."""
+    """Fill placeholders, convert to HTML and print to PDF.
+
+    Private documents pass links=False (no repo/site footer) and their own draft_label.
+    """
     text = source.read_text(encoding="utf-8")
     missing = sorted({m for m in PLACEHOLDER.findall(text) if m not in values})
     if missing:
@@ -201,8 +211,9 @@ def render(
     body = re.sub(
         r'src="(?!https?:|file:)([^"]+)"', lambda m: f'src="{(base / m.group(1)).as_uri()}"', body
     )
-    links = f"{REPO_URL}  ·  {SITE_URL}"
-    css = CSS % {"short": short_title, "draft": "DRAFT" if draft else "", "links": links}
+    foot = f"{REPO_URL}  ·  {SITE_URL}" if links else ""
+    css = CSS % {"short": short_title, "draft": draft_label if draft else "", "links": foot}
+    css += extra_css
     page = (
         f"<!doctype html><html><head><meta charset='utf-8'><title>{html.escape(source.stem)}"
         f"-documentation.md</title><style>{css}</style></head><body>{body}</body></html>"
