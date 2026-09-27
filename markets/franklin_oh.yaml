@@ -29,7 +29,7 @@ site:
   min_shape_index: 0.60         # metric = rectangularity (ADR-0025)
   improvement_ratio_max: 0.25
   frontage_buffer_ft: 50        # ADR-0080: ≈ p90 centerline→parcel-edge distance on drive streets (n 3,675)
-  university_owner_pattern: '\bUNIVERSITY\b|\bCOLLEGE\b'   # ADR-0084: university/college land fails (campus parking concession); Public/Institutional owners only
+  concession_owner_pattern: '\bOHIO STATE UNIV'   # ADR-0084 amended: OSU land (CampusParc concession) fails; other colleges route to Review
 demand:
   walk_shed_minutes: [3, 5, 8]
   decay_weights: {3: 1.0, 5: 0.6, 8: 0.25}
@@ -243,7 +243,7 @@ provenance:
   site.min_shape_index:            {status: SCOPE,  source: "SCOPE §2.1; rectangularity (ADR-0025)"}
   site.improvement_ratio_max:      {status: SCOPE,  source: "SCOPE §5.5"}
   criteria.c04_daypart_weights:    {status: SET,    source: "ADR-0081: share of operating days; applied (analyst may revisit)"}
-  site.university_owner_pattern:  {status: SET,    source: "ADR-0084: Bernard M5 review (university land not available)"}
+  site.concession_owner_pattern:  {status: SET,    source: "ADR-0084 amended: Bernard 2026-09-26 (only OSU / campus parking concession land fails)"}
   site.frontage_buffer_ft:         {status: SET,    source: "ADR-0080: derived from Franklin parcels/OSM streets; applied (analyst may revisit)"}
   demand.transit_adjustment.high_frequency_radius_m: {status: VERIFY, source: "SCOPE §2.1"}
   demand.transit_adjustment.high_frequency_headway_max_min: {status: SET, source: "Bernard, M4 decisions 2026-09-26 (COTA frequent network)"}

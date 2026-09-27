@@ -131,8 +131,9 @@ class SiteSection(_Strict):
     min_shape_index: float = Field(ge=0, le=1)
     improvement_ratio_max: float | None = None
     frontage_buffer_ft: float | None = None
-    # ADR-0084: owner-name pattern (Public/Institutional owners) for university/college land
-    university_owner_pattern: str | None = None
+    # ADR-0084 (amended): owner-name pattern (Public/Institutional owners) for land under a
+    # campus parking concession (Franklin: The Ohio State University)
+    concession_owner_pattern: str | None = None
 
     @model_validator(mode="after")
     def _ranges(self) -> SiteSection:

@@ -12,7 +12,7 @@ import pytest
 from pyproj import CRS
 from shapely.geometry import LineString, box
 
-from parkiq.score import composite_rank, normalize, oat_weights, ranks_matrix
+from parkiq.score import composite_rank, normalize, oat_weights, ranks_matrix, resolve_overlaps
 from parkiq.screen import assemble, frontage
 
 FT = CRS.from_epsg(3735)
@@ -92,3 +92,13 @@ def test_assemble_same_owner_contiguous_only() -> None:
     lab = pd.Series(assemble(parcels))
     assert lab[0] == lab[1]  # touching, same normalized owner
     assert lab[2] != lab[0] and lab[3] != lab[0]  # other owner / not contiguous
+
+
+def test_overlapping_candidates_keep_higher_score() -> None:
+    # A and B cover the same land (B is an assembly containing A); C touches B only on an edge
+    geoms = gpd.GeoSeries([box(0, 0, 100, 100), box(0, 0, 200, 100), box(200, 0, 300, 100)], crs=FT)
+    ids = np.array(["A", "ASM:B", "C"])
+    sup = resolve_overlaps(geoms, np.array([60.0, 50.0, 40.0]), ids)
+    assert sup == {"ASM:B": "A"}
+    sup = resolve_overlaps(geoms, np.array([50.0, 60.0, 40.0]), ids)
+    assert sup == {"A": "ASM:B"}

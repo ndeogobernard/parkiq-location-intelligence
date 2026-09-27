@@ -642,3 +642,24 @@ renormalization); any ranking built with a neutral criterion is marked PRELIMINA
   `site.university_owner_pattern` (`\bUNIVERSITY\b|\bCOLLEGE\b`, colleges included as analyst
   choice). Franklin: 101 sites in the 8-minute reach are university/college land; 6 former
   candidates failed (Columbus State Community College 4, Capital University 2).
+
+## ADR-0084 amendment (Bernard, 2026-09-26): only Ohio State land fails
+Only land owned by The Ohio State University, or under a campus parking concession (CampusParc),
+fails the screen ("Ohio State University land (campus parking concession): not available for
+acquisition"); `site.concession_owner_pattern` = `\bOHIO STATE UNIV` on Public/Institutional
+owners. Other colleges and universities (Columbus State Community College, Capital University and
+others) route to Review with the owner-feasibility flag "acquisition likely difficult; ground lease
+possible". Franklin: 28 sites in the 8-minute reach are Ohio State land; 7 candidates returned
+(Columbus State 5, Capital University 2).
+
+## ADR-0085: One candidate per piece of land; existing-lot-only flag, Applied (Bernard, 2026-09-26)
+* **Overlaps:** the same land appears in only one candidate. Candidates whose shared area exceeds
+  5 % of the smaller site are resolved best Balanced composite first (ties by id); the other is
+  recorded as "superseded by <site>" (`CandidateParcels.superseded_by`, status Fail) and scores
+  are normalized over the remaining candidates. A later suitability rerun keeps earlier
+  supersessions until the screen is rerun. Test: `tests/test_score.py`. Franklin: no overlapping
+  candidates; the two "381 E Main St" candidates are adjacent parcels with different owners (an
+  assembly of four parcels and a single parcel) that share a site address, not the same land.
+* **Existing lot only:** a candidate that is viable only because it is an existing surface lot
+  (a new lot would fail on land use, zoning, Zone A or shape) carries `existing_only_flag` and the
+  reason "verify legal nonconforming status and continuous use". Franklin: 21 candidates.

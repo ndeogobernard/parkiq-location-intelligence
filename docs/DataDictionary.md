@@ -481,6 +481,8 @@ Geometry: MultiPolygon · CRS: analysis CRS
 | `land_value` | REAL | yes |  |  | Assessed land value, summed over components (addition) |
 | `owner_feasibility` | TEXT | yes |  |  | Owner feasibility flag, not a score (addition, ADR-0084) |
 | `zone_a_portion_removed` | BOOLEAN | yes |  |  | Zone A new-lot parcels dropped from the assembly (addition, ADR-0084) |
+| `existing_only_flag` | BOOLEAN | yes |  |  | Viable only as an existing lot: verify legal nonconforming status and continuous use (addition, ADR-0085) |
+| `superseded_by` | TEXT | yes |  |  | Overlapping candidate kept instead of this one (addition, ADR-0085) |
 
 ### `WalkSheds`
 

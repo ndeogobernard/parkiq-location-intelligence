@@ -60,7 +60,10 @@ EXISTING = (
 )
 ZS_ORDER = {"Prohibited": 0, "Unknown": 1, "Conditional": 2, "ByRight": 3}
 SCOPE_POOL = (40, 200)  # SCOPE §5.5 expectation (ADR-0030: report, never auto-adjust)
-UNIVERSITY_LAND = "university land: not available for acquisition"
+CONCESSION_LAND = (
+    "Ohio State University land (campus parking concession): not available for acquisition"
+)
+EXISTING_ONLY = "verify legal nonconforming status and continuous use"
 
 
 def walk_graph(ctx: RunContext) -> WalkGraph:
@@ -403,8 +406,8 @@ def run_screen(ctx: RunContext) -> dict[str, Any]:
     lim = p["zoning_reason"].fillna("").str.contains("limitation text").to_numpy()
     zst = np.where((zs == "Prohibited") & lim & (zst == "Review"), "Fail", zst)
     za_lost_site = agg(za_lost, "max").astype(bool)
-    # owner feasibility (flag, not a score); university land fails (ADR-0084)
-    uni_rx = site.university_owner_pattern
+    # owner feasibility (flag, not a score); campus-concession land fails (ADR-0084 amended)
+    uni_rx = site.concession_owner_pattern
     otype = p["owner_type"].fillna("").astype(str)
     uni = (
         (
@@ -418,7 +421,7 @@ def run_screen(ctx: RunContext) -> dict[str, Any]:
     uni_site = agg(uni, "max").astype(bool)
     pubinst_site = agg(pubinst, "max").astype(bool)
     feasibility = [
-        UNIVERSITY_LAND
+        CONCESSION_LAND
         if u
         else ("acquisition likely difficult; ground lease possible" if q else None)
         for u, q in zip(uni_site, pubinst_site, strict=True)
@@ -435,6 +438,7 @@ def run_screen(ctx: RunContext) -> dict[str, Any]:
     smin, smax = site.target_stalls_range
     reasons: list[list[str]] = []
     status: list[str] = []
+    existing_only = np.zeros(ns, dtype=bool)
     for k in range(ns):
         mm = members.iloc[k]
         h = [r for i in mm for r in hard.get(i, [])]
@@ -447,12 +451,13 @@ def run_screen(ctx: RunContext) -> dict[str, Any]:
             h.append(f"SIZE: {lot[k]:,.0f} sq ft outside {lo:,.0f}–{hi:,.0f}")
         elif stalls[k] < smin or stalls[k] > smax:
             h.append(f"STALLS: {stalls[k]:.0f} outside {smin}–{smax} ({basis[k]})")
-        if not ex_site[k] and shape_index[k] < site.min_shape_index:
+        shape_bad = shape_index[k] < site.min_shape_index
+        if not ex_site[k] and shape_bad:
             h.append(f"SHAPE: {shape_index[k]:.2f} < {site.min_shape_index}")
         if za_lost_site[k] and len(h) > n_geo:
             h.insert(n_geo, "ZONE_A: Zone A portion removed")
         if uni_site[k]:
-            h.append(f"OWNER: {UNIVERSITY_LAND}")
+            h.append(f"OWNER: {CONCESSION_LAND}")
         if reach_site[k] and front[k] < site.min_frontage_ft:
             h.append(f"FRONTAGE: {front[k]:.0f} ft < {site.min_frontage_ft:.0f}")
         if excl_site[k]:
@@ -481,6 +486,10 @@ def run_screen(ctx: RunContext) -> dict[str, Any]:
             continue
         if ex_site[k]:
             rv = [EXISTING] + [x for x in rv if not x.startswith("zoning")]
+            # viable only as an existing lot: a new lot would fail here (ADR-0085)
+            if nl or shape_bad or zone_a[k]:
+                existing_only[k] = True
+                rv.append(EXISTING_ONLY)
         status.append("Review" if rv else "Pass")
         reasons.append(rv)
 
@@ -526,6 +535,8 @@ def run_screen(ctx: RunContext) -> dict[str, Any]:
             "land_value": land_value,
             "owner_feasibility": feasibility,
             "zone_a_portion_removed": za_lost_site,
+            "existing_only_flag": existing_only,
+            "superseded_by": None,
         },
         geometry=sgeo,
         crs=p.crs,
@@ -584,7 +595,8 @@ def run_screen(ctx: RunContext) -> dict[str, Any]:
         },
         "zone_a_candidates": int(cands["zone_a_flag"].astype(bool).sum()),
         "zone_a_portion_removed_sites": int(za_lost_site.sum()),
-        "university_land_sites_in_reach": int((uni_site & reach_site).sum()),
+        "concession_land_sites_in_reach": int((uni_site & reach_site).sum()),
+        "existing_only_candidates": int(existing_only.sum()),
         "owner_feasibility_candidates": dict(Counter(cands["owner_feasibility"].fillna("none"))),
         "not_applied": ["PERMIT (S22 pipeline not configured)"],
         "frontage_measured": "sites within the 8-minute reach only",

@@ -407,6 +407,8 @@ layers:
       land_value:          {type: REAL, desc: "Assessed land value, summed over components (addition)"}
       owner_feasibility:   {type: TEXT, desc: "Owner feasibility flag, not a score (addition, ADR-0084)"}
       zone_a_portion_removed: {type: BOOLEAN, desc: "Zone A new-lot parcels dropped from the assembly (addition, ADR-0084)"}
+      existing_only_flag:  {type: BOOLEAN, desc: "Viable only as an existing lot: verify legal nonconforming status and continuous use (addition, ADR-0085)"}
+      superseded_by:       {type: TEXT, desc: "Overlapping candidate kept instead of this one (addition, ADR-0085)"}
   WalkSheds:
     feature_dataset: Analysis
     geometry: MultiPolygon

@@ -101,6 +101,36 @@ def ranks_matrix(comp: np.ndarray, ids: np.ndarray) -> np.ndarray:
     return r
 
 
+def resolve_overlaps(
+    geoms: gpd.GeoSeries, score: np.ndarray, ids: np.ndarray, min_share: float = 0.05
+) -> dict[str, str]:
+    """Candidates covering the same land: {superseded id: kept id} (ADR-0085).
+
+    Two sites overlap when their shared area exceeds ``min_share`` of the smaller site. Sites are
+    taken best score first (ties by id); a site overlapping one already kept is superseded by it.
+    """
+    order = np.lexsort((ids, -score))
+    g = gpd.GeoDataFrame(geometry=geoms.to_numpy(), crs=geoms.crs)  # RangeIndex = position
+    pairs = gpd.sjoin(g, g, predicate="intersects")
+    left = pairs.index.to_numpy()
+    right = pairs["index_right"].to_numpy()
+    nbr: dict[int, list[int]] = {}
+    for a, b in zip(left[left != right], right[left != right], strict=True):
+        ga, gb = geoms.iloc[a], geoms.iloc[b]
+        shared = ga.intersection(gb).area
+        if shared > min_share * min(ga.area, gb.area):
+            nbr.setdefault(int(a), []).append(int(b))
+    kept: list[int] = []
+    out: dict[str, str] = {}
+    for i in order:
+        hit = [k for k in kept if k in nbr.get(int(i), [])]
+        if hit:
+            out[str(ids[i])] = str(ids[hit[0]])
+        else:
+            kept.append(int(i))
+    return out
+
+
 def oat_weights(w: np.ndarray, i: int, factor: float) -> np.ndarray:
     """One-at-a-time weight change for criterion ``i``, others rescaled to sum to 1."""
     out = w.astype(float).copy()
@@ -278,6 +308,22 @@ def run_suitability(ctx: RunContext) -> dict[str, Any]:
     """Normalize, composite and rank per scenario → SiteScores (PRELIMINARY if neutral criteria)."""
     cfg = ctx.cfg
     c, s, notes = _scored(ctx)
+    # the same land appears in one candidate only: keep the higher Balanced score (ADR-0085)
+    wb = cfg.weights.scenarios.get("Balanced") or next(iter(cfg.weights.scenarios.values()))
+    comp_b, _ = composite_rank(
+        s, np.array([wb[x] for x in CRIT]), c["parcel_id"].astype(str).to_numpy()
+    )
+    sup = resolve_overlaps(c.geometry, comp_b, c["parcel_id"].astype(str).to_numpy())
+    if sup:
+        allc = ctx.store.read_layer("CandidateParcels")
+        hit = allc["parcel_id"].isin(list(sup))
+        allc.loc[hit, "superseded_by"] = allc.loc[hit, "parcel_id"].map(sup)
+        allc.loc[hit, "screen_reason"] = (
+            "SUPERSEDED: superseded by " + allc.loc[hit, "superseded_by"]
+        )
+        allc.loc[hit, "screen_status"] = "Fail"
+        ctx.store.write_layer("CandidateParcels", allc, None)
+        c, s, notes = _scored(ctx)  # normalize over the remaining candidates
     cr = ctx.store.read_table("CandidateCriteria").set_index("parcel_id").reindex(c["parcel_id"])
     neutral = [x for x, v in notes.items() if "neutral" in v]
     prelim = bool(neutral)
@@ -298,6 +344,7 @@ def run_suitability(ctx: RunContext) -> dict[str, Any]:
     ctx.store.write_layer("SiteScores", out, "DERIVED")
     rep = {
         "candidates": len(c),
+        "superseded": sup,
         "normalization": notes,
         "neutral_criteria": neutral,
         "weights_renormalized": False,
