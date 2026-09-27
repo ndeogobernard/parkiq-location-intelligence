@@ -48,16 +48,24 @@ def parkiq_cards(html: str) -> list[str]:
 
 
 MAX_DESC = 160  # characters: three to four lines at card width
-MAX_LINKS = 3
+LABELS = ["GitHub", "Report", "StoryMap"]  # every ParkIQ card, always visible, in this order
+LABELS_WEBAPP = ["GitHub", "Report", "Live Map"]  # the Web Applications card
 
 
 def card_links(card: str) -> list[str]:
-    """Hrefs of a card's link buttons (gallery images are not links)."""
+    """Hrefs of a card's live link buttons (gallery images are not links)."""
     return re.findall(r'<a class="card-link" href="([^"]+)"', card)
 
 
+def card_labels(card: str) -> list[str]:
+    """Labels of every link slot, live (<a>) or not yet published (disabled <span>)."""
+    slots = re.findall(r'<(?:a|span) class="card-link"[^>]*>(.*?)</(?:a|span)>', card, flags=re.S)
+    return [re.sub(r"<[^>]+>", "", x).strip() for x in slots]
+
+
 def card_structure(name: str, card: str) -> list[str]:
-    """ParkIQ card rules: one sentence of at most 160 characters, at most three live links."""
+    """ParkIQ card rules: one sentence of at most 160 characters; exactly three link slots with
+    the fixed labels in order (live targets as links, others disabled; ADR-0089)."""
     out = []
     m = re.search(r'<p class="card-desc">(.*?)</p>', card, flags=re.S)
     desc = re.sub(r"<[^>]+>", "", m.group(1)).strip() if m else ""
@@ -65,8 +73,12 @@ def card_structure(name: str, card: str) -> list[str]:
         out.append(f"ndeogo card '{name}': description {len(desc)} > {MAX_DESC} characters")
     if len(re.findall(r"[.!?](?=\s+[A-Z])", desc)) > 0:
         out.append(f"ndeogo card '{name}': description is more than one sentence")
-    if len(card_links(card)) > MAX_LINKS:
-        out.append(f"ndeogo card '{name}': {len(card_links(card))} links > {MAX_LINKS}")
+    want = LABELS_WEBAPP if "Live Map" in card_labels(card) or "Explorer" in name else LABELS
+    if card_labels(card) != want:
+        out.append(f"ndeogo card '{name}': links {card_labels(card)} != {want}")
+    for span in re.findall(r'<span class="card-link"[^>]*>', card):
+        if 'aria-disabled="true"' not in span:
+            out.append(f"ndeogo card '{name}': unpublished link slot without aria-disabled")
     return out
 
 

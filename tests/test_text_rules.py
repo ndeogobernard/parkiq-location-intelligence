@@ -26,16 +26,29 @@ def test_site_rules_flag_parkiq_cards_only(tmp_path: Path) -> None:
     )
     (tmp_path / "index.html").write_text(html, encoding="utf-8")
     out = check_text.site_violations(tmp_path)
-    assert out == ["ndeogo card 'ParkIQ A': em dash", "ndeogo card 'ParkIQ A': 'coming soon' item"]
+    assert "ndeogo card 'ParkIQ A': em dash" in out
+    assert "ndeogo card 'ParkIQ A': 'coming soon' item" in out
+    assert not any("'Other'" in o for o in out)  # non-ParkIQ cards are not checked
 
 
 def test_card_structure_rules() -> None:
+    gh = '<a class="card-link" href="g">GitHub</a>'
+    rep = '<span class="card-link" aria-disabled="true">Report</span>'
+    sm = '<span class="card-link" aria-disabled="true">StoryMap</span>'
     long = "A" * 161
-    card = f'<p class="card-desc">{long}</p>' + '<a class="card-link" href="x1">a</a>' * 4
-    out = check_text.card_structure("C", card)
-    assert any("161 > 160" in o for o in out) and any("4 links" in o for o in out)
-    two = '<p class="card-desc">First sentence here. Second one.</p>'
+    out = check_text.card_structure("C", f'<p class="card-desc">{long}</p>{gh}{rep}{sm}')
+    assert any("161 > 160" in o for o in out)
+    two = f'<p class="card-desc">First sentence here. Second one.</p>{gh}{rep}{sm}'
     assert any("more than one sentence" in o for o in check_text.card_structure("C", two))
-    ok = '<p class="card-desc">ParkIQ · Franklin County, OH</p>'
-    ok += '<a class="card-link" href="g">GitHub</a>'
+    ok = f'<p class="card-desc">ParkIQ · Franklin County, OH</p>{gh}{rep}{sm}'
     assert check_text.card_structure("C", ok) == []
+    wrong_order = f'<p class="card-desc">One.</p>{gh}{sm}{rep}'
+    assert any("links" in o for o in check_text.card_structure("C", wrong_order))
+    missing = f'<p class="card-desc">One.</p>{gh}{rep}'
+    assert any("links" in o for o in check_text.card_structure("C", missing))
+    live = '<span class="card-link" aria-disabled="true">Live Map</span>'
+    assert (
+        check_text.card_structure("Explorer", f'<p class="card-desc">One.</p>{gh}{rep}{live}') == []
+    )
+    no_aria = f'<p class="card-desc">One.</p>{gh}<span class="card-link">Report</span>{sm}'
+    assert any("aria-disabled" in o for o in check_text.card_structure("C", no_aria))

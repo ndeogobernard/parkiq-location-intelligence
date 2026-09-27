@@ -711,3 +711,15 @@ hot-zone query must return exactly the hexagons the gap step qualified, and the 
 runs once SiteFinancials has rows (M6). Every statement and its result is written to
 `sql_checks.sql` in the run folder. Franklin run: 202 checks, 0 failures; hot-zone query 2,578
 hexagons = gap step. Test: `tests/test_sqlcheck.py`.
+
+## ADR-0089: Portfolio card links and map series grid, Applied (Bernard, 2026-09-26)
+Every ParkIQ portfolio card shows exactly three link slots, always visible, in a fixed order
+(GitHub, Report, StoryMap; the Web Applications card: GitHub, Report, Live Map). A published
+target is a normal link; an unpublished one shows the same label in the site's disabled style
+(`aria-disabled="true"`), never "coming soon" and never an em dash, and becomes a link when the
+target goes live. Links are unique to each card. `scripts/check_text.py` checks the labels and their
+order, the disabled markup, sharing, and the one-sentence, 160-character description. The ParkIQ
+Map Series card opts into a grid overlay (`data-gallery-view="grid"`) that lists every map in the
+gallery manifest with an 800 px thumbnail; a map opens the existing lightbox, and closing it
+returns to the grid. Other gallery cards are unchanged. This replaces the "only live links" rule
+of ADR-0083.
