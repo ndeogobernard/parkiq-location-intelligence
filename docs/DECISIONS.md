@@ -684,3 +684,19 @@ possible". Franklin: 28 sites in the 8-minute reach are Ohio State land; 7 candi
   zones with place names, shortfall by zone, demand by source. Private (`--no-public`): adds the
   ranked candidates, a top-20 table and the criteria breakdown per scenario. The public web app
   is an ArcGIS Experience Builder app built from hosted layers; this file is its offline version.
+
+## ADR-0087: Public web layers and the map series gallery, Applied (Bernard, 2026-09-26)
+* **Hosted layers for the ArcGIS Online web app** are kept small (feature storage costs credits):
+  one hexagon layer holds shortage and demand for every time of week as fields, so each hexagon's
+  geometry is stored once; the web map draws that layer five times (one entry per time of week,
+  no extra storage) and the Experience Builder app switches between them with bookmarks. Zoning is
+  dissolved into its screen classes and clipped to 1.5 miles around the paid-parking hexagons;
+  geometries are simplified and coordinates kept to about 1 m. Franklin: 9 public layers, 7.9 MB
+  (about 1.9 credits a month at 2.4 credits per 10 MB). Public layers never carry parcel ids,
+  owner names or candidate sites; the candidate layer is private to the partners' group.
+* **Map series gallery:** every public-safe map a milestone produces goes into the ParkIQ Map
+  Series gallery on the portfolio site with a plain-language caption, through a manifest
+  (`_private/gallery/parkiq_gallery.json`) and `_private/tools/publish_gallery.py`, which refuses a
+  map whose map-standard record is not public-clean and text-rule clean. Each STOP report lists
+  the maps added so they can be removed on request. Candidate maps and anything with parcel ids,
+  owner names or specific candidate sites are never published.
