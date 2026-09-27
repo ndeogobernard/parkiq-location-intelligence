@@ -43,6 +43,15 @@ Downtown parking-zone line or an existing lot's legal status). 21 are viable onl
 surface lots, 13 touch Downtown parking Zone A where new lots are not allowed, and 19 are owned by
 public or institutional owners (acquisition likely difficult, ground lease possible).
 
+**Key finding: the biggest shortfall is not where the sites are.** The zone near Ohio State has
+the largest weekday shortfall in the county (about 11,500 stalls) but yields no candidate site:
+of the 1,258 sites within an 8-minute walk of it, most are small residential lots too small for a
+50-stall lot (1,014), and the larger ones are Ohio State land, where campus parking runs under a
+long-term concession (28 sites), or under limited zoning that does not allow a parking lot. The
+opportunity is east of downtown: all ten top-ranked sites, and 31 of the 48 candidates, lie east
+of North High Street, around Columbus State Community College, Franklin University and the
+Discovery District.
+
 Candidates are scored on ten criteria (shortage nearby by time of week, competing supply, walk
 to the main destinations, land cost per stall, access, zoning certainty and others), ranked under
 three weighting scenarios, and tested with 1,000 random weightings. Rates, venues and planned

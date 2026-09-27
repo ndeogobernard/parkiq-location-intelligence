@@ -1,0 +1,18 @@
+{
+ "map": "03-paid-market-hot-zones.jpg",
+ "elements": {
+  "scale_bar": "1 mi",
+  "north_arrow": true,
+  "locator": true,
+  "title": "Paid-parking hot zones",
+  "subtitle": "Weekday-day parking gap where paid parking is within an 8-minute walk, central Columbus",
+  "legend": "Weekday-day gap (stalls)",
+  "how_to_read": "How to read this map: Shaded hexes have paid parking (meters, paid lots or garages) within an 8-minute walk: red needs more parking than is counted nearby, blue has spare supply. Outlined areas are hot zones short of parking by day and in the evening.",
+  "status_line": "Analysis as of September 2026",
+  "sources": "Sources: OSM parking & streets (Overpass, 2026-09); Overture buildings (2026-09-23.1); Franklin County Auditor parcels (2026-09-23); City of Columbus curb meters (2026-09); LODES WAC (2023); CTPP tract of work (2017-2021); CMS hospitals (2026-Q2); IPEDS (2024); OSM/Overture places (2026-09); Placer.ai office index (2026). \u00a9 OpenStreetMap contributors. Analysis as of September 2026",
+  "osm_credit": true,
+  "brand_date": "ParkIQ \u00b7 map date 2026-09-26",
+  "public_clean": true,
+  "text_rules": true
+ }
+}

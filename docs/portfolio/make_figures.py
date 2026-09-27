@@ -73,5 +73,97 @@ def main(run: Path) -> None:
     print("figures written to", out)
 
 
+def pipeline_figure(run: Path, out: Path) -> None:
+    """Report 3 figure: the pipeline steps with what each produced in the run (not a map)."""
+    import json
+
+    import matplotlib.pyplot as plt
+    from matplotlib.patches import FancyArrowPatch, FancyBboxPatch
+
+    def rep(name: str) -> dict:  # type: ignore[type-arg]
+        f = run / name
+        return json.loads(f.read_text(encoding="utf-8")) if f.exists() else {}
+
+    scr, gap = rep("screen_report.json"), rep("gap_report.json")
+    import sqlite3
+
+    gpkg = next(run.glob("ParkIQ_*.gpkg"))
+    with sqlite3.connect(gpkg) as con:
+        anchors = con.execute('SELECT COUNT(*) FROM "DemandAnchors"').fetchone()[0]
+    nl = chr(10)
+    zones = gap.get("screening", {}).get("zones", 0)
+    steps = [
+        (f"schema +{nl}setup", f"GeoPackage, H3 grid,{nl}walking network, slope"),
+        (f"ingest +{nl}qaqc", f"public sources,{nl}QA log"),
+        ("demand", f"{anchors:,} anchors,{nl}5 times of week"),
+        ("supply", f"lots, garages,{nl}metered curb"),
+        ("gap", f"{zones} paid-parking{nl}hot zones"),
+        (
+            "screen",
+            f"{scr.get('parcels', 0):,} parcels{nl}to {scr.get('candidates', 0)} candidates",
+        ),
+        (f"walk sheds +{nl}criteria", f"3/5/8-min sheds,{nl}10 criteria"),
+        (f"scoring +{nl}sensitivity", f"3 scenarios,{nl}1,000 weightings"),
+        (f"finance,{nl}shortlist, package", f"next: buy and{nl}ground lease"),
+    ]
+    fig, ax = plt.subplots(figsize=(16, 5.2), dpi=100)
+    ax.set_axis_off()
+    ax.set_xlim(0, 16)
+    ax.set_ylim(0, 5.2)
+    w, gapx = 1.55, 0.2
+    for i, (name, what) in enumerate(steps):
+        x = 0.15 + i * (w + gapx)
+        done = i < len(steps) - 1
+        c = "#2c7fb8" if done else "#999999"
+        ax.add_patch(
+            FancyBboxPatch(
+                (x, 1.4),
+                w,
+                2.4,
+                boxstyle="round,pad=0.04",
+                fc=c,
+                alpha=0.12 if done else 0.08,
+                ec=c,
+                lw=1.6,
+            )
+        )
+        ax.text(
+            x + w / 2,
+            3.45,
+            name,
+            ha="center",
+            va="top",
+            fontsize=10,
+            fontweight="bold",
+            color=c,
+            wrap=True,
+        )
+        ax.text(x + w / 2, 2.55, what, ha="center", va="top", fontsize=9)
+        if i:
+            ax.add_patch(
+                FancyArrowPatch(
+                    (x - gapx, 2.6), (x, 2.6), arrowstyle="-|>", mutation_scale=12, color="#555"
+                )
+            )
+    ax.text(
+        0.15,
+        4.6,
+        "The ParkIQ pipeline: each step reads the previous steps' layers from one GeoPackage",
+        fontsize=15,
+        fontweight="bold",
+    )
+    ax.text(
+        0.15,
+        0.7,
+        "Franklin County run, September 2026. Grey: waits for partner finance inputs. "
+        "Each step also runs as an ArcGIS Pro tool.",
+        fontsize=9.5,
+        color="#444",
+    )
+    fig.savefig(out / "pipeline-steps.png", bbox_inches="tight")
+    plt.close(fig)
+
+
 if __name__ == "__main__":
     main(Path(sys.argv[1]))
+    pipeline_figure(Path(sys.argv[1]), HERE / "figures")

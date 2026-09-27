@@ -77,6 +77,59 @@ def key_numbers(run_dir: Path, schema: Schema, crs: Any) -> dict[str, str]:
         "repo_url": REPO_URL,
         "site_url": SITE_URL,
         "sources_table": sources_table(reg),
+        **pipeline_numbers(run_dir, gpkg),
+    }
+
+
+def pipeline_numbers(run_dir: Path, gpkg: Path) -> dict[str, str]:
+    """Pipeline facts for the pipeline report: steps, commands, tools, tests, run results."""
+    import json
+
+    from parkiq.runner import steps
+
+    repo = Path(__file__).resolve().parents[1]
+    reg = steps()
+    implemented = [n for n, st in reg.items() if st.fn is not None]
+    cli = (repo / "parkiq" / "cli.py").read_text(encoding="utf-8")
+    n_cmd = len(re.findall(r"^@app\.command", cli, flags=re.M))
+    pyt = repo / "toolbox" / "ParkIQ.pyt"
+    tools = (
+        re.search(r"self\.tools = \[([^\]]*)\]", pyt.read_text(encoding="utf-8"))
+        if pyt.exists()
+        else None
+    )
+    n_tests = sum(
+        len(re.findall(r"^def test_", f.read_text(encoding="utf-8"), flags=re.M))
+        for f in (repo / "tests").glob("test_*.py")
+    )
+
+    def rep(name: str) -> dict[str, Any]:
+        f = run_dir / name
+        return dict(json.loads(f.read_text(encoding="utf-8"))) if f.exists() else {}
+
+    scr, gap, dem = rep("screen_report.json"), rep("gap_report.json"), rep("demand_report.json")
+    gdb = rep(gpkg.stem + "_gdb_report.json")
+    with closing(sqlite3.connect(gpkg)) as con:
+        anchors = con.execute('SELECT COUNT(*) FROM "DemandAnchors"').fetchone()[0]
+        mapped = con.execute(
+            "SELECT COUNT(*) FROM SupplyFacilities WHERE capacity_source IS NULL OR capacity_source <> 'parcel estimate'"
+        ).fetchone()[0]
+        meters = con.execute('SELECT COUNT(*) FROM "OnStreetSegments"').fetchone()[0]
+    return {
+        "steps_implemented": _fmt(len(implemented)),
+        "steps_total": _fmt(len(reg)),
+        "cli_commands": _fmt(n_cmd),
+        "toolbox_tools": _fmt(
+            len([t for t in tools.group(1).split(",") if t.strip()]) if tools else 0
+        ),
+        "test_functions": _fmt(n_tests),
+        "anchors": _fmt(anchors),
+        "mapped_facilities": _fmt(mapped),
+        "metered_faces": _fmt(meters),
+        "wd_day_demand": _fmt(float(dem.get("demand_total", {}).get("wd_day", 0))),
+        "paid_zones": _fmt(int(gap.get("screening", {}).get("zones", 0))),
+        "candidates": _fmt(int(scr.get("candidates", 0))),
+        "gdb_layers": _fmt(len(gdb.get("layers", {}))),
     }
 
 
