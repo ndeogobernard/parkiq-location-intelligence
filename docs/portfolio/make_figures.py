@@ -42,7 +42,8 @@ def main(run: Path) -> None:
         sources=[
             "Franklin County Auditor parcels (2026-09-23)",
             "City of Columbus zoning and overlays (2026-09)",
-            "Zone A/B digitized from City Code §3359.27 Map 2 (Ord. 1532-2013; unofficial digitization)",
+            "Zone A/B digitized from City Code §3359.27 Map 2 "
+            "(Ord. 1532-2013; unofficial digitization)",
             "Census TIGER county (2025)",
         ],
         uses_osm=False,
