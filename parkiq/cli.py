@@ -249,6 +249,33 @@ def report_pdf_cmd(
     typer.echo(f"written {pdf}")
 
 
+@app.command("sql-check")
+def sql_check_cmd(
+    market: MarketOpt,
+    run_id: Annotated[str, typer.Option("--run-id", help="run to check")],
+    config_dir: Annotated[Path | None, typer.Option(help="configs/ directory")] = None,
+) -> None:
+    """SQL validation of the run GeoPackage: domains, required fields, unique keys, relationship
+    orphans and the SCOPE Appendix D queries (ADR-0088). Exit 1 if any check fails."""
+    from parkiq import sqlcheck
+    from parkiq.runner import open_run
+
+    cfg = _load(market, config_dir)
+    ctx = open_run(cfg, run_id=run_id)
+    checks = sqlcheck.run(ctx.store.gpkg, ctx.store.schema, ctx.run_dir)
+    bad = [c for c in checks if not c.passed]
+    for c in bad:
+        typer.secho(f"FAIL [{c.kind}] {c.table}: {c.name} ({c.count} rows)", fg=typer.colors.RED)
+    for c in checks:
+        if c.note:
+            typer.echo(f"note [{c.kind}] {c.name}: {c.note}")
+    typer.echo(
+        f"{len(checks)} SQL checks, {len(bad)} failed; statements in "
+        f"{ctx.run_dir / 'sql_checks.sql'}"
+    )
+    raise typer.Exit(1 if bad else 0)
+
+
 @app.command("dashboard")
 def dashboard_cmd(
     market: MarketOpt,

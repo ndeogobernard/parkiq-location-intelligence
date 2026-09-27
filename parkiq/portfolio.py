@@ -78,7 +78,19 @@ def key_numbers(run_dir: Path, schema: Schema, crs: Any) -> dict[str, str]:
         "site_url": SITE_URL,
         "sources_table": sources_table(reg),
         **pipeline_numbers(run_dir, gpkg),
+        **sql_numbers(run_dir),
     }
+
+
+def sql_numbers(run_dir: Path) -> dict[str, str]:
+    """SQL validation results (``parkiq sql-check``, ADR-0088) for reports."""
+    import json
+
+    f = run_dir / "sql_check_report.json"
+    if not f.exists():
+        return {"sql_checks": "not run", "sql_failed": "not run"}
+    rep = json.loads(f.read_text(encoding="utf-8"))
+    return {"sql_checks": _fmt(int(rep["checks"])), "sql_failed": _fmt(len(rep["failed"]))}
 
 
 def pipeline_numbers(run_dir: Path, gpkg: Path) -> dict[str, str]:

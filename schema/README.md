@@ -11,11 +11,15 @@ classes. From that one file ParkIQ builds, checks and documents every run.
 | Empty GeoPackage for a new run (fields, types, domains as GeoPackage constraints) | `parkiq run --steps schema` |
 | Validation of every write (types, nulls, unique keys, domain values) | `parkiq/schema.py` |
 | Difference report between any GeoPackage and the definition | `parkiq schema-diff --gpkg <file>` |
+| SQL validation in SQLite: domains, required fields, unique keys, relationship orphans, SCOPE signature queries | `parkiq sql-check` ([`docs/queries/`](../docs/queries/README.md)) |
 | Entity-relationship diagram | [`docs/ERD.png`](../docs/ERD.png), [`docs/ERD.drawio`](../docs/ERD.drawio) |
 | Data dictionary | [`docs/DataDictionary.md`](../docs/DataDictionary.md) |
 | File geodatabase with feature datasets, domains, subtypes and relationship classes | `parkiq export-gdb` |
 
-The Franklin County run (September 2026) matches the definition with 0 differences.
+The Franklin County run (September 2026) matches the definition with 0 differences and passes
+all 202 SQL checks; the hot-zone signature query returns exactly the 2,578 hexagons the gap step
+qualified. Every SQL statement is written to `sql_checks.sql` in the run folder, so it can be rerun
+in any SQLite client.
 
 ## Feature datasets
 

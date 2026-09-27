@@ -673,7 +673,7 @@ relationships:
   - {name: CriteriaDefinitions_WeightScenarios, origin: CriteriaDefinitions, destination: WeightScenarios, cardinality: "1:M", origin_key: criterion_id, destination_key: criterion_id}
   - {name: DataSourceRegistry_Sources,      origin: DataSourceRegistry, destination: "*",            cardinality: "1:M", origin_key: source_id, destination_key: source_id, note: "every source-derived feature class"}
   - {name: Venues_DemandAnchors,            origin: Venues,           destination: DemandAnchors,    cardinality: "1:M", origin_key: venue_id,  destination_key: venue_id}
-  - {name: Parcels_CandidateParcels,        origin: Parcels,          destination: CandidateParcels, cardinality: "1:1", origin_key: parcel_id, destination_key: parcel_id, note: addition}
+  - {name: Parcels_CandidateParcels,        origin: Parcels,          destination: CandidateParcels, cardinality: "1:1", origin_key: parcel_id, destination_key: parcel_id, note: "addition; assembled sites (id prefix ASM:) list their parcels in member_parcel_ids (ADR-0082)", assembly_prefix: "ASM:", members_field: member_parcel_ids}
   - {name: HexGrid_HexDemand,               origin: HexGrid,          destination: Hex_Demand_Daypart, cardinality: "1:M", origin_key: hex_id, destination_key: hex_id, note: addition}
   - {name: HexGrid_HexSupply,               origin: HexGrid,          destination: Hex_Supply_Daypart, cardinality: "1:M", origin_key: hex_id, destination_key: hex_id, note: addition}
   - {name: HexGrid_HexGap,                  origin: HexGrid,          destination: Hex_Gap_Daypart,  cardinality: "1:M", origin_key: hex_id,    destination_key: hex_id, note: addition}

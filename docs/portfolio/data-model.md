@@ -32,6 +32,7 @@ A parking site-selection model pulls together more than a dozen public datasets 
 - **BuildSchema** creates every layer and table, empty, in a new GeoPackage, and writes the domains as GeoPackage schema-extension constraints so GIS software sees them as field domains.
 - **Validation on write**: every time a pipeline step writes a layer, the data is coerced and checked against the schema (types, nullability, uniqueness, domain values); a violation stops the run with every problem listed.
 - **schema-diff** compares any GeoPackage with the definition and lists every difference: missing layers, wrong geometry or CRS, missing or extra columns, detached domains.
+- **SQL validation** (`parkiq sql-check`) re-checks a finished GeoPackage in SQLite, independently of the pipeline: domain values, required fields, unique keys and relationship orphans, all generated from the definition, plus the SCOPE signature queries. The Franklin run passes {{sql_checks}} SQL checks with {{sql_failed}} failures, and the hot-zone signature query returns exactly the hexagons the gap step found.
 - **Documentation**: the ERD (draw.io and PNG) and the data dictionary are generated from the file; a test fails if the committed documents are out of date.
 
 **One schema for every market.** Markets differ only in their configuration file (boundary, projection, source settings), never in the data model, so a second city reuses the design unchanged.

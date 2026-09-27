@@ -700,3 +700,14 @@ possible". Franklin: 28 sites in the 8-minute reach are Ohio State land; 7 candi
   map whose map-standard record is not public-clean and text-rule clean. Each STOP report lists
   the maps added so they can be removed on request. Candidate maps and anything with parcel ids,
   owner names or specific candidate sites are never published.
+
+## ADR-0088: SQL validation of run GeoPackages, Applied (2026-09-26)
+`parkiq sql-check` (`parkiq/sqlcheck.py`) validates a finished GeoPackage in SQLite, independently of
+the Python checks on write, so edits made in ArcGIS Pro, QGIS or scripts can be re-checked:
+coded and range domains, non-nullable fields, unique keys and relationship orphans are generated
+from `schema.yaml`; assembled sites (`ASM:` ids) are checked through their `member_parcel_ids`
+with a recursive split. The SCOPE Appendix D signature queries live in `docs/queries/`; the
+hot-zone query must return exactly the hexagons the gap step qualified, and the shortlist query
+runs once SiteFinancials has rows (M6). Every statement and its result is written to
+`sql_checks.sql` in the run folder. Franklin run: 202 checks, 0 failures; hot-zone query 2,578
+hexagons = gap step. Test: `tests/test_sqlcheck.py`.
