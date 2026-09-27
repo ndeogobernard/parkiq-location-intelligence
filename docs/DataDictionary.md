@@ -828,7 +828,7 @@ Immutable, EPSG:4326, source attributes as delivered: `Raw_Boundary`, `Raw_Parce
 | CriteriaDefinitions_WeightScenarios | `CriteriaDefinitions` | WeightScenarios | 1:M | `criterion_id` → `criterion_id` |  |
 | DataSourceRegistry_Sources | `DataSourceRegistry` | every source-derived feature class | 1:M | `source_id` → `source_id` | every source-derived feature class |
 | Venues_DemandAnchors | `Venues` | DemandAnchors | 1:M | `venue_id` → `venue_id` |  |
-| Parcels_CandidateParcels | `Parcels` | CandidateParcels | 1:1 | `parcel_id` → `parcel_id` | addition |
+| Parcels_CandidateParcels | `Parcels` | CandidateParcels | 1:1 | `parcel_id` → `parcel_id` | addition; assembled sites (id prefix ASM:) list their parcels in member_parcel_ids (ADR-0082) |
 | HexGrid_HexDemand | `HexGrid` | Hex_Demand_Daypart | 1:M | `hex_id` → `hex_id` | addition |
 | HexGrid_HexSupply | `HexGrid` | Hex_Supply_Daypart | 1:M | `hex_id` → `hex_id` | addition |
 | HexGrid_HexGap | `HexGrid` | Hex_Gap_Daypart | 1:M | `hex_id` → `hex_id` | addition |
