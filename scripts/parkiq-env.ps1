@@ -28,7 +28,7 @@ $system = @("$env:SystemRoot\System32", "$env:SystemRoot", "$env:SystemRoot\Syst
             "$env:SystemRoot\System32\Wbem", "$env:SystemRoot\System32\OpenSSH")
 $git = (Get-Command git -ErrorAction SilentlyContinue)
 $gitDir = if ($git) { @(Split-Path $git.Source) } else { @() }
-$ghDir = @(Get-ChildItem "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\GitHub.cli_*in", "$env:ProgramFiles\GitHub CLI" -Filter gh.exe -ErrorAction SilentlyContinue | Select-Object -First 1 | ForEach-Object { $_.DirectoryName })
+$ghDir = @(Get-ChildItem "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\GitHub.cli_*\bin", "$env:ProgramFiles\GitHub CLI" -Filter gh.exe -ErrorAction SilentlyContinue | Select-Object -First 1 | ForEach-Object { $_.DirectoryName })
 $env:PATH = (($envDirs + $system + $gitDir + $ghDir) -join ";")
 $env:GDAL_DATA = Join-Path $EnvPath "Library\share\gdal"
 $env:PROJ_DATA = Join-Path $EnvPath "Library\share\proj"

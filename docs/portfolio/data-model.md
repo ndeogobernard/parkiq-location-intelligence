@@ -1,6 +1,6 @@
 # ParkIQ Parking Data Model
 
-A schema-as-configuration geodatabase design for parking site selection: one YAML file builds, checks and documents every layer, domain and relationship, for any market
+ParkIQ: A Parking Lot Site Selection Location Intelligence Analysis
 
 <div class="keybox" markdown="1">
 
@@ -27,7 +27,7 @@ A parking site-selection model pulls together more than a dozen public datasets 
 
 ## My Approach
 
-**The schema is configuration.** Every feature class, table, field, type, domain, subtype and relationship is declared once in `schema/schema.yaml`. The same file drives four things, so they can never disagree:
+**One definition file.** Every feature class, table, field, type, domain, subtype and relationship is declared once in `schema/schema.yaml`. The same file drives four things, so they can never disagree:
 
 - **BuildSchema** creates every layer and table, empty, in a new GeoPackage, and writes the domains as GeoPackage schema-extension constraints so GIS software sees them as field domains.
 - **Validation on write**: every time a pipeline step writes a layer, the data is coerced and checked against the schema (types, nullability, uniqueness, domain values); a violation stops the run with every problem listed.
@@ -79,6 +79,6 @@ A parking site-selection model pulls together more than a dozen public datasets 
 
 ## Why It Matters
 
-Site-selection and investment decisions only hold up if every number can be traced to its source and recomputed. Treating the data model as configuration makes the geodatabase self-describing and self-checking: the build, the validation and the documentation come from one definition, a new market is a new configuration file rather than a new project, and a reviewer can see exactly which data, vintage and run produced a result.
+Site-selection and investment decisions only hold up if every number can be traced to its source and recomputed. Keeping the data model in one definition file makes the geodatabase self-describing and self-checking: the build, the validation and the documentation come from one definition, a new market is a new configuration file rather than a new project, and a reviewer can see exactly which data, vintage and run produced a result.
 
 Repository: {{repo_url}} · Portfolio: {{site_url}} · Report generated {{report_date}}

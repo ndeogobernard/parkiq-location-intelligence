@@ -1,18 +1,34 @@
-# ParkIQ: Location Intelligence for Parking Site Selection
+# ParkIQ: A Parking Lot Site Selection Location Intelligence Analysis
 
-A repeatable, config-driven toolkit that finds developable parcels where a **paid surface parking
-lot** fills across dayparts and pays. It models demand by daypart at walk-shed resolution,
-inventories supply and rates, finds unmet multi-daypart demand, screens and scores parcels,
-underwrites each one (buy and ground lease) and exports an investment package.
+ParkIQ finds parcels in Franklin County, Ohio, where a new **paid surface parking lot** would fill
+and pay. It models parking demand and supply on a walking network for five times of the week,
+finds where paid parking is short, screens every parcel against zoning, size, shape, access and
+ownership rules, and ranks the remaining sites under three weighting scenarios. Buy and ground
+lease underwriting follows once the partners set the finance assumptions.
 
-* Spec: [`docs/SCOPE.md`](docs/SCOPE.md) (source of truth) · architecture: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) ·
+**Results so far (Franklin County run of September 2026):** 20 public datasets ingested and
+checked; 492,935 parcels screened; 10,350 demand anchors and 6,418 mapped parking facilities plus
+1,864 metered block faces allocated on the walking network; 6 paid-market hot zones; 48 candidate
+lot sites ranked (rates, venues and planned projects are still neutral, so ranks can change).
+
+| Start here | For |
+|---|---|
+| [`parkiq/`](parkiq/README.md) | the pipeline: steps, commands, ArcGIS Pro toolbox |
+| [`docs/analysis/`](docs/analysis/README.md) | the site selection analysis and its results |
+| [`schema/`](schema/README.md) | the data model (GeoPackage and file geodatabase) |
+| [`docs/maps/`](docs/maps/README.md) | the map series and map standard |
+| [`docs/webapp/`](docs/webapp/README.md) | the web app and the offline dashboard |
+| [`docs/REPLICATION.md`](docs/REPLICATION.md) | reproducing the Franklin County run step by step |
+
+* Spec: [`docs/SCOPE.md`](docs/SCOPE.md) · architecture: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) ·
   engineering standards: [`docs/ENGINEERING.md`](docs/ENGINEERING.md) ·
   manual method: [`docs/MANUAL_METHODOLOGY.md`](docs/MANUAL_METHODOLOGY.md)
 * Decisions: [`docs/DECISIONS.md`](docs/DECISIONS.md) · open confirmations: [`docs/VERIFY.md`](docs/VERIFY.md)
 * Pilot market: Franklin County, OH ([`markets/franklin_oh.yaml`](markets/franklin_oh.yaml))
 
-**Status:** M1 of 8. Built: config, schema v0, SetupMarket (boundary, study area, H3 grid, walk
-network, slope), free-source ingest, QA. Everything from `demand` onward is a later milestone.
+**Status:** milestones M1 to M5 built (setup, ingest and QA, demand, supply, gap and hot zones,
+screen, walk sheds, criteria, scoring and sensitivity); M6 underwriting waits for partner
+inputs, and the rate criterion waits for the field rate survey.
 
 ## Install (Windows)
 
@@ -33,10 +49,8 @@ shadow GDAL/rasterio's (ADR-0052). It changes the current window only.
 
 ## Development
 
-**Tools:** _TODO_
-
-Lint, format and type checks run with `ruff check .`, `ruff format --check .` and `mypy`; the
-offline test suite (`pytest`) runs the synthetic fixture market in about a minute.
+Before every push run `bash scripts/prepush.sh`: lint, format, type checks, the project text
+rules and the offline test suite (the synthetic fixture market), each checked by exit code.
 
 ## Commands
 
@@ -112,8 +126,9 @@ when off, they are registered as "not configured" and produce no rows, never syn
 
 SCOPE §6.2 plus the additions in ARCHITECTURE §1 / ADR-0005, -0006, -0051: `parkiq/` (library, no
 `arcpy`), `parkiq/ingest/` (one adapter per source), `configs/`, `markets/`, `schema/`,
-`tests/` (fixture market is **SYNTHETIC: NOT REAL DATA**), `arcgis/` (ArcPy only; `manual/` holds
-the Session-1 scripts), `toolbox/` (M7), `templates/` (M6–M7), `docs/`.
+`tests/` (fixture market is **SYNTHETIC: NOT REAL DATA**), `arcgis/` (ArcPy only: workspace
+builder, file geodatabase export; `manual/` holds the Session-1 scripts), `toolbox/` (ArcGIS Pro
+Python toolbox), `templates/` (M6 to M7), `docs/`.
 
 ## Licence
 
