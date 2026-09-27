@@ -47,6 +47,29 @@ def parkiq_cards(html: str) -> list[str]:
     return [a for a in arts if "parkiq" in a.lower()]
 
 
+MAX_DESC = 160  # characters: three to four lines at card width
+MAX_LINKS = 3
+
+
+def card_links(card: str) -> list[str]:
+    """Hrefs of a card's link buttons (gallery images are not links)."""
+    return re.findall(r'<a class="card-link" href="([^"]+)"', card)
+
+
+def card_structure(name: str, card: str) -> list[str]:
+    """ParkIQ card rules: one sentence of at most 160 characters, at most three live links."""
+    out = []
+    m = re.search(r'<p class="card-desc">(.*?)</p>', card, flags=re.S)
+    desc = re.sub(r"<[^>]+>", "", m.group(1)).strip() if m else ""
+    if len(desc) > MAX_DESC:
+        out.append(f"ndeogo card '{name}': description {len(desc)} > {MAX_DESC} characters")
+    if len(re.findall(r"[.!?](?=\s+[A-Z])", desc)) > 0:
+        out.append(f"ndeogo card '{name}': description is more than one sentence")
+    if len(card_links(card)) > MAX_LINKS:
+        out.append(f"ndeogo card '{name}': {len(card_links(card))} links > {MAX_LINKS}")
+    return out
+
+
 def site_violations(site: Path) -> list[str]:
     """ParkIQ cards: no em dash, no 'coming soon'; ParkIQ report PDFs: no em dash."""
     out = []
@@ -59,6 +82,10 @@ def site_violations(site: Path) -> list[str]:
                 out.append(f"ndeogo card '{name}': em dash")
             if "coming soon" in card.lower():
                 out.append(f"ndeogo card '{name}': 'coming soon' item")
+            out += card_structure(name, card)
+        hrefs = [h for c in parkiq_cards(idx.read_text(encoding="utf-8")) for h in card_links(c)]
+        dup = sorted({h for h in hrefs if hrefs.count(h) > 1})
+        out += [f"ndeogo ParkIQ cards share a link: {h}" for h in dup]
     for pdf in sorted((site / "documentation").glob("parkiq-*.pdf")):
         import pypdf
 

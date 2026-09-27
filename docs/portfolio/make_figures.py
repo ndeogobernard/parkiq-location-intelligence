@@ -32,7 +32,7 @@ def main(run: Path) -> None:
     p = pyogrio.read_dataframe(g, layer="Parcels", columns=["zoning_status"], bbox=view)
     zones = pyogrio.read_dataframe(g, layer="ParkingZones")
     spec = MapSpec(
-        title="One schema, many layers: the zoning screen",
+        title="Where the zoning code allows a paid parking lot",
         subtitle="Parcels by zoning-screen result for a commercial surface lot, central Columbus",
         how_to_read=(
             "Each parcel is coloured by what the City code allows for a new paid surface "
@@ -42,7 +42,7 @@ def main(run: Path) -> None:
         sources=[
             "Franklin County Auditor parcels (2026-09-23)",
             "City of Columbus zoning and overlays (2026-09)",
-            "Zone A/B digitized from City Code §3359.27 Map 2 (Ord. 1532-2013) [VERIFY]",
+            "Zone A/B digitized from City Code §3359.27 Map 2 (Ord. 1532-2013; unofficial digitization)",
             "Census TIGER county (2025)",
         ],
         uses_osm=False,
