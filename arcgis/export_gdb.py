@@ -2,7 +2,7 @@
 
 Runs in ArcGIS Pro's Python (arcpy). Called by ``parkiq export-gdb`` (ADR-0045), or directly:
 
-    "C:\\Program Files\\ArcGIS\\Pro\\bin\\Python\\envs\\arcgispro-py3\\python.exe" arcgis/export_gdb.py
+    <ArcGIS Pro python.exe> arcgis/export_gdb.py
         --gpkg <run>/ParkIQ_<slug>.gpkg --schema schema/schema.yaml --out <run>/ParkIQ_<slug>.gdb
 
 * Feature classes go into their feature datasets (schema ``feature_dataset``) in the analysis CRS;
@@ -133,14 +133,27 @@ def main() -> int:
         card = {"1:1": "ONE_TO_ONE", "1:M": "ONE_TO_MANY", "M:N": "MANY_TO_MANY"}[r["cardinality"]]
         try:
             arcpy.management.CreateRelationshipClass(
-                o, d, f"{gdb}\\{r['name']}", "SIMPLE", r["destination"], r["origin"], "NONE",
-                card, "NONE", r["origin_key"], r["destination_key"],
+                o,
+                d,
+                f"{gdb}\\{r['name']}",
+                "SIMPLE",
+                r["destination"],
+                r["origin"],
+                "NONE",
+                card,
+                "NONE",
+                r["origin_key"],
+                r["destination_key"],
             )
         except arcpy.ExecuteError as exc:
             msg = str(exc).splitlines()[0] if str(exc) else "error"
             rep["skipped"].append(f"{r['name']}: {msg}")  # type: ignore[union-attr]
-    (out.parent / (out.stem + "_gdb_report.json")).write_text(json.dumps(rep, indent=1), encoding="utf-8")
-    print(json.dumps({"gdb": gdb, "layers": len(rep["layers"]), "skipped": rep["skipped"]}, indent=1))  # type: ignore[arg-type]
+    (out.parent / (out.stem + "_gdb_report.json")).write_text(
+        json.dumps(rep, indent=1), encoding="utf-8"
+    )
+    print(
+        json.dumps({"gdb": gdb, "layers": len(rep["layers"]), "skipped": rep["skipped"]}, indent=1)
+    )  # type: ignore[arg-type]
     return 0
 
 
