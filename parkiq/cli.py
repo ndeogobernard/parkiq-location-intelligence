@@ -249,6 +249,59 @@ def report_pdf_cmd(
     typer.echo(f"written {pdf}")
 
 
+@app.command("dashboard")
+def dashboard_cmd(
+    market: MarketOpt,
+    run_id: Annotated[str, typer.Option("--run-id", help="run to show")],
+    out: Annotated[Path, typer.Option(help="output HTML")],
+    public: Annotated[bool, typer.Option(help="zones and aggregates only (no candidates)")] = True,
+    config_dir: Annotated[Path | None, typer.Option(help="configs/ directory")] = None,
+) -> None:
+    """Offline dashboard: one self-contained HTML (public: no parcels or candidates)."""
+    from datetime import date
+
+    from parkiq import dashboard
+    from parkiq.runner import open_run
+
+    cfg = _load(market, config_dir)
+    ctx = open_run(cfg, run_id=run_id)
+    html = dashboard.build(ctx.store.gpkg, out, public, date.today().strftime("%B %Y"))
+    typer.echo(f"written {html}")
+
+
+ARCGIS_PYTHON = r"C:\Program Files\ArcGIS\Pro\bin\Python\envs\arcgispro-py3\python.exe"
+
+
+@app.command("export-gdb")
+def export_gdb_cmd(
+    market: MarketOpt,
+    run_id: Annotated[str, typer.Option("--run-id", help="run to export")],
+    arcgis_python: Annotated[
+        Path | None, typer.Option(help="ArcGIS Pro python.exe (default: PARKIQ_ARCGIS_PYTHON)")
+    ] = None,
+    raw: Annotated[bool, typer.Option(help="also export the raw source snapshots")] = False,
+    config_dir: Annotated[Path | None, typer.Option(help="configs/ directory")] = None,
+) -> None:
+    """Export the run GeoPackage to a file geodatabase with domains, subtypes and relationship
+    classes (ADR-0045). Needs ArcGIS Pro; runs arcgis/export_gdb.py in Pro's Python."""
+    import os
+    import subprocess
+
+    from parkiq.runner import open_run
+
+    cfg = _load(market, config_dir)
+    ctx = open_run(cfg, run_id=run_id)
+    exe = arcgis_python or Path(os.environ.get("PARKIQ_ARCGIS_PYTHON", ARCGIS_PYTHON))
+    if not exe.exists():
+        typer.secho(f"ArcGIS Pro Python not found at {exe}", fg=typer.colors.RED)
+        raise typer.Exit(2)
+    script = Path(__file__).resolve().parents[1] / "arcgis" / "export_gdb.py"
+    gpkg = ctx.store.gpkg
+    cmd = [str(exe), str(script), "--gpkg", str(gpkg), "--schema", str(cfg.schema_path)]
+    cmd += ["--out", str(gpkg.with_suffix(".gdb"))] + (["--raw"] if raw else [])
+    raise typer.Exit(subprocess.run(cmd, check=False).returncode)
+
+
 @app.command()
 def validate(
     run_id: Annotated[str, typer.Option("--run-id")],

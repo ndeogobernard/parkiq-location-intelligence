@@ -242,18 +242,29 @@ class Store:
         self._register(name, "raster", self.crs.to_string(), str(rel).replace("\\", "/"))
 
 
+SLIVER_AREA = 1e-4  # CRS units²: polygon parts below this are clipping slivers (not a parameter)
+
+
 def _to_multipolygon(geom: Any) -> Any:
+    """MultiPolygon with sliver parts removed (ArcGIS rejects near-zero-area parts, ADR-0053)."""
     from shapely.geometry import MultiPolygon, Polygon
 
     if geom is None or geom.is_empty:
         return geom
     if isinstance(geom, Polygon):
-        return MultiPolygon([geom])
-    if isinstance(geom, MultiPolygon):
+        parts: list[Polygon] = [geom]
+    elif isinstance(geom, MultiPolygon):
+        parts = list(geom.geoms)
+    else:  # GeometryCollection from make_valid: keep polygonal parts
+        parts = []
+        for g in getattr(geom, "geoms", []):
+            if isinstance(g, MultiPolygon):
+                parts.extend(g.geoms)
+            elif isinstance(g, Polygon):
+                parts.append(g)
+    keep = [g for g in parts if g.area > SLIVER_AREA] or parts
+    if not keep:
+        return None
+    if isinstance(geom, MultiPolygon) and len(keep) == len(parts):
         return geom
-    # GeometryCollection from make_valid: keep polygonal parts
-    polys = [g for g in getattr(geom, "geoms", []) if isinstance(g, Polygon | MultiPolygon)]
-    parts: list[Polygon] = []
-    for g in polys:
-        parts.extend(g.geoms if isinstance(g, MultiPolygon) else [g])
-    return MultiPolygon(parts) if parts else None
+    return MultiPolygon(keep)

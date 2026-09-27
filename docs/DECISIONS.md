@@ -663,3 +663,24 @@ possible". Franklin: 28 sites in the 8-minute reach are Ohio State land; 7 candi
 * **Existing lot only:** a candidate that is viable only because it is an existing surface lot
   (a new lot would fail on land use, zoning, Zone A or shape) carries `existing_only_flag` and the
   reason "verify legal nonconforming status and continuous use". Franklin: 21 candidates.
+
+## ADR-0086: Sliver parts, toolbox, file geodatabase export and offline dashboard, Applied (2026-09-26)
+* **Sliver parts:** polygon parts smaller than 1e-4 square CRS units (clipping slivers, down to
+  1e-12 sq ft) are dropped when a MultiPolygon layer is written (`store.SLIVER_AREA`,
+  ADR-0053). ArcGIS rejected them ("shape integrity error") when reading FloodHazard, Parcels
+  and CandidateParcels; the three layers of the Franklin run were rewritten.
+* **ArcGIS Pro toolbox** (`toolbox/ParkIQ.pyt`, ADR-0016): Check Market Configuration, Run
+  Pipeline Steps, Export File Geodatabase and Build Portfolio Report validate their parameters in
+  Pro (market file, ParkIQ Python, run id pattern, step order) and run the ParkIQ command line in
+  the ParkIQ environment, streaming its messages.
+* **File geodatabase export** (`parkiq export-gdb`, `arcgis/export_gdb.py`, ADR-0045): runs in
+  ArcGIS Pro's Python; feature datasets, tables, coded and range domains assigned to fields,
+  subtypes on an integer `<field>_code` (the schema's subtype fields are text), and relationship
+  classes (created on a Basic licence in Pro 3.4). Franklin run: 40 layers; 3 relationship
+  classes skipped because their layers are not in the run yet (SiteFinancials, Venues, the
+  registry-to-every-layer link).
+* **Offline dashboard** (`parkiq dashboard`, `parkiq/dashboard.py`): one self-contained Plotly
+  HTML (no web tiles, plotly.js embedded). Public: shortage by hex for each time of week, hot
+  zones with place names, shortfall by zone, demand by source. Private (`--no-public`): adds the
+  ranked candidates, a top-20 table and the criteria breakdown per scenario. The public web app
+  is an ArcGIS Experience Builder app built from hosted layers; this file is its offline version.
